@@ -156,7 +156,7 @@ def update_order_status(status, order_id):
 def update_user_info(id, **kwargs):
     if 'lang' in kwargs.keys():
         value = kwargs['lang']
-        sql = f'UPDATE testdb.{users_table_name} SET lang = %s WHERE tg_id = %s OR id = %s'
+        sql = f'UPDATE {users_table_name} SET lang = %s WHERE tg_id = %s OR id = %s'
 
     with closing(get_connection()) as connection:
         with connection.cursor() as cursor:
