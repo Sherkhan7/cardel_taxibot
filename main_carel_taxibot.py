@@ -6,7 +6,8 @@ from handlers import (
     message_handler,
     callback_query_handler,
     registration_conversation_handler,
-    command_handler
+    command_handler,
+    announce_passenger_conversation_handler
 )
 
 
@@ -16,6 +17,8 @@ def main():
     updater = Updater(TOKEN, persistence=my_persistence)
 
     updater.dispatcher.add_handler(command_handler)
+
+    updater.dispatcher.add_handler(announce_passenger_conversation_handler)
 
     updater.dispatcher.add_handler(registration_conversation_handler)
 
