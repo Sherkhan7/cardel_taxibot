@@ -15,7 +15,6 @@ def get_connection():
 
 
 users_table_name = 'users'
-books_table_name = 'books'
 
 
 def insert_data(data, table_name):
@@ -37,6 +36,14 @@ def insert_data(data, table_name):
     print(f'{table_name}: +{cursor.rowcount}(last_row_id = {value})')
 
     return value
+
+
+def get_main_menu_buttons():
+    with closing(get_connection()) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(f'SELECT * FROM `main_menu_buttons` WHERE status = TRUE')
+
+    return cursor.fetchall()
 
 
 def insert_order_items(items_data, table_name):
@@ -72,28 +79,26 @@ def get_user(id):
     return cursor.fetchone()
 
 
-def get_book(id):
+def get_all_regions():
     with closing(get_connection()) as connection:
         with connection.cursor() as cursor:
-            cursor.execute(f'SELECT * FROM {books_table_name} WHERE id = %s', id)
-
-    return cursor.fetchone()
-
-
-def get_all_books():
-    with closing(get_connection()) as connection:
-        with connection.cursor() as cursor:
-            cursor.execute(f'SELECT * FROM {books_table_name}')
+            cursor.execute(f"SELECT * FROM `regions` WHERE parent_id = 0")
 
     return cursor.fetchall()
 
 
-def get_books(ids):
-    interval = ",".join(ids)
-
+def get_districts_by_parent(parent_id):
     with closing(get_connection()) as connection:
         with connection.cursor() as cursor:
-            cursor.execute(f'SELECT * FROM {books_table_name} WHERE id in ({interval}) ORDER BY id DESC')
+            cursor.execute(f"SELECT * FROM `regions` WHERE parent_id = %s", parent_id)
+
+    return cursor.fetchall()
+
+
+def get_region_and_district(region_id, district_id):
+    with closing(get_connection()) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(f"SELECT * FROM `regions` WHERE id = %s or id = %s", (region_id, district_id))
 
     return cursor.fetchall()
 
