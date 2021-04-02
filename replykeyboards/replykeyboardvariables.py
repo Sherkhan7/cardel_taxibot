@@ -1,3 +1,5 @@
+main_menu_keyboard = 'main_menu_keyboard'
+passenger_mail_keyboard = 'passenger_mail_keyboard'
 client_menu_keyboard = 'client_menu_keyboard'
 admin_menu_keyboard = 'admin_menu_keyboard'
 settings_keyboard = 'settings_keyboard'
