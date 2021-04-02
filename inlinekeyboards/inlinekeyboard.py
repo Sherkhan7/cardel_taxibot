@@ -1,6 +1,7 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-from DB import get_all_books
+from DB import *
 from .inlinekeyboardtypes import *
+import datetime
 
 
 class InlineKeyboard(object):
@@ -14,58 +15,89 @@ class InlineKeyboard(object):
 
     def __create_inline_keyboard(self, keyb_type, lang, data, history):
 
-        if keyb_type == books_keyboard:
+        if keyb_type == langs_keyboard:
+            return self.__get_langs_keyboard(inline_keyboard_types[keyb_type])
 
-            return self.__get_books_keyboard(data)
+        elif keyb_type == regions_keyboard:
+            return self.__get_regions_keyboard(get_all_regions(), keyb_type, lang)
 
-        elif keyb_type == book_keyboard:
+        elif keyb_type == districts_keyboard:
+            return self.__get_regions_keyboard(get_districts_by_parent(data), keyb_type, lang)
 
-            return self.__get_book_keyboard(inline_keyboard_types[keyb_type][lang], data)
+        elif keyb_type == dates_keyboard:
+            return self.__get_dates_keyboard(inline_keyboard_types[keyb_type], lang)
 
-        elif keyb_type == order_keyboard:
-
-            return self.__get_order_keyboard(inline_keyboard_types[keyb_type][lang])
-
-        elif keyb_type == basket_keyboard:
-
-            return self.__get_basket_keyboard(inline_keyboard_types[keyb_type][lang])
+        elif keyb_type == times_keyboard:
+            return self.__get_hours_keyboard(lang, data)
 
         elif keyb_type == confirm_keyboard:
-
-            return self.__get_confirm_keyboard(inline_keyboard_types[keyb_type][lang], data)
+            return self.__get_confirm_keyboard(inline_keyboard_types[keyb_type], lang)
 
         elif keyb_type == orders_keyboard:
-
             return self.__get_orders_keyboard(inline_keyboard_types[keyb_type][lang], data)
 
         elif keyb_type == yes_no_keyboard:
-
             return self.__get_yes_no_keyboard(inline_keyboard_types[keyb_type][lang], data)
 
         elif keyb_type == delivery_keyboard:
-
             return self.__get_delivery_keyboard(inline_keyboard_types[keyb_type][lang], data)
 
         elif keyb_type == paginate_keyboard:
-
             return self.__get_paginate_keyboard(data, history)
 
         elif keyb_type == geo_keyboard:
-
             return self.__get_geo_keyboard(data)
 
     @staticmethod
-    def __get_books_keyboard(data):
+    def __get_langs_keyboard(buttons):
 
-        inline_keyboard = [
-            [InlineKeyboardButton(f'\U0001F4D5  {book["title"]}', callback_data=f'book_{book["id"]}')]
-            for book in get_all_books()
-        ]
+        return InlineKeyboardMarkup([
+            [InlineKeyboardButton(f'{buttons[0]["icon"]} {buttons[0]["text"]}', callback_data=buttons[0]["data"])],
+            [InlineKeyboardButton(f'{buttons[1]["icon"]} {buttons[1]["text"]}', callback_data=buttons[1]["data"])],
+            [InlineKeyboardButton(f'{buttons[2]["icon"]} {buttons[2]["text"]}', callback_data=buttons[2]["data"])],
+        ])
 
-        if data:
-            inline_keyboard.append([InlineKeyboardButton('\U0001F6D2  Savat', callback_data='basket')])
+    @staticmethod
+    def __get_regions_keyboard(regions, keyb_type, lang):
+        length = len(regions)
+        region_name = f'name_{lang}'
+        icon = inline_keyboard_types[back_next_keyboard][0]['icon']
+        back_btn_text = inline_keyboard_types[back_next_keyboard][0][f'text_{lang}']
+        back_btn_text = f'{icon} {back_btn_text}'
+        back_btn_data = inline_keyboard_types[back_next_keyboard][0]['data']
 
-        return InlineKeyboardMarkup(inline_keyboard)
+        if length % 2 == 0:
+
+            keyboard = [
+                [
+                    InlineKeyboardButton(regions[i][region_name], callback_data=regions[i]['id']),
+
+                    InlineKeyboardButton(regions[i + 1][region_name], callback_data=regions[i + 1]['id'])
+                ]
+
+                for i in range(0, length, 2)
+            ]
+
+            if keyb_type == districts_keyboard:
+                keyboard.append([InlineKeyboardButton(back_btn_text, callback_data=back_btn_data)])
+
+        else:
+            keyboard = [
+                [
+                    InlineKeyboardButton(regions[i][region_name], callback_data=regions[i]['id']),
+                    InlineKeyboardButton(back_btn_text, callback_data=back_btn_data)
+                ]
+
+                if i == length - 1 else
+
+                [
+                    InlineKeyboardButton(regions[i][region_name], callback_data=regions[i]['id']),
+
+                    InlineKeyboardButton(regions[i + 1][region_name], callback_data=regions[i + 1]['id'])
+                ] for i in range(0, length, 2)
+            ]
+
+        return InlineKeyboardMarkup(keyboard)
 
     @staticmethod
     def __get_book_keyboard(buttons, book_data):
@@ -92,72 +124,95 @@ class InlineKeyboard(object):
         return InlineKeyboardMarkup(inline_keyboard)
 
     @staticmethod
-    def __get_order_keyboard(buttons):
+    def __get_dates_keyboard(buttons, lang):
 
-        button1_text = f'\U0001F6D2  {buttons[1]}'
-        button1_data = f'order'
-
-        button2_text = f'\U00002B05  {buttons[2]}'
-        button2_data = 'back'
-
-        minus_sign = '\U00002796'
-        pilus_sign = '\U00002795'
-
-        return InlineKeyboardMarkup(
-            [
-                [
-                    InlineKeyboardButton(f'{minus_sign}', callback_data='-'),
-                    InlineKeyboardButton('1', callback_data='1'),
-                    InlineKeyboardButton(f'{pilus_sign}', callback_data='+'),
-                ],
-
-                [InlineKeyboardButton(button1_text, callback_data=button1_data)],
-
-                [InlineKeyboardButton(button2_text, callback_data=button2_data)],
-            ]
-        )
-
-    @staticmethod
-    def __get_basket_keyboard(buttons):
-
-        button1_text = f'\U0001F501  {buttons[1]}'
-        button1_data = 'continue'
-
-        button2_text = f'\U00002705  {buttons[2]}'
-        button2_data = 'confirmation'
+        # now
+        button1_text = buttons[0][f'text_{lang}']
+        button1_data = buttons[0]['data']
+        # today
+        today = datetime.datetime.today()
+        button2_text = buttons[1][f'text_{lang}']
+        button2_data = today.strftime("%d-%m-%Y")
+        # tomorrow
+        tomorrow = today + datetime.timedelta(days=1)
+        button3_text = tomorrow.strftime("%d-%m-%Y")
+        button3_data = button3_text
+        # after tomorrow
+        after_tomorrow = tomorrow + datetime.timedelta(days=1)
+        button4_text = after_tomorrow.strftime("%d-%m-%Y")
+        button4_data = button4_text
 
         return InlineKeyboardMarkup([
+            [
+                InlineKeyboardButton(button1_text, callback_data=button1_data),
+                InlineKeyboardButton(button2_text, callback_data=button2_data)
+            ],
+            [
+                InlineKeyboardButton(button3_text, callback_data=button3_data),
+                InlineKeyboardButton(button4_text, callback_data=button4_data)
+            ]
+        ])
 
+    @staticmethod
+    def __get_hours_keyboard(lang, data):
+        begin = data['begin']
+        end = data['end']
+
+        if begin == 6 and end == 17:
+            icon = inline_keyboard_types[back_next_keyboard][1]['icon']
+            text = inline_keyboard_types[back_next_keyboard][1][f'text_{lang}']
+            button_text = f'{text} {icon}'
+            button_data = inline_keyboard_types[back_next_keyboard][1]['data']
+
+            inline_keyboard = [
+                [
+                    InlineKeyboardButton(f'{i}:00', callback_data=f'{i}:00'),
+                    InlineKeyboardButton(f'{i + 1}:00', callback_data=f'{i + 1}:00'),
+                    InlineKeyboardButton(f'{i + 2}:00', callback_data=f'{i + 2}:00'),
+                ] for i in range(begin, end + 1, 3)
+            ]
+
+        elif begin == 18 and end == 29:
+            inline_keyboard = []
+            icon = inline_keyboard_types[back_next_keyboard][0]['icon']
+            text = inline_keyboard_types[back_next_keyboard][0][f'text_{lang}']
+            button_text = f'{icon} {text}'
+            button_data = inline_keyboard_types[back_next_keyboard][0]['data']
+
+            for i in range(begin, end + 1, 3):
+
+                if i == 24:
+                    i = 0
+                elif i == 27:
+                    i = 3
+
+                inline_keyboard.append([
+                    InlineKeyboardButton(f'{i}:00', callback_data=f'{i}:00'),
+                    InlineKeyboardButton(f'{i + 1}:00', callback_data=f'{i + 1}:00'),
+                    InlineKeyboardButton(f'{i + 2}:00', callback_data=f'{i + 2}:00'),
+
+                ])
+
+        inline_keyboard.append([InlineKeyboardButton(button_text, callback_data=button_data)])
+
+        return InlineKeyboardMarkup(inline_keyboard)
+
+    @staticmethod
+    def __get_confirm_keyboard(buttons, lang):
+        text = buttons[0][f'text_{lang}']
+        icon = buttons[0]['icon']
+        button1_text = f'{icon} {text}'
+        button1_data = buttons[0]['data']
+
+        text = buttons[1][f'text_{lang}']
+        icon = buttons[1]['icon']
+        button2_text = f'{icon} {text}'
+        button2_data = buttons[1]['data']
+
+        return InlineKeyboardMarkup([
             [InlineKeyboardButton(button1_text, callback_data=button1_data)],
             [InlineKeyboardButton(button2_text, callback_data=button2_data)]
         ])
-
-    @staticmethod
-    def __get_confirm_keyboard(buttons, data):
-
-        inline_keyboard = []
-        button1_text = f'\U0001F4CD Geolokatsiyam'
-
-        if data:
-            from_latitude = data['latitude']
-            from_longitude = data['longitude']
-            inline_keyboard.append(
-                [InlineKeyboardButton(button1_text,
-                                      url=f'http://www.google.com/maps/place/{from_latitude},{from_longitude}/'
-                                          f'@{from_latitude},{from_longitude},12z')])
-
-        button2_text = f'\U00002705 {buttons[0]}'
-        button2_data = 'confirm'
-
-        button3_text = f'\U0000274C {buttons[1]}'
-        button3_data = 'cancel'
-
-        inline_keyboard.extend([
-            [InlineKeyboardButton(button2_text, callback_data=button2_data)],
-            [InlineKeyboardButton(button3_text, callback_data=button3_data)]
-        ])
-
-        return InlineKeyboardMarkup(inline_keyboard)
 
     @staticmethod
     def __get_orders_keyboard(buttons, data):

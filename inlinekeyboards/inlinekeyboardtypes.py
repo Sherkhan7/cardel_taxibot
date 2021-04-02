@@ -2,15 +2,58 @@ from .inlinekeyboardvariables import *
 
 inline_keyboard_types = {
 
-    book_keyboard: {
-        "uz": {1: "Kitob haqida", 2: "Buyurtma qilish", 3: "Ortga"},
-    },
+    langs_keyboard: [
+        {
+            "text": "O'zbekcha (lotin)",
+            "icon": "🇺🇿",
+            "data": "uz"
+        },
+        {
+            "text": "Русский",
+            "icon": "🇷🇺",
+            "data": "ru"
+        },
+        {
+            "text": "Ўзбекча (кирилл)",
+            "icon": "🇺🇿",
+            "data": "cy"
+        },
+    ],
 
-    confirm_keyboard: {
-        "uz": ["Tasdiqlash", "Buyurtmani bekor qilish"],
-        "cy": ["Тасдиқлаш", "Таҳрирлаш"],
-        "ru": ["Подтвердить", "Редактировать"],
-    },
+    back_next_keyboard: [
+        {
+            "text_uz": "Ortga",
+            "text_ru": "Назад",
+            "text_cy": "Ортга",
+            "icon": "«",
+            "data": "back"
+        },
+        {
+            "text_uz": "Keyingisi",
+            "text_ru": "Следующий",
+            "text_cy": "Кейингиси",
+            "icon": "»",
+            "data": "next"
+        },
+
+    ],
+
+    confirm_keyboard: [
+        {
+            "text_uz": "Tasdiqlash",
+            "text_ru": "Подтвердить",
+            "text_cy": "Тасдиқлаш",
+            "icon": "✅",
+            "data": "confirm"
+        },
+        {
+            "text_uz": "Bekor qilish",
+            "text_ru": "Отменить",
+            "text_cy": "Бекор қилиш",
+            "icon": "❌",
+            "data": "cancel"
+        },
+    ],
 
     order_keyboard: {
         "uz": {1: "Buyurtma berish", 2: "Ortga"},
@@ -57,7 +100,20 @@ inline_keyboard_types = {
 
     },
 
-    delivery_keyboard: {
-        "uz": ["Yetkazib berildi"]
-    }
+    dates_keyboard: [
+        {
+            "text_uz": "Hozir",
+            "text_ru": "Сейчас",
+            "text_cy": "Ҳозир",
+            "icon": "",
+            "data": "now"
+        },
+        {
+            "text_uz": "Bugun",
+            "text_ru": "Сегодня",
+            "text_cy": "Бугун",
+            "icon": "",
+            "data": "today"
+        },
+    ]
 }
