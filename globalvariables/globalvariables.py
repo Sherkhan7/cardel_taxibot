@@ -20,3 +20,6 @@ STATUS_TEXT, OPENED_STATUS, CLOSED_STATUS, NOT_CONFIRMED_STATUS, TG_ACCOUNT_TEXT
 
 DISTRICT, COMMENT, PASSENGER_TEXT, ANNOUNCE, MAIL, PASSENGER, STATUS, QUANTITY, DEPARTURE_TIME = \
     ('district', 'comment', 'passenger_text', 'announce', 'mail', 'passenger', 'status', 'quantity', 'departure_time')
+
+MAIL_TEXT, RECEIVER_CONTACT_TEXT, SENDER_TEXT, CAR_MODEL, CAR_ID, BAGGAGE = \
+    ('mail_text', 'receiver_contact_text', 'sender_text', 'car_model', 'car_id', 'baggage')
