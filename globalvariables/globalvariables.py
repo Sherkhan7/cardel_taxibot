@@ -1,8 +1,9 @@
 USER_ID, TG_ID, USER_TG_ID, NAME, SURNAME, USERNAME, FROM_REGION, FROM_DISTRICT, FROM_LOCATION = \
     ('user_id', 'tg_id', 'user_tg_id', 'name', 'surname', 'username', 'from_region', 'from_district', 'from_location')
 
-TO_REGION, TO_DISTRICT, TO_LOCATION, WEIGHT_UNIT, WEIGHT, VOLUME_UNIT, PASSENGERS, PASSENGERS_TEXT = \
-    ('to_region', 'to_district', 'to_location', 'weight_unit', 'weight', 'volume_unit', 'passengers', 'passengers_text')
+TO_REGION, TO_DISTRICT, TO_LOCATION, RECEIVER_CONTACT, IS_ADMIN, YES_NO, PASSENGERS, PASSENGERS_TEXT = \
+    ('to_region', 'to_district', 'to_location', 'receiver_contact', 'is_admin', 'yes_no', 'passengers',
+     'passengers_text')
 
 VOLUME, DEFINITION, PHOTO, DATE, TIME, USER_PHONE_NUMBER, CONFIRMATION, EDIT, MESSAGE_ID = \
     ('volume', 'definition', 'photo', 'date', 'time', 'user_phone_number', 'confirmation', 'edit', 'message_id')
@@ -17,4 +18,5 @@ DATETIME_TEXT, USER_TEXT, USER_PHONE_NUMBER_TEXT, STATE, REGION_NAME, ID, LANG, 
 STATUS_TEXT, OPENED_STATUS, CLOSED_STATUS, NOT_CONFIRMED_STATUS, TG_ACCOUNT_TEXT, UNDEFINED_TEXT = \
     ('status_text', 'opened_status', 'closed_status', 'not_confirmed_status', 'tg_account_text', 'undifened_text')
 
-DISTRICT, COMMENT, PASSENGER_TEXT = ('district', 'comment', 'passenger_text')
+DISTRICT, COMMENT, PASSENGER_TEXT, ANNOUNCE, MAIL, PASSENGER, STATUS, QUANTITY, DEPARTURE_TIME = \
+    ('district', 'comment', 'passenger_text', 'announce', 'mail', 'passenger', 'status', 'quantity', 'departure_time')
