@@ -103,6 +103,14 @@ def get_region_and_district(region_id, district_id):
     return cursor.fetchall()
 
 
+def get_driver(user_id):
+    with closing(get_connection()) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(f"SELECT * FROM `drivers` WHERE user_id = %s", user_id)
+
+    return cursor.fetchone()
+
+
 def get_order_items(order_id):
     with closing(get_connection()) as connection:
         with connection.cursor() as cursor:
@@ -121,17 +129,15 @@ def get_user_orders(user_id):
     return cursor.fetchall()
 
 
-def get_order(order_id):
+def get_car_models():
     with closing(get_connection()) as connection:
         with connection.cursor() as cursor:
-            cursor.execute(
-                f'SELECT * FROM orders WHERE orders.id = %s', order_id)
+            cursor.execute(f"SELECT * FROM `cars`")
 
-    return cursor.fetchone()
+    return cursor.fetchall()
 
 
 def get_orders_by_status(status):
-
     if isinstance(status, tuple):
         sql = f'SELECT * FROM orders WHERE orders.status = %s OR orders.status = %s ORDER BY id DESC'
     else:
