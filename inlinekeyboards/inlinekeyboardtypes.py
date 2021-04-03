@@ -89,9 +89,22 @@ inline_keyboard_types = {
         },
     },
 
-    yes_no_keyboard: {
-        "uz": {1: "Ha", 2: "Yo'q"}
-    },
+    yes_no_keyboard: [
+        {
+            "text_uz": "Ha",
+            "text_ru": "Да",
+            "text_cy": "Ҳа",
+            "icon": "✅",
+            "data": "yes"
+        },
+        {
+            "text_uz": "Yo'q",
+            "text_ru": "Нет",
+            "text_cy": "Йўқ",
+            "icon": "❌",
+            "data": "no"
+        },
+    ],
 
     basket_keyboard: {
         "uz": {1: "Buyurtmani davom ettirish", 2: "Buyurtmani tasdiqlash"},

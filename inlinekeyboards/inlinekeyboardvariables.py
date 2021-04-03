@@ -14,4 +14,5 @@ districts_keyboard = 'districts_keyboard'
 back_next_keyboard = 'back_next_keyboard'
 dates_keyboard = 'dates_keyboard'
 times_keyboard = 'times_keyboard'
+car_models_keyboard = 'car_models_keyboard'
 

@@ -37,10 +37,10 @@ class InlineKeyboard(object):
             return self.__get_orders_keyboard(inline_keyboard_types[keyb_type][lang], data)
 
         elif keyb_type == yes_no_keyboard:
-            return self.__get_yes_no_keyboard(inline_keyboard_types[keyb_type][lang], data)
+            return self.__get_yes_no_keyboard(inline_keyboard_types[keyb_type], lang)
 
-        elif keyb_type == delivery_keyboard:
-            return self.__get_delivery_keyboard(inline_keyboard_types[keyb_type][lang], data)
+        elif keyb_type == car_models_keyboard:
+            return self.__get_car_models_keyboard(get_car_models())
 
         elif keyb_type == paginate_keyboard:
             return self.__get_paginate_keyboard(data, history)
@@ -71,28 +71,23 @@ class InlineKeyboard(object):
             keyboard = [
                 [
                     InlineKeyboardButton(regions[i][region_name], callback_data=regions[i]['id']),
-
                     InlineKeyboardButton(regions[i + 1][region_name], callback_data=regions[i + 1]['id'])
                 ]
-
                 for i in range(0, length, 2)
             ]
 
             if keyb_type == districts_keyboard:
                 keyboard.append([InlineKeyboardButton(back_btn_text, callback_data=back_btn_data)])
-
         else:
+
             keyboard = [
                 [
                     InlineKeyboardButton(regions[i][region_name], callback_data=regions[i]['id']),
                     InlineKeyboardButton(back_btn_text, callback_data=back_btn_data)
                 ]
-
                 if i == length - 1 else
-
                 [
                     InlineKeyboardButton(regions[i][region_name], callback_data=regions[i]['id']),
-
                     InlineKeyboardButton(regions[i + 1][region_name], callback_data=regions[i + 1]['id'])
                 ] for i in range(0, length, 2)
             ]
@@ -252,22 +247,52 @@ class InlineKeyboard(object):
         ])
 
     @staticmethod
-    def __get_yes_no_keyboard(buttons, data):
+    def __get_yes_no_keyboard(buttons, lang):
+        # yes
+        text = buttons[0][f'text_{lang}']
+        icon = buttons[0]['icon']
+        button1_text = f'{icon} {text}'
+        button1_data = buttons[0]['data']
+
+        # no
+        text = buttons[1][f'text_{lang}']
+        icon = buttons[1]['icon']
+        button2_text = f'{icon} {text}'
+        button2_data = buttons[1]['data']
 
         return InlineKeyboardMarkup([
-
             [
-                InlineKeyboardButton('\U00002705  ' + buttons[1], callback_data=f'{data[0]}_y_{data[-1]}'),
-                InlineKeyboardButton('\U0000274C  ' + buttons[2], callback_data=f'{data[0]}_n_{data[-1]}')
+                InlineKeyboardButton(button1_text, callback_data=button1_data),
+                InlineKeyboardButton(button2_text, callback_data=button2_data)
             ],
         ])
 
     @staticmethod
-    def __get_delivery_keyboard(buttons, order_id):
+    def __get_car_models_keyboard(car_models):
+        length = len(car_models)
+        if length % 2 == 0:
 
-        return InlineKeyboardMarkup([
-            [InlineKeyboardButton(buttons[0], callback_data=f'd_{order_id}')],
-        ])
+            keyboard = [
+                [
+                    InlineKeyboardButton(car_models[i]['car_model'], callback_data=car_models[i]['id']),
+                    InlineKeyboardButton(car_models[i + 1]['car_model'], callback_data=car_models[i + 1]['id'])
+                ]
+                for i in range(0, length, 2)
+            ]
+
+        else:
+            keyboard = [
+                [
+                    InlineKeyboardButton(car_models[i]['car_model'], callback_data=car_models[i]['id'])
+                ]
+                if i == length - 1 else
+                [
+                    InlineKeyboardButton(car_models[i]['car_model'], callback_data=car_models[i]['id']),
+                    InlineKeyboardButton(car_models[i + 1]['car_model'], callback_data=car_models[i + 1]['id'])
+                ] for i in range(0, length, 2)
+            ]
+
+        return InlineKeyboardMarkup(keyboard)
 
     @staticmethod
     def __get_paginate_keyboard(data, history=None):
