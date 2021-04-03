@@ -21,18 +21,6 @@ def get_passenger_layout(lang, data):
     phone_number = data[PHONE_NUMBER]
     passengers = str(data[PASSENGERS])
 
-    # if data[STATE] == 'opened':
-    #     status = PASSENGER_LAYOUT_DICT[lang][OPENED_STATUS]
-    #     emoji = '\U0001F7E2'
-    #
-    # elif data[STATE] == 'closed':
-    #     status = PASSENGER_LAYOUT_DICT[lang][CLOSED_STATUS]
-    #     emoji = '\U0001F534'
-    #
-    # else:
-    #     status = PASSENGER_LAYOUT_DICT[lang][NOT_CONFIRMED_STATUS]
-    #     emoji = '\U0001F7E1'
-
     if time == 'now':
         time = PASSENGER_LAYOUT_DICT[lang][TIME]
 
@@ -50,6 +38,35 @@ def get_passenger_layout(lang, data):
     ]
     if data[COMMENT] is None:
         layout.pop(5)
+
+    return '\n'.join(layout)
+
+
+def get_mail_layout(lang, data):
+    from_point = get_region_and_district(data[FROM_REGION], data[FROM_DISTRICT])
+    from_region_name = from_point[0][f'name_{lang}']
+    from_district_name = from_point[1][f'name_{lang}']
+
+    to_point = get_region_and_district(data[TO_REGION], data[TO_DISTRICT])
+    to_region_name = to_point[0][f'name_{lang}']
+    to_district_name = to_point[1][f'name_{lang}']
+
+    receiver_contact = data[RECEIVER_CONTACT]
+    comment = data[COMMENT]
+    fullname = data[FULLNAME]
+    phone_number = data[PHONE_NUMBER]
+
+    layout = [
+        f'📦 {MAIL_LAYOUT_DICT[lang][MAIL_TEXT]}\n',
+        f'📍 {PASSENGER_LAYOUT_DICT[lang][FROM_TEXT]}: {wrap_tags(from_district_name, from_region_name)}',
+        f'🏁 {PASSENGER_LAYOUT_DICT[lang][TO_TEXT]}: {wrap_tags(to_district_name, to_region_name)}\n',
+        f'📞 {MAIL_LAYOUT_DICT[lang][RECEIVER_CONTACT_TEXT]}: {wrap_tags(receiver_contact)}',
+        f'📦 {MAIL_LAYOUT_DICT[lang][MAIL_TEXT]}: {wrap_tags(comment)}\n',
+        f'👤 {MAIL_LAYOUT_DICT[lang][SENDER_TEXT]}: {wrap_tags(fullname)}',
+        f'📞 {PASSENGER_LAYOUT_DICT[lang][USER_PHONE_NUMBER_TEXT]}: {wrap_tags(phone_number)}\n',
+        f'🤖 @{BOT_USERNAME} ©',
+        f'🛡 cardel online ™',
+    ]
 
     return '\n'.join(layout)
 
@@ -75,7 +92,7 @@ def get_fullname_error_text(lang):
 
 def get_phone_number_layout(lang):
     """ Layout view
-        telefon raqamingizni quyida formatda yuboring
+        telefon raqamini quyidagi formatda yuboring
 
         Misol: +998 XX xxx xx xx yoki XX xxx xx xx
     """

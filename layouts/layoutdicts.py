@@ -57,6 +57,24 @@ PASSENGER_LAYOUT_DICT = {
     }
 }
 
+MAIL_LAYOUT_DICT = {
+    "uz": {
+        MAIL_TEXT: "Pochta",
+        RECEIVER_CONTACT_TEXT: "Qabul qiluvchi",
+        SENDER_TEXT: "Yuboruvchi"
+    },
+    "ru": {
+        MAIL_TEXT: "Почта",
+        RECEIVER_CONTACT_TEXT: "Получателя",
+        SENDER_TEXT: "Отправитель"
+    },
+    "cy": {
+        MAIL_TEXT: "Почта",
+        RECEIVER_CONTACT_TEXT: "Қабул қилувчи",
+        SENDER_TEXT: "Юборувчи"
+    },
+}
+
 # USER_INFO_LAYOUT_DICT = {
 #     'uz': {
 #         NAME: "Ism",
@@ -77,17 +95,17 @@ PASSENGER_LAYOUT_DICT = {
 
 PHONE_NUMBER_LAYOUT_DICT = {
     "uz": {
-        1: "telefon raqamingizni quyidagi formatda yuboring",
+        1: "Telefon raqamini quyidagi formatda yuboring",
         2: "Misol",
         3: "yoki",
     },
     "ru": {
-        1: "отправьте свой номер телефона в формате ниже",
+        1: "Отправьте номер телефона в формате ниже",
         2: "Папример",
         3: "или",
     },
     "cy": {
-        1: "телефон рақамингизни қуйидаги форматда юборинг",
+        1: "Телефон рақамини қуйидаги форматда юборинг",
         2: "Мисол",
         3: "ёки",
     },
