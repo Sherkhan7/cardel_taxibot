@@ -2,4 +2,4 @@ from .callbackqueryhandler import callback_query_handler
 from .messagehandler import message_handler
 from .registrationconversation import registration_conversation_handler
 from .commandhandler import command_handler
-from .announcepassangercon import announce_passenger_conversation_handler
+from .announceconversation import announce_conversation_handler

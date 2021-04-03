@@ -119,16 +119,14 @@ def fullname_callback(update: Update, context: CallbackContext):
         user_data[FULLNAME] = fullname
 
         if user_data[LANG] == LANGS[0]:
-            text = "📱 Telefon raqamini yuborish tugmasini bosing\n" \
-                   "yoki"
+            text = "📱 Telefon raqamini yuborish tugmasini bosing\nyoki"
 
         if user_data[LANG] == LANGS[1]:
-            text = "Нажмите на кнопку 📱 Отправить номер телефона\n" \
-                   "или"
+            text = "Нажмите на кнопку 📱 Отправить номер телефона\nили"
 
         if user_data[LANG] == LANGS[2]:
-            text = "📱 Телефон рақамини юбориш тугмасини босинг\n" \
-                   "ёки"
+            text = "📱 Телефон рақамини юбориш тугмасини босинг\nёки"
+
         layout = get_phone_number_layout(user_data[LANG])
         text += f' {layout}'
         reply_keyboard = ReplyKeyboard(phone_number_keyboard, user_data[LANG]).get_keyboard()
@@ -156,19 +154,18 @@ def phone_number_callback(update: Update, context: CallbackContext):
     if not phone_number:
 
         if user_data[LANG] == LANGS[0]:
-            error_text = "Telefon raqami xato formatda yuborildi!\n"
+            error_text = "Telefon raqami xato formatda yuborildi"
 
         if user_data[LANG] == LANGS[1]:
-            error_text = "Номер телефона введен в неправильном формате!\n"
+            error_text = "Номер телефона введен в неправильном формате"
 
         if user_data[LANG] == LANGS[2]:
-            error_text = "Телефон рақами хато форматда юборилди!\n"
+            error_text = "Телефон рақами хато форматда юборилди"
 
         layout = get_phone_number_layout(user_data[LANG])
-        error_text = f'❌ {error_text}' + layout
+        error_text = f'❌ {error_text}!\n\n' + layout
 
         update.message.reply_html(error_text, quote=True)
-
         state = user_data[STATE]
 
     else:
@@ -179,17 +176,17 @@ def phone_number_callback(update: Update, context: CallbackContext):
 
         if user_data[LANG] == LANGS[0]:
             text = f"Xush kelibsiz, {user_data[FULLNAME]}!\n" \
-                   "Biz sizni ko'rganimizdan xursandmiz!\n\n"
+                   "Biz sizni ko'rganimizdan xursandmiz"
 
         if user_data[LANG] == LANGS[1]:
             text = f"Добро пожаловать, {user_data[FULLNAME]}!\n" \
-                   "Мы рады видеть вас!\n\n"
+                   "Мы рады видеть вас"
 
         if user_data[LANG] == LANGS[2]:
             text = f"Хуш келибсиз, {user_data[FULLNAME]}!\n" \
-                   "Биз сизни кўрганимиздан хурсандмиз!\n\n"
+                   "Биз сизни кўрганимиздан хурсандмиз"
 
-        text = f'🤝  {text}'
+        text = f'🤝  {text}!'
         reply_keyboard = ReplyKeyboard(main_menu_keyboard, user_data[LANG]).get_keyboard()
         update.message.reply_text(text, reply_markup=reply_keyboard)
 
