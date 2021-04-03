@@ -3,3 +3,4 @@ from .messagehandler import message_handler
 from .registrationconversation import registration_conversation_handler
 from .commandhandler import command_handler
 from .announceconversation import announce_conversation_handler
+from .driverconversation import driver_conversation_handler

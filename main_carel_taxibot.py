@@ -7,7 +7,8 @@ from handlers import (
     callback_query_handler,
     registration_conversation_handler,
     command_handler,
-    announce_passenger_conversation_handler
+    announce_conversation_handler,
+    driver_conversation_handler,
 )
 
 
@@ -18,7 +19,9 @@ def main():
 
     updater.dispatcher.add_handler(command_handler)
 
-    updater.dispatcher.add_handler(announce_passenger_conversation_handler)
+    updater.dispatcher.add_handler(driver_conversation_handler)
+
+    updater.dispatcher.add_handler(announce_conversation_handler)
 
     updater.dispatcher.add_handler(registration_conversation_handler)
 
