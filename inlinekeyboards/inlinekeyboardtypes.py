@@ -128,5 +128,30 @@ inline_keyboard_types = {
             "icon": "",
             "data": "today"
         },
+    ],
+
+    districts_selective_keyboard: [
+        {
+            "text_uz": "Barchasini tanlash",
+            "text_ru": "Выбрать все",
+            "text_cy": "Барчасини танлаш",
+            "icon": "✅",
+            "data": "check_all"
+        },
+        {
+            "text_uz": "Saqlash",
+            "text_ru": "Сохранить",
+            "text_cy": "Сақлаш",
+            "icon": "♻️",
+            "data": "save_checked"
+        },
+{
+            "text_uz": "Yakunlash",
+            "text_ru": "Завершение",
+            "text_cy": "Якунлаш",
+            "icon": "🆗",
+            "data": "ok"
+        },
+
     ]
 }

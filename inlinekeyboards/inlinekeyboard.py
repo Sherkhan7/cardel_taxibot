@@ -24,6 +24,9 @@ class InlineKeyboard(object):
         elif keyb_type == districts_keyboard:
             return self.__get_regions_keyboard(get_districts_by_parent(data), keyb_type, lang)
 
+        elif keyb_type == districts_selective_keyboard:
+            return self.__get_districts_selective_keyboard(get_districts_by_parent(data), lang)
+
         elif keyb_type == dates_keyboard:
             return self.__get_dates_keyboard(inline_keyboard_types[keyb_type], lang)
 
@@ -60,7 +63,6 @@ class InlineKeyboard(object):
     @staticmethod
     def __get_regions_keyboard(regions, keyb_type, lang):
         length = len(regions)
-        region_name = f'name_{lang}'
         icon = inline_keyboard_types[back_next_keyboard][0]['icon']
         back_btn_text = inline_keyboard_types[back_next_keyboard][0][f'text_{lang}']
         back_btn_text = f'{icon} {back_btn_text}'
@@ -70,8 +72,8 @@ class InlineKeyboard(object):
 
             keyboard = [
                 [
-                    InlineKeyboardButton(regions[i][region_name], callback_data=regions[i]['id']),
-                    InlineKeyboardButton(regions[i + 1][region_name], callback_data=regions[i + 1]['id'])
+                    InlineKeyboardButton(regions[i][f'name_{lang}'], callback_data=regions[i]['id']),
+                    InlineKeyboardButton(regions[i + 1][f'name_{lang}'], callback_data=regions[i + 1]['id'])
                 ]
                 for i in range(0, length, 2)
             ]
@@ -82,15 +84,79 @@ class InlineKeyboard(object):
 
             keyboard = [
                 [
-                    InlineKeyboardButton(regions[i][region_name], callback_data=regions[i]['id']),
+                    InlineKeyboardButton(regions[i][f'name_{lang}'], callback_data=regions[i]['id']),
                     InlineKeyboardButton(back_btn_text, callback_data=back_btn_data)
                 ]
                 if i == length - 1 else
                 [
-                    InlineKeyboardButton(regions[i][region_name], callback_data=regions[i]['id']),
-                    InlineKeyboardButton(regions[i + 1][region_name], callback_data=regions[i + 1]['id'])
+                    InlineKeyboardButton(regions[i][f'name_{lang}'], callback_data=regions[i]['id']),
+                    InlineKeyboardButton(regions[i + 1][f'name_{lang}'], callback_data=regions[i + 1]['id'])
                 ] for i in range(0, length, 2)
             ]
+
+        return InlineKeyboardMarkup(keyboard)
+
+    @staticmethod
+    def __get_districts_selective_keyboard(regions, lang):
+        length = len(regions)
+        back_btn_icon = inline_keyboard_types[back_next_keyboard][0]['icon']
+        back_btn_text = inline_keyboard_types[back_next_keyboard][0][f'text_{lang}']
+        back_btn_text = f'{back_btn_icon} {back_btn_text}'
+        back_btn_data = inline_keyboard_types[back_next_keyboard][0]['data']
+
+        check_all_btn_icon = inline_keyboard_types[districts_selective_keyboard][0]['icon']
+        check_all_btn_text = inline_keyboard_types[districts_selective_keyboard][0][f'text_{lang}']
+        check_all_btn_text = f'{check_all_btn_icon} {check_all_btn_text}'
+        check_all_btn_data = inline_keyboard_types[districts_selective_keyboard][0][f'data']
+
+        save_btn_icon = inline_keyboard_types[districts_selective_keyboard][1]['icon']
+        save_btn_text = inline_keyboard_types[districts_selective_keyboard][1][f'text_{lang}']
+        save_btn_text = f'{save_btn_icon} {save_btn_text}'
+        save_btn_data = inline_keyboard_types[districts_selective_keyboard][1]['data']
+
+        unchecked_icon = '☑'
+        unchecked_data = '_unchecked'
+
+        ok_btn_icon = inline_keyboard_types[districts_selective_keyboard][2]['icon']
+        ok_btn_text = inline_keyboard_types[districts_selective_keyboard][2][f'text_{lang}']
+        ok_btn_text = f'{ok_btn_icon} {ok_btn_text}'
+        ok_btn_data = inline_keyboard_types[districts_selective_keyboard][2]['data']
+
+        if length % 2 == 0:
+
+            keyboard = [
+                [
+                    InlineKeyboardButton(f'{unchecked_icon} ' + regions[i][f'name_{lang}'],
+                                         callback_data=str(regions[i]['id']) + unchecked_data),
+                    InlineKeyboardButton(f'{unchecked_icon} ' + regions[i + 1][f'name_{lang}'],
+                                         callback_data=str(regions[i + 1]['id']) + unchecked_data)
+                ]
+                for i in range(0, length, 2)
+            ]
+
+            keyboard.append([InlineKeyboardButton(back_btn_text, callback_data=back_btn_data)])
+        else:
+
+            keyboard = [
+                [
+                    InlineKeyboardButton(f'{unchecked_icon} ' + regions[i][f'name_{lang}'],
+                                         callback_data=str(regions[i]['id']) + unchecked_data),
+                    InlineKeyboardButton(back_btn_text, callback_data=back_btn_data)
+                ]
+                if i == length - 1 else
+                [
+                    InlineKeyboardButton(f'{unchecked_icon} ' + regions[i][f'name_{lang}'],
+                                         callback_data=str(regions[i]['id']) + unchecked_data),
+                    InlineKeyboardButton(f'{unchecked_icon} ' + regions[i + 1][f'name_{lang}'],
+                                         callback_data=str(regions[i + 1]['id']) + unchecked_data)
+                ] for i in range(0, length, 2)
+            ]
+        keyboard.insert(0, [
+            InlineKeyboardButton(save_btn_text, callback_data=save_btn_data),
+            InlineKeyboardButton(check_all_btn_text, callback_data=check_all_btn_data)
+        ])
+        keyboard.insert(0, [InlineKeyboardButton(ok_btn_text, callback_data=ok_btn_data)])
+
 
         return InlineKeyboardMarkup(keyboard)
 
