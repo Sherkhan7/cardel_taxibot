@@ -14,7 +14,7 @@ from telegram.ext import (
 )
 from DB import insert_data, get_user, get_driver
 from languages import LANGS
-from layouts import get_passenger_layout, get_phone_number_layout, get_mail_layout
+from layouts import get_passenger_layout, get_phone_number_layout, get_parcel_layout
 from globalvariables import *
 from helpers import wrap_tags
 from filters import phone_number_filter
@@ -79,8 +79,8 @@ def yes_no_callback(update: Update, context: CallbackContext):
         except TelegramError:
             callback_query.edit_message_reply_markup()
 
-        icon = reply_keyboard_types[passenger_mail_keyboard][5]['icon']
-        text = reply_keyboard_types[passenger_mail_keyboard][5][f'text_{user[LANG]}']
+        icon = reply_keyboard_types[passenger_parcel_keyboard][5]['icon']
+        text = reply_keyboard_types[passenger_parcel_keyboard][5][f'text_{user[LANG]}']
         text = f'{icon} {text}'
         reply_keyboard = ReplyKeyboard(main_menu_keyboard, user[LANG]).get_keyboard()
         callback_query.message.reply_text(text, reply_markup=reply_keyboard)

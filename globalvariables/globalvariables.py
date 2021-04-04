@@ -18,8 +18,8 @@ DATETIME_TEXT, USER_TEXT, USER_PHONE_NUMBER_TEXT, STATE, REGION_NAME, ID, LANG, 
 STATUS_TEXT, OPENED_STATUS, CLOSED_STATUS, NOT_CONFIRMED_STATUS, TG_ACCOUNT_TEXT, UNDEFINED_TEXT = \
     ('status_text', 'opened_status', 'closed_status', 'not_confirmed_status', 'tg_account_text', 'undifened_text')
 
-DISTRICT, COMMENT, PASSENGER_TEXT, ANNOUNCE, MAIL, PASSENGER, STATUS, QUANTITY, DEPARTURE_TIME = \
-    ('district', 'comment', 'passenger_text', 'announce', 'mail', 'passenger', 'status', 'quantity', 'departure_time')
+DISTRICT, COMMENT, PASSENGER_TEXT, ANNOUNCE, PARCEL, PASSENGER, STATUS, QUANTITY, DEPARTURE_TIME = \
+    ('district', 'comment', 'passenger_text', 'announce', 'parcel', 'passenger', 'status', 'quantity', 'departure_time')
 
-MAIL_TEXT, RECEIVER_CONTACT_TEXT, SENDER_TEXT, CAR_MODEL, CAR_ID, BAGGAGE = \
-    ('mail_text', 'receiver_contact_text', 'sender_text', 'car_model', 'car_id', 'baggage')
+PARCEl_TEXT, RECEIVER_CONTACT_TEXT, SENDER_TEXT, CAR_MODEL, CAR_ID, BAGGAGE = \
+    ('parcel_text', 'receiver_contact_text', 'sender_text', 'car_model', 'car_id', 'baggage')

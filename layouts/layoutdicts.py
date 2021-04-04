@@ -57,19 +57,19 @@ PASSENGER_LAYOUT_DICT = {
     }
 }
 
-MAIL_LAYOUT_DICT = {
+PARCEL_LAYOUT_DICT = {
     "uz": {
-        MAIL_TEXT: "Pochta",
+        PARCEl_TEXT: "Pochta",
         RECEIVER_CONTACT_TEXT: "Qabul qiluvchi",
         SENDER_TEXT: "Yuboruvchi"
     },
     "ru": {
-        MAIL_TEXT: "Почта",
+        PARCEl_TEXT: "Почта",
         RECEIVER_CONTACT_TEXT: "Получателя",
         SENDER_TEXT: "Отправитель"
     },
     "cy": {
-        MAIL_TEXT: "Почта",
+        PARCEl_TEXT: "Почта",
         RECEIVER_CONTACT_TEXT: "Қабул қилувчи",
         SENDER_TEXT: "Юборувчи"
     },

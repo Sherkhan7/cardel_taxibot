@@ -1,7 +1,7 @@
 from .replykeyboardvariables import *
 
 reply_keyboard_types = {
-    passenger_mail_keyboard: [
+    passenger_parcel_keyboard: [
         {
             "text_uz": "Taksi qidirsh",
             "text_ru": "Найди такси",
@@ -21,7 +21,7 @@ reply_keyboard_types = {
             "text_ru": "Почта объявление",
             "text_cy": "Почта эълон бериш",
             "icon": "📦",
-            "data": "announce_mail"
+            "data": "announce_parcel"
         },
         {
             "text_uz": "Aktiv e'lonlar",

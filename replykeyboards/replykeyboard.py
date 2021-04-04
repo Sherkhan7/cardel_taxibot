@@ -26,8 +26,8 @@ class ReplyKeyboard(object):
         elif keyb_type == location_keyboard:
             return self.__get_location_keyboard(reply_keyboard_types[keyb_type], lang)
 
-        elif keyb_type == passenger_mail_keyboard:
-            return self.__get_passenger_mail_keyboard(reply_keyboard_types[keyb_type], lang)
+        elif keyb_type == passenger_parcel_keyboard:
+            return self.__get_passenger_parcel_keyboard(reply_keyboard_types[keyb_type], lang)
 
         elif keyb_type == driver_keyboard:
             return self.__get_driver_keyboard(reply_keyboard_types[keyb_type], lang)
@@ -44,7 +44,6 @@ class ReplyKeyboard(object):
                 KeyboardButton(f'{buttons[2]["icon"]} {buttons[2][f"text_{lang}"]}'),
                 KeyboardButton(f'{buttons[3]["icon"]} {buttons[3][f"text_{lang}"]}')
             ],
-
         ], resize_keyboard=True)
 
     @staticmethod
@@ -74,10 +73,9 @@ class ReplyKeyboard(object):
         ], resize_keyboard=True)
 
     @staticmethod
-    def __get_passenger_mail_keyboard(buttons, lang):
+    def __get_passenger_parcel_keyboard(buttons, lang):
 
         return ReplyKeyboardMarkup([
-
             [
                 KeyboardButton(f'{buttons[0]["icon"]} {buttons[0][f"text_{lang}"]}'),
                 KeyboardButton(f'{buttons[1]["icon"]} {buttons[1][f"text_{lang}"]}')
@@ -90,14 +88,12 @@ class ReplyKeyboard(object):
                 KeyboardButton(f'{buttons[4]["icon"]} {buttons[4][f"text_{lang}"]}'),
                 KeyboardButton(f'{buttons[5]["icon"]} {buttons[5][f"text_{lang}"]}')
             ],
-
         ], resize_keyboard=True)
 
     @staticmethod
     def __get_driver_keyboard(buttons, lang):
 
         return ReplyKeyboardMarkup([
-
             [
                 KeyboardButton(f'{buttons[0]["icon"]} {buttons[0][f"text_{lang}"]}'),
                 KeyboardButton(f'{buttons[1]["icon"]} {buttons[1][f"text_{lang}"]}')
@@ -106,7 +102,6 @@ class ReplyKeyboard(object):
                 KeyboardButton(f'{buttons[2]["icon"]} {buttons[2][f"text_{lang}"]}'),
                 KeyboardButton(f'{buttons[3]["icon"]} {buttons[3][f"text_{lang}"]}')
             ],
-
         ], resize_keyboard=True)
 
     def get_keyboard(self):

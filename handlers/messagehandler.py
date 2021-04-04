@@ -1,7 +1,7 @@
+from telegram import Update, InlineKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import Filters, MessageHandler, CallbackContext
-from telegram import Update, InlineKeyboardMarkup
 
-from DB import *
+from DB import get_user
 from helpers import wrap_tags
 from globalvariables import *
 from languages import LANGS
@@ -22,20 +22,17 @@ def message_handler_callback(update: Update, context: CallbackContext):
     user_data = context.user_data
     text = update.message.text
 
-    passenger_mail_obj = re.search(r"(Yo'lovchi va pochta|Пассажир и почта|Йўловчи ва почта)$", text)
-    driver_obj = re.search(r"(Haydovchi|Водитель|Ҳайдовчи)$", text)
+    passenger_parcel_obj = re.search(r"(Yo'lovchi va pochta|Пассажир и почта|Йўловчи ва почта)$", text)
     settings_obj = re.search(r"(Sozlamalar|Настройки|Созламалар)$", text)
     contact_us_obj = re.search(r"(Biz bilan bog'lanish|Свяжитесь с нами|Биз билан боғланиш)$", text)
     main_menu_obj = re.search(r"(Bosh menyu|Главное меню|Бош меню)$", text)
 
     if user:
 
-        if passenger_mail_obj:
-            reply_keyboard = ReplyKeyboard(passenger_mail_keyboard, user[LANG]).get_keyboard()
+        if passenger_parcel_obj:
+            reply_keyboard = ReplyKeyboard(passenger_parcel_keyboard, user[LANG]).get_keyboard()
             update.message.reply_text(text, reply_markup=reply_keyboard)
 
-        elif driver_obj:
-            pass
         # elif settings_obj:
         #     pass
         #
@@ -54,16 +51,16 @@ def message_handler_callback(update: Update, context: CallbackContext):
 
             thinking_emoji = '🤔🤔🤔'
             if user[LANG] == LANGS[0]:
-                text = "/start ni bosing !"
+                text = "/start ni bosing"
 
             if user[LANG] == LANGS[1]:
-                text = "Нажмите /start !"
+                text = "Нажмите /start"
 
             if user[LANG] == LANGS[2]:
-                text = "/start ни босинг !"
+                text = "/start ни босинг"
 
             text = f'{thinking_emoji}\n\n' \
-                   f'❗ {text}'
+                   f'❗ {text}!'
             update.message.reply_text(text, quote=True)
 
     else:

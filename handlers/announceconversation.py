@@ -14,7 +14,7 @@ from telegram.ext import (
 )
 from DB import insert_data, get_user
 from languages import LANGS
-from layouts import get_passenger_layout, get_phone_number_layout, get_mail_layout
+from layouts import get_passenger_layout, get_phone_number_layout, get_parcel_layout
 from globalvariables import *
 from helpers import wrap_tags
 from filters import phone_number_filter
@@ -39,9 +39,9 @@ def announce_conversation_callback(update: Update, context: CallbackContext):
     user_data = context.user_data
     text = update.message.text
     announce_passenger = re.search(r"(Yo'lovchi e'lon berish|Пассажир объявление|Йўловчи эълон бериш)$", text)
-    announce_mail = re.search(r"(Pochta e'lon berish|Почта объявление|Почта эълон бериш)$", text)
+    announce_parcel = re.search(r"(Pochta e'lon berish|Почта объявление|Почта эълон бериш)$", text)
 
-    user_data[ANNOUNCE] = MAIL if announce_mail else PASSENGER if announce_passenger else None
+    user_data[ANNOUNCE] = PARCEL if announce_parcel else PASSENGER if announce_passenger else None
 
     if user[LANG] == LANGS[0]:
         text = "Qayerdan (Viloyatni tanlang)"
@@ -176,7 +176,7 @@ def district_callback(update: Update, context: CallbackContext):
         ])
         state = PASSENGERS
 
-        if user_data[ANNOUNCE] == MAIL:
+        if user_data[ANNOUNCE] == PARCEL:
             text = text_2
             layout = get_phone_number_layout(user[LANG])
             text += f'.\n\n{layout}'
@@ -377,8 +377,8 @@ def comment_callback(update: Update, context: CallbackContext):
                 context.bot.delete_message(user[TG_ID], user_data[MESSAGE_ID])
             except TelegramError:
                 context.bot.edit_message_reply_markup(user[TG_ID], user_data[MESSAGE_ID])
-        elif user_data[ANNOUNCE] == MAIL:
-            layout = get_mail_layout(user[LANG], data=user_data)
+        elif user_data[ANNOUNCE] == PARCEL:
+            layout = get_parcel_layout(user[LANG], data=user_data)
 
         message = update.message.reply_html(layout, reply_markup=inline_keyboard)
         user_data[MESSAGE_ID] = message.message_id
@@ -441,10 +441,10 @@ def confirmation_callback(update: Update, context: CallbackContext):
             data[QUANTITY] = user_data[PASSENGERS]
             data[DEPARTURE_TIME] = datetime.datetime.now() if user_data[TIME] == 'now' else \
                 datetime.datetime.strptime(f'{user_data[DATE]} {user_data[TIME]}', '%d-%m-%Y %H:%M')
-            table = PASSENGERS
-        elif user_data[ANNOUNCE] == MAIL:
+            table = 'passenger_announces'
+        elif user_data[ANNOUNCE] == PARCEL:
             data[RECEIVER_CONTACT] = user_data[RECEIVER_CONTACT]
-            table = 'mails'
+            table = 'parcel_announces'
 
         # insert new announcement
         insert_data(data, table)
@@ -453,7 +453,7 @@ def confirmation_callback(update: Update, context: CallbackContext):
     message_text += f'\n\n{icon} Status: {status}'
     callback_query.edit_message_text(message_text, parse_mode=ParseMode.HTML)
 
-    reply_keyboard = ReplyKeyboard(passenger_mail_keyboard, user[LANG]).get_keyboard()
+    reply_keyboard = ReplyKeyboard(passenger_parcel_keyboard, user[LANG]).get_keyboard()
     callback_query.message.reply_text(text, reply_markup=reply_keyboard)
 
     user_data.clear()
@@ -467,7 +467,7 @@ def announce_fallback(update: Update, context: CallbackContext):
 
     if text == '/start' or text == '/menu' or text == '/cancel':
 
-        keyboard = passenger_mail_keyboard if text == '/cancel' else main_menu_keyboard
+        keyboard = passenger_parcel_keyboard if text == '/cancel' else main_menu_keyboard
 
         if user[LANG] == LANGS[0]:
             text = "E'lon berish bekor qilindi"

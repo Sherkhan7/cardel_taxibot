@@ -42,7 +42,7 @@ def get_passenger_layout(lang, data):
     return '\n'.join(layout)
 
 
-def get_mail_layout(lang, data):
+def get_parcel_layout(lang, data):
     from_point = get_region_and_district(data[FROM_REGION], data[FROM_DISTRICT])
     from_region_name = from_point[0][f'name_{lang}']
     from_district_name = from_point[1][f'name_{lang}']
@@ -57,12 +57,12 @@ def get_mail_layout(lang, data):
     phone_number = data[PHONE_NUMBER]
 
     layout = [
-        f'📦 {MAIL_LAYOUT_DICT[lang][MAIL_TEXT]}\n',
+        f'📦 {PARCEL_LAYOUT_DICT[lang][PARCEl_TEXT]}\n',
         f'📍 {PASSENGER_LAYOUT_DICT[lang][FROM_TEXT]}: {wrap_tags(from_district_name, from_region_name)}',
         f'🏁 {PASSENGER_LAYOUT_DICT[lang][TO_TEXT]}: {wrap_tags(to_district_name, to_region_name)}\n',
-        f'📞 {MAIL_LAYOUT_DICT[lang][RECEIVER_CONTACT_TEXT]}: {wrap_tags(receiver_contact)}',
-        f'📦 {MAIL_LAYOUT_DICT[lang][MAIL_TEXT]}: {wrap_tags(comment)}\n',
-        f'👤 {MAIL_LAYOUT_DICT[lang][SENDER_TEXT]}: {wrap_tags(fullname)}',
+        f'📞 {PARCEL_LAYOUT_DICT[lang][RECEIVER_CONTACT_TEXT]}: {wrap_tags(receiver_contact)}',
+        f'📦 {PARCEL_LAYOUT_DICT[lang][PARCEl_TEXT]}: {wrap_tags(comment)}\n',
+        f'👤 {PARCEL_LAYOUT_DICT[lang][SENDER_TEXT]}: {wrap_tags(fullname)}',
         f'📞 {PASSENGER_LAYOUT_DICT[lang][USER_PHONE_NUMBER_TEXT]}: {wrap_tags(phone_number)}\n',
         f'🤖 @{BOT_USERNAME} ©',
         f'🛡 cardel online ™',
