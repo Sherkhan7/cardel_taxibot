@@ -373,10 +373,12 @@ def comment_callback(update: Update, context: CallbackContext):
 
         if user_data[ANNOUNCE] == PASSENGER:
             layout = get_passenger_layout(user[LANG], data=user_data)
+
             try:
                 context.bot.delete_message(user[TG_ID], user_data[MESSAGE_ID])
             except TelegramError:
                 context.bot.edit_message_reply_markup(user[TG_ID], user_data[MESSAGE_ID])
+
         elif user_data[ANNOUNCE] == PARCEL:
             layout = get_parcel_layout(user[LANG], data=user_data)
 
@@ -406,13 +408,16 @@ def confirmation_callback(update: Update, context: CallbackContext):
         if user[LANG] == LANGS[0]:
             text = "E'lon bekor qilindi"
             status = "Bekor qilindi"
+
         if user[LANG] == LANGS[1]:
             text = "Объявление отменено"
             status = "Отменено"
+
         if user[LANG] == LANGS[2]:
             text = "Эълон бекор қилинди"
             status = "Бекор қилинди"
-        text = f'‼ {text}'
+
+        text = f'‼ {text}!'
 
     elif data == 'confirm':
 
@@ -420,12 +425,15 @@ def confirmation_callback(update: Update, context: CallbackContext):
         if user[LANG] == LANGS[0]:
             text = "E'lon tasdiqlandi"
             status = "Taqsdiqlangan"
+
         if user[LANG] == LANGS[1]:
             text = "Объявление одобрено"
             status = "Одобрено"
+
         if user[LANG] == LANGS[2]:
             text = "Эълон тасдиқланди"
             status = "Тасдиқланган"
+
         text = f'✅ {text}'
 
         data = dict()
@@ -467,8 +475,6 @@ def announce_fallback(update: Update, context: CallbackContext):
 
     if text == '/start' or text == '/menu' or text == '/cancel':
 
-        keyboard = passenger_parcel_keyboard if text == '/cancel' else main_menu_keyboard
-
         if user[LANG] == LANGS[0]:
             text = "E'lon berish bekor qilindi"
         if user[LANG] == LANGS[1]:
@@ -477,6 +483,7 @@ def announce_fallback(update: Update, context: CallbackContext):
             text = "Эълон бериш бекор қилинди"
 
         text = f'‼ {text} !'
+        keyboard = passenger_parcel_keyboard if text == '/cancel' else main_menu_keyboard
         reply_keyboard = ReplyKeyboard(keyboard, user[LANG]).get_keyboard()
         update.message.reply_text(text, reply_markup=reply_keyboard)
 
@@ -484,29 +491,33 @@ def announce_fallback(update: Update, context: CallbackContext):
             try:
                 context.bot.delete_message(user[TG_ID], user_data[MESSAGE_ID])
             except TelegramError:
-                context.bot.edit_message_reply_markup(user[TG_ID], user_data[MESSAGE_ID])
+                try:
+                    context.bot.edit_message_reply_markup(user[TG_ID], user_data[MESSAGE_ID])
+                except TelegramError:
+                    pass
 
         user_data.clear()
-        state = ConversationHandler.END
+        return ConversationHandler.END
 
     else:
+
         if user[LANG] == LANGS[0]:
             text = "Hozir siz e'lon berish bo'limidasiz.\n\n" \
                    "E'lon berishni to'xtatish uchun /cancel ni bosing.\n\n" \
                    "Bosh menyuga qaytish uchun /menu ni bosing"
+
         if user[LANG] == LANGS[1]:
             text = "Вы сейчас в разделе объявлений.\n\n" \
                    "Нажмите /cancel, чтобы остановить объявлению.\n\n" \
                    "Нажмите /menu, чтобы вернуться в главное меню."
+
         if user[LANG] == LANGS[2]:
             text = "Ҳозир сиз эълон бериш бўлимидасиз.\n\n" \
                    "Эълон беришни тўхтатиш учун /cancel ни босинг.\n\n" \
                    "Бош менюга қайтиш учун /menu ни босинг."
 
         update.message.reply_text(text)
-        state = user_data[STATE]
-
-    return state
+        return
 
 
 announce_conversation_handler = ConversationHandler(
@@ -527,13 +538,11 @@ announce_conversation_handler = ConversationHandler(
         TIME: [CallbackQueryHandler(time_callback, pattern=r'^(back|next|\d+[:]00)$')],
 
         RECEIVER_CONTACT: [MessageHandler(
-            Filters.contact | Filters.text & (~Filters.command) & (~Filters.update.edited_message),
-            receiver_callback)],
+            Filters.contact | Filters.text & (~Filters.command) & (~Filters.update.edited_message), receiver_callback)],
 
         COMMENT: [
             CallbackQueryHandler(comment_callback, pattern=r'^no_comment$'),
-            MessageHandler(Filters.text & (~Filters.command) & (~Filters.update.edited_message),
-                           comment_callback)
+            MessageHandler(Filters.text & (~Filters.command) & (~Filters.update.edited_message), comment_callback)
         ],
 
         CONFIRMATION: [CallbackQueryHandler(confirmation_callback, pattern='^(confirm|cancel)$')]
