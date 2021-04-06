@@ -37,12 +37,12 @@ class ReplyKeyboard(object):
 
         return ReplyKeyboardMarkup([
             [
+                KeyboardButton(f'{buttons[3]["icon"]} {buttons[3][f"text_{lang}"]}'),
                 KeyboardButton(f'{buttons[0]["icon"]} {buttons[0][f"text_{lang}"]}'),
-                KeyboardButton(f'{buttons[1]["icon"]} {buttons[1][f"text_{lang}"]}')
             ],
             [
                 KeyboardButton(f'{buttons[2]["icon"]} {buttons[2][f"text_{lang}"]}'),
-                KeyboardButton(f'{buttons[3]["icon"]} {buttons[3][f"text_{lang}"]}')
+                KeyboardButton(f'{buttons[1]["icon"]} {buttons[1][f"text_{lang}"]}'),
             ],
         ], resize_keyboard=True)
 
@@ -96,11 +96,12 @@ class ReplyKeyboard(object):
         return ReplyKeyboardMarkup([
             [
                 KeyboardButton(f'{buttons[0]["icon"]} {buttons[0][f"text_{lang}"]}'),
-                KeyboardButton(f'{buttons[1]["icon"]} {buttons[1][f"text_{lang}"]}')
+                KeyboardButton(f'{buttons[2]["icon"]} {buttons[2][f"text_{lang}"]}'),
+                # KeyboardButton(f'{buttons[1]["icon"]} {buttons[1][f"text_{lang}"]}')
             ],
             [
-                KeyboardButton(f'{buttons[2]["icon"]} {buttons[2][f"text_{lang}"]}'),
-                KeyboardButton(f'{buttons[3]["icon"]} {buttons[3][f"text_{lang}"]}')
+                KeyboardButton(f'{buttons[4]["icon"]} {buttons[4][f"text_{lang}"]}'),
+                # KeyboardButton(f'{buttons[3]["icon"]} {buttons[3][f"text_{lang}"]}')
             ],
         ], resize_keyboard=True)
 

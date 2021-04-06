@@ -17,7 +17,6 @@ from languages import LANGS
 from layouts import get_active_driver_layout, get_comment_text
 from globalvariables import *
 from helpers import wrap_tags
-from filters import phone_number_filter
 
 from replykeyboards import ReplyKeyboard
 from replykeyboards.replykeyboardvariables import *
@@ -61,8 +60,7 @@ def activate_conversation_callback(update: Update, context: CallbackContext):
     inline_keyboard.inline_keyboard.append([InlineKeyboardButton(save_btn_text, callback_data=save_btn_data)])
     message = update.message.reply_text(text, reply_markup=inline_keyboard)
 
-    state = FROM_REGION
-    user_data[STATE] = state
+    user_data[STATE] = FROM_REGION
     user_data[MESSAGE_ID] = message.message_id
 
     return REGION
@@ -105,7 +103,7 @@ def region_callback(update: Update, context: CallbackContext):
         text_2 = "Куда"
         district_text = "(Выберите район)"
         region_text = "(Выберите область)"
-        note_text = "Примечание:Вы можете выбрать несколько районов"
+        note_text = "Примечание: Вы можете выбрать несколько районов"
         error_text = "Ни один район не был выбран.\n" \
                      "⚠ Выберите хотя бы один район."
         empty_seats_text = "Выберите количество свободных мест"
@@ -259,7 +257,7 @@ def district_callback(update: Update, context: CallbackContext):
             alert_text = f'{icon} {alert_text}'
             district_ids_list = loop(icon, action, inline_keyboard)
             callback_query.edit_message_reply_markup(reply_markup)
-            callback_query.answer(alert_text, show_alert=True)
+            callback_query.answer(alert_text)
 
             if CHECKED not in user_data:
                 user_data[CHECKED] = dict()
@@ -277,6 +275,7 @@ def district_callback(update: Update, context: CallbackContext):
             del user_data[CHECKED][key][region_id]
 
         logger.info('user_data: %s', user_data)
+        return
 
     else:
 
@@ -338,6 +337,7 @@ def district_callback(update: Update, context: CallbackContext):
         alert = f'{text[-1]} {alert}'
         callback_query.answer(alert)
         logger.info('user_data: %s', user_data)
+        return
 
 
 def empty_seats_callback(update: Update, context: CallbackContext):
@@ -395,11 +395,11 @@ def comment_callback(update: Update, context: CallbackContext):
         text = "Jo'nash vaqtini yozib yuboring"
         example_text = "Misol uchun: bugun, kechasi 7larda, ertaga ertalab"
 
-    if user[LANG] == LANGS[0]:
+    if user[LANG] == LANGS[1]:
         text = "Запишите время отправления"
         example_text = "Например: сегодня,  в 7 вечера, завтра утром"
 
-    if user[LANG] == LANGS[0]:
+    if user[LANG] == LANGS[2]:
         text = "Жўнаш вақтини ёзиб юборинг"
         example_text = "Мисол учун: бугун, кечаси 7ларда, эртага эрталаб"
 

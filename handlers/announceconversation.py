@@ -12,9 +12,9 @@ from telegram.ext import (
     CallbackContext,
     Filters,
 )
+from layouts import *
 from DB import insert_data, get_user
 from languages import LANGS
-from layouts import get_passenger_layout, get_phone_number_layout, get_parcel_layout, get_comment_text
 from globalvariables import *
 from helpers import wrap_tags
 from filters import phone_number_filter
@@ -304,18 +304,9 @@ def receiver_callback(update: Update, context: CallbackContext):
 
     if not phone_number:
 
-        if user[LANG] == LANGS[0]:
-            error_text = "Telefon raqami xato formatda yuborildi"
-
-        if user[LANG] == LANGS[1]:
-            error_text = "Номер телефона введен в неправильном формате"
-
-        if user[LANG] == LANGS[2]:
-            error_text = "Телефон рақами хато форматда юборилди"
-
+        error_text = get_phone_number_error_text(user[LANG])
         layout = get_phone_number_layout(user[LANG])
         error_text = f'❌ {error_text}!\n\n' + layout
-
         update.message.reply_html(error_text, quote=True)
         state = user_data[STATE]
 

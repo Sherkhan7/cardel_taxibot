@@ -36,7 +36,6 @@ def get_passenger_layout(lang, data):
         f'\n👤 {PASSENGER_LAYOUT_DICT[lang][USER_TEXT]}: {wrap_tags(fullanme)}',
         f'📞 {PASSENGER_LAYOUT_DICT[lang][USER_PHONE_NUMBER_TEXT]}: {wrap_tags(phone_number)}\n',
         f'🤖 @{BOT_USERNAME} ©',
-        f'🛡 cardel online ™',
     ]
     if data[COMMENT] is None:
         layout.pop(5)
@@ -67,7 +66,6 @@ def get_parcel_layout(lang, data):
         f'👤 {PARCEL_LAYOUT_DICT[lang][SENDER_TEXT]}: {wrap_tags(fullname)}',
         f'📞 {PASSENGER_LAYOUT_DICT[lang][USER_PHONE_NUMBER_TEXT]}: {wrap_tags(phone_number)}\n',
         f'🤖 @{BOT_USERNAME} ©',
-        f'🛡 cardel online ™',
     ]
 
     return '\n'.join(layout)
@@ -125,7 +123,6 @@ def get_active_driver_layout(lang, data):
         f'🚖 {TAXI_LAYOUT_DICT[lang][BAGGAGE_TEXT]}: {wrap_tags(baggage)}',
         f'🚖 {TAXI_LAYOUT_DICT[lang][CAR_MODEL]}: {wrap_tags(car_model)}\n',
         f'🤖 @{BOT_USERNAME} ©',
-        f'🛡 cardel online ™',
     ]
     if data[COMMENT] is None:
         layout.pop(5)

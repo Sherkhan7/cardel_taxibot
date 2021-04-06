@@ -1,11 +1,12 @@
 from .replykeyboardvariables import *
 
 reply_keyboard_types = {
+
     passenger_parcel_keyboard: [
         {
             "text_uz": "Taksi qidirsh",
-            "text_ru": "Найди такси",
-            "text_cy": "Такси топиш",
+            "text_ru": "Поиск такси",
+            "text_cy": "Такси қидирш",
             "icon": "🚕",
             "data": "search_taxi"
         },
@@ -46,6 +47,7 @@ reply_keyboard_types = {
         },
 
     ],
+
     settings_keyboard: [
         {
             "text_uz": "Mening ma'lumotlarim",
@@ -69,6 +71,7 @@ reply_keyboard_types = {
             "data": ""
         },
     ],
+
     phone_number_keyboard: [
         {
             "text_uz": "Telefon raqamini yuborish",
@@ -78,6 +81,7 @@ reply_keyboard_types = {
             "data": ""
         },
     ],
+
     location_keyboard: [
         {
             "text_uz": "Lokatsiyamni yuborish",
@@ -87,6 +91,7 @@ reply_keyboard_types = {
             "data": ""
         },
     ],
+
     driver_keyboard: [
         {
             "text_uz": "Aktivlashtirish",
@@ -115,6 +120,13 @@ reply_keyboard_types = {
             "text_cy": "Сақланган эълонлар",
             "icon": "🗄",
             "data": ""
+        },
+{
+            "text_uz": "Bosh menyu",
+            "text_ru": "Главное меню",
+            "text_cy": "Бош меню",
+            "icon": "🏠",
+            "data": "main_menyu"
         },
 
     ]

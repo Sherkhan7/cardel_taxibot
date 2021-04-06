@@ -52,18 +52,18 @@ def driver_conversation_callback(update: Update, context: CallbackContext):
         inline_keyboard = InlineKeyboard(yes_no_keyboard, user[LANG]).get_keyboard()
         message = update.message.reply_text(text, reply_markup=inline_keyboard)
 
-        state = YES_NO
-        user_data[STATE] = state
+        user_data[STATE] = YES_NO
         user_data[MESSAGE_ID] = message.message_id
+
+        return YES_NO
 
     else:
         reply_keyboard = ReplyKeyboard(driver_keyboard, user[LANG]).get_keyboard()
         update.message.reply_text(update.message.text, reply_markup=reply_keyboard)
 
-        sate = ConversationHandler.END
+        return ConversationHandler.END
 
-    logger.info('user_data: %s', user_data)
-    return sate
+    # logger.info('user_data: %s', user_data)
 
 
 def yes_no_callback(update: Update, context: CallbackContext):
@@ -86,9 +86,10 @@ def yes_no_callback(update: Update, context: CallbackContext):
         callback_query.message.reply_text(text, reply_markup=reply_keyboard)
 
         user_data.clear()
-        state = ConversationHandler.END
+        return ConversationHandler.END
 
     elif data == 'yes':
+
         if user[LANG] == LANGS[0]:
             text = "Avtomabilingiz rusumini tanlang"
         if user[LANG] == LANGS[1]:
@@ -100,11 +101,11 @@ def yes_no_callback(update: Update, context: CallbackContext):
         inline_keyboard = InlineKeyboard(car_models_keyboard).get_keyboard()
         callback_query.edit_message_text(text, reply_markup=inline_keyboard)
 
-        state = CAR_MODEL
-        user_data[STATE] = state
+        user_data[STATE] = CAR_MODEL
 
-    logger.info('user_data: %s', user_data)
-    return state
+        return CAR_MODEL
+
+    # logger.info('user_data: %s', user_data)
 
 
 def car_model_callback(update: Update, context: CallbackContext):
@@ -127,7 +128,7 @@ def car_model_callback(update: Update, context: CallbackContext):
 
     user_data[STATE] = BAGGAGE
 
-    logger.info('user_data: %s', user_data)
+    # logger.info('user_data: %s', user_data)
     return BAGGAGE
 
 
@@ -143,14 +144,16 @@ def baggage_callback(update: Update, context: CallbackContext):
     data[CAR_ID] = user_data[CAR_ID]
 
     # Inset driver data to database
-    # insert_data(data, 'drivers')
+    insert_data(data, 'drivers')
 
     if user[LANG] == LANGS[0]:
         text = "Registratsiya muvofaqqiyatli yakunlandi"
         text_2 = "Haydovchi"
+
     if user[LANG] == LANGS[1]:
         text = "Регистрация успешно завершена"
         text_2 = "Водитель"
+
     if user[LANG] == LANGS[2]:
         text = "Регистрация мувофаққиятли якунланди"
         text_2 = "Ҳайдовчи"
@@ -167,7 +170,48 @@ def baggage_callback(update: Update, context: CallbackContext):
 
 
 def driver_fallback(update: Update, context: CallbackContext):
-    print('driver fallback')
+    user = get_user(update.effective_user.id)
+    user_data = context.user_data
+    text = update.message.text
+
+    if text == '/start' or text == '/menu' or text == '/cancel':
+
+        if user[LANG] == LANGS[0]:
+            text = "Haydovchi sifatida ro'yxatdan o'tish bekor qilindi"
+        if user[LANG] == LANGS[1]:
+            text = "Регистрация в качестве водителя отменена"
+        if user[LANG] == LANGS[2]:
+            text = "Ҳайдовчи сифатида рўйхатдан ўтиш бекор қилинди"
+
+        text = f'‼ {text} !'
+        reply_keyboard = ReplyKeyboard(main_menu_keyboard, user[LANG]).get_keyboard()
+        update.message.reply_text(text, reply_markup=reply_keyboard)
+
+        if MESSAGE_ID in user_data:
+            try:
+                context.bot.delete_message(user[TG_ID], user_data[MESSAGE_ID])
+            except TelegramError:
+                context.bot.edit_message_reply_markup(user[TG_ID], user_data[MESSAGE_ID])
+
+        user_data.clear()
+        return ConversationHandler.END
+
+    else:
+
+        if user[LANG] == LANGS[0]:
+            text = "Hozir siz haydovchi sifatida ro'yxatdan o'tyapsiz.\n\n" \
+                   "Ro'yxatdan o'tishni to'xtatish uchun /cancel ni bosing"
+
+        if user[LANG] == LANGS[1]:
+            text = "Вы сейчас регистрируетесь как водитель такси.\n\n" \
+                   "Нажмите /cancel, чтобы остановить регистрацию"
+
+        if user[LANG] == LANGS[2]:
+            text = "Ҳозир сиз ҳайдовчи сифатида рўйхатдан ўтяпсиз\n\n" \
+                   "Рўйхатдан ўтишни тўхтатиш учун /cancel ни босинг"
+        text = f'‼ {text}.'
+        update.message.reply_text(text, quote=True)
+        return
 
 
 driver_conversation_handler = ConversationHandler(
