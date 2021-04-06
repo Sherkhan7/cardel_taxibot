@@ -14,7 +14,7 @@ from DB import insert_data, get_user
 from filters import *
 from helpers import wrap_tags
 from languages import LANGS
-from layouts import get_fullname_error_text, get_phone_number_layout
+from layouts import *
 from globalvariables import *
 
 from replykeyboards import ReplyKeyboard
@@ -52,7 +52,7 @@ def do_command(update: Update, context: CallbackContext):
             keyboard = ReplyKeyboard(main_menu_keyboard, user[LANG]).get_keyboard()
             update.message.reply_text(text, reply_markup=keyboard)
 
-            state = ConversationHandler.END
+            return ConversationHandler.END
 
         else:
 
@@ -62,14 +62,12 @@ def do_command(update: Update, context: CallbackContext):
             keyboard = InlineKeyboard(langs_keyboard).get_keyboard()
             update.message.reply_text(text, reply_markup=keyboard)
 
-            state = LANG
-            user_data[STATE] = state
+            user_data[STATE] = LANG
             user_data[TG_ID] = update.effective_user.id
             user_data[USERNAME] = update.effective_user.username
             user_data[IS_ADMIN] = True if update.effective_user.id in ACTIVE_ADMINS else False
 
-    # logger.info('user_data: %s', user_data)
-    return state
+            return LANG
 
 
 def lang_callback(update: Update, context: CallbackContext):
@@ -104,10 +102,9 @@ def lang_callback(update: Update, context: CallbackContext):
         callback_query.edit_message_text(edit_text)
         callback_query.message.reply_html(text)
 
-        state = FULLNAME
-        user_data[STATE] = state
+        user_data[STATE] = FULLNAME
 
-        return state
+        return FULLNAME
 
 
 def fullname_callback(update: Update, context: CallbackContext):
@@ -132,18 +129,16 @@ def fullname_callback(update: Update, context: CallbackContext):
         reply_keyboard = ReplyKeyboard(phone_number_keyboard, user_data[LANG]).get_keyboard()
         update.message.reply_html(text, reply_markup=reply_keyboard)
 
-        state = PHONE_NUMBER
-        user_data[STATE] = state
+        user_data[STATE] = PHONE_NUMBER
+
+        return PHONE_NUMBER
 
     else:
 
         fullname_error_text = get_fullname_error_text(user_data[LANG])
         update.message.reply_html(fullname_error_text, quote=True)
 
-        state = user_data[STATE]
-
-    # logger.info('user_data: %s', user_data)
-    return state
+        return
 
 
 def phone_number_callback(update: Update, context: CallbackContext):
@@ -153,20 +148,12 @@ def phone_number_callback(update: Update, context: CallbackContext):
 
     if not phone_number:
 
-        if user_data[LANG] == LANGS[0]:
-            error_text = "Telefon raqami xato formatda yuborildi"
-
-        if user_data[LANG] == LANGS[1]:
-            error_text = "Номер телефона введен в неправильном формате"
-
-        if user_data[LANG] == LANGS[2]:
-            error_text = "Телефон рақами хато форматда юборилди"
-
+        error_text = get_phone_number_error_text(user_data[LANG])
         layout = get_phone_number_layout(user_data[LANG])
         error_text = f'❌ {error_text}!\n\n' + layout
-
         update.message.reply_html(error_text, quote=True)
-        state = user_data[STATE]
+
+        return
 
     else:
 
@@ -191,9 +178,8 @@ def phone_number_callback(update: Update, context: CallbackContext):
         update.message.reply_text(text, reply_markup=reply_keyboard)
 
         user_data.clear()
-        state = ConversationHandler.END
 
-    return state
+        return ConversationHandler.END
 
 
 registration_conversation_handler = ConversationHandler(
