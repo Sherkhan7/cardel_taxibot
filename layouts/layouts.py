@@ -152,6 +152,19 @@ def get_fullname_error_text(lang):
     return f'⚠  {text}:\n\n {wrap_tags(example)}'
 
 
+def get_phone_number_error_text(lang):
+    if lang == LANGS[0]:
+        text = "Telefon raqami xato formatda yuborildi"
+
+    if lang == LANGS[1]:
+        text = "Номер телефона введен в неправильном формате"
+
+    if lang == LANGS[2]:
+        text = "Телефон рақами хато форматда юборилди"
+
+    return text
+
+
 def get_phone_number_layout(lang):
     """ Layout view
         telefon raqamini quyidagi formatda yuboring
