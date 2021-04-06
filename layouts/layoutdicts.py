@@ -59,22 +59,48 @@ PASSENGER_LAYOUT_DICT = {
 
 PARCEL_LAYOUT_DICT = {
     "uz": {
-        PARCEl_TEXT: "Pochta",
+        PARCEL_TEXT: "Pochta",
         RECEIVER_CONTACT_TEXT: "Qabul qiluvchi",
         SENDER_TEXT: "Yuboruvchi"
     },
     "ru": {
-        PARCEl_TEXT: "Почта",
+        PARCEL_TEXT: "Почта",
         RECEIVER_CONTACT_TEXT: "Получателя",
         SENDER_TEXT: "Отправитель"
     },
     "cy": {
-        PARCEl_TEXT: "Почта",
+        PARCEL_TEXT: "Почта",
         RECEIVER_CONTACT_TEXT: "Қабул қилувчи",
         SENDER_TEXT: "Юборувчи"
     },
 }
 
+TAXI_LAYOUT_DICT = {
+    "uz": {
+        TAXI_TEXT: "Taksi",
+        EMPTY_SEATS_TEXT: "Bo'sh joylar soni",
+        ASK_PARCEL: "Pochta qabul qilinadimi",
+        DRIVER_TEXT: "Haydovchi",
+        CAR_MODEL: "Mashina markasi",
+        BAGGAGE_TEXT: "Bagaj(yuqori bagaj)",
+    },
+    "ru": {
+        TAXI_TEXT: "Такси",
+        EMPTY_SEATS_TEXT: "Количество свободных мест",
+        ASK_PARCEL: "Будет ли приниматься почта",
+        DRIVER_TEXT: "Водитель",
+        CAR_MODEL: "Марка машины",
+        BAGGAGE_TEXT: "Багаж (верхний багаж)",
+    },
+    "cy": {
+        TAXI_TEXT: "Такси",
+        EMPTY_SEATS_TEXT: "Бўш жойлар сони",
+        ASK_PARCEL: "Почта қабул қилинадими",
+        DRIVER_TEXT: "Ҳайдовчи",
+        CAR_MODEL: "Машина маркаси",
+        BAGGAGE_TEXT: "Багаж(юқори багаж)",
+    },
+}
 # USER_INFO_LAYOUT_DICT = {
 #     'uz': {
 #         NAME: "Ism",

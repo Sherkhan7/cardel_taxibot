@@ -103,10 +103,31 @@ def get_region_and_district(region_id, district_id):
     return cursor.fetchall()
 
 
+def get_region_districts(region_id, district_ids_list):
+    district_ids_list.append(region_id)
+
+    mark = ','.join(['%s' for i in range(len(district_ids_list))])
+    with closing(get_connection()) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(f"SELECT * FROM `regions` WHERE id IN ({mark})", district_ids_list)
+
+    return cursor.fetchall()
+
+
 def get_driver(user_id):
     with closing(get_connection()) as connection:
         with connection.cursor() as cursor:
             cursor.execute(f"SELECT * FROM `drivers` WHERE user_id = %s", user_id)
+
+    return cursor.fetchone()
+
+
+def get_car_baggage_status_car(user_id):
+    with closing(get_connection()) as connection:
+        with connection.cursor() as cursor:
+            sql = "SELECT cars.car_model, drivers.baggage, drivers.status FROM cars " \
+                  "INNER JOIN drivers ON drivers.car_id = cars.id WHERE drivers.user_id = %s"
+            cursor.execute(sql, user_id)
 
     return cursor.fetchone()
 

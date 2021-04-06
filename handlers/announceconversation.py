@@ -14,7 +14,7 @@ from telegram.ext import (
 )
 from DB import insert_data, get_user
 from languages import LANGS
-from layouts import get_passenger_layout, get_phone_number_layout, get_parcel_layout
+from layouts import get_passenger_layout, get_phone_number_layout, get_parcel_layout, get_comment_text
 from globalvariables import *
 from helpers import wrap_tags
 from filters import phone_number_filter
@@ -215,22 +215,6 @@ def passenger_quantity_callback(update: Update, context: CallbackContext):
 
     logger.info('user_data: %s', user_data)
     return DATE
-
-
-def get_comment_text(lang):
-    if lang == LANGS[0]:
-        text = "Agar izohlaringiz bo'lsa yozib yuboring"
-        button_text = "Izoh yo'q"
-
-    if lang == LANGS[1]:
-        text = "Если у вас есть какие-либо комментарии, пожалуйста, напишите"
-        button_text = "Нет комментариев"
-
-    if lang == LANGS[2]:
-        text = "Агар изоҳларингиз бўлса ёзиб юборинг"
-        button_text = "Изоҳ йўқ"
-
-    return [f'{text}:', button_text]
 
 
 def date_callback(update: Update, context: CallbackContext):

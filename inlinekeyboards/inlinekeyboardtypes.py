@@ -104,6 +104,13 @@ inline_keyboard_types = {
             "icon": "❌",
             "data": "no"
         },
+        {
+            "text_uz": "Bor",
+            "text_ru": "Есть",
+            "text_cy": "Бор",
+            "icon": "✅",
+            "data": "have"
+        },
     ],
 
     basket_keyboard: {
@@ -145,7 +152,7 @@ inline_keyboard_types = {
             "icon": "♻️",
             "data": "save_checked"
         },
-{
+        {
             "text_uz": "Yakunlash",
             "text_ru": "Завершение",
             "text_cy": "Якунлаш",

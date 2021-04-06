@@ -9,6 +9,7 @@ from handlers import (
     command_handler,
     announce_conversation_handler,
     driver_conversation_handler,
+    activate_conversation_handler,
 )
 
 
@@ -19,6 +20,8 @@ def main():
 
     updater.dispatcher.add_handler(command_handler)
 
+    updater.dispatcher.add_handler(activate_conversation_handler)
+
     updater.dispatcher.add_handler(driver_conversation_handler)
 
     updater.dispatcher.add_handler(announce_conversation_handler)
@@ -27,7 +30,7 @@ def main():
 
     updater.dispatcher.add_handler(message_handler)
 
-    updater.dispatcher.add_handler(callback_query_handler)
+    # updater.dispatcher.add_handler(callback_query_handler)
 
     # ...and the error handler
     updater.dispatcher.add_error_handler(error_handler)
