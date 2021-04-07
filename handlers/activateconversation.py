@@ -261,7 +261,8 @@ def district_callback(update: Update, context: CallbackContext):
 
             if CHECKED not in user_data:
                 user_data[CHECKED] = dict()
-            elif key not in user_data[CHECKED]:
+
+            if key not in user_data[CHECKED]:
                 user_data[CHECKED][key] = dict()
 
             user_data[CHECKED][key].update({region_id: district_ids_list})
@@ -313,7 +314,8 @@ def district_callback(update: Update, context: CallbackContext):
 
             if CHECKED not in user_data:
                 user_data[CHECKED] = dict()
-            elif key not in user_data[CHECKED]:
+
+            if key not in user_data[CHECKED]:
                 user_data[CHECKED][key] = dict()
 
             if action == 'unchecked':
