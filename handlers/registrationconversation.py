@@ -1,4 +1,4 @@
-from telegram import Update
+from telegram import Update, ParseMode, InlineKeyboardButton
 from telegram.ext import (
     CallbackQueryHandler,
     CommandHandler,
@@ -7,10 +7,8 @@ from telegram.ext import (
     CallbackContext,
     Filters
 )
-
 from config import ACTIVE_ADMINS
 from DB import insert_data, get_user
-
 from filters import *
 from helpers import wrap_tags
 from languages import LANGS
@@ -80,27 +78,56 @@ def lang_callback(update: Update, context: CallbackContext):
         user_data[LANG] = data
 
         if data == LANGS[0]:
-            edit_text = "Til: 🇺🇿"
+            heading = "Foydalanish shartlari"
+            text = "Cardel Taxi ma'muriyati haydovchilar va yo'lovchilar orasidagi nizoli holatlarda va pochta " \
+                   "jo’natmalari borasida yuzaga keladigan nizoli holatlarda  javobgarlikni o'z zimmasiga olmaydi"
+            button_text = "Roziman"
+
+        if data == LANGS[1]:
+            heading = "Условия использования"
+            text = "Администрация Cardel Taxi не несет ответственности в случае возникновения споров между " \
+                   "водителями и пассажирами, а также в случае возникновения споров по почтовым отправлениям"
+            button_text = "Я согласен"
+
+        if data == LANGS[2]:
+            heading = "Фойдаланиш шартлари"
+            text = "Cardel Taxi маъмурияти ҳайдовчилар ва йўловчилар орасидаги низоли ҳолатларда ва " \
+                   "почта жўнатмалари борасида юзага келадиган низоли ҳолатларда жавобгарликни ўз зиммасига олмайди"
+            button_text = "Розиман"
+        text = f'‼ {wrap_tags(heading)}:\n\n{text} !'
+        inline_keyboard = callback_query.message.reply_markup.from_button(InlineKeyboardButton(
+            text=button_text, callback_data='agree'
+        ))
+        callback_query.edit_message_text(text, parse_mode=ParseMode.HTML, reply_markup=inline_keyboard)
+
+        user_data[STATE] = AGREEMENT
+
+        return AGREEMENT
+
+
+def agreement_callback(update: Update, context: CallbackContext):
+    user_data = context.user_data
+    callback_query = update.callback_query
+
+    if callback_query:
+
+        if user_data[LANG] == LANGS[0]:
             text = "Salom!\n" \
                    "Ism,familyangizni quyidagi formatda yuboring"
             example = "Misol: Sherzodbek Esanov yoki Sherzodbek"
 
-        if data == LANGS[1]:
-            edit_text = 'Язык: 🇷🇺'
+        if user_data[LANG] == LANGS[1]:
             text = 'Привет!\n' \
                    'Отправьте свое имя,фамилию в формате ниже'
             example = 'Пример: Шерзодбек Эсанов или Шерзодбек'
 
-        if data == LANGS[2]:
-            edit_text = "Тил: 🇺🇿"
+        if user_data[LANG] == LANGS[2]:
             text = "Салом!\n" \
                    "Исм,фамилянгизни қуйидаги форматда юборинг"
             example = "Мисол: Шерзодбек Эсанов ёки Шерзодбек"
 
         text = f'🖐  {text}:\n\n {wrap_tags(example)}'
-
-        callback_query.edit_message_text(edit_text)
-        callback_query.message.reply_html(text)
+        callback_query.edit_message_text(text, parse_mode=ParseMode.HTML)
 
         user_data[STATE] = FULLNAME
 
@@ -188,9 +215,12 @@ registration_conversation_handler = ConversationHandler(
     states={
         LANG: [
             CallbackQueryHandler(lang_callback, pattern='^(uz|ru|cy)$'),
-            # used for handle messages in this state
             MessageHandler(Filters.text & (~ Filters.command) & (~Filters.update.edited_message), lang_callback)
         ],
+
+        AGREEMENT: [
+            CallbackQueryHandler(agreement_callback, pattern='^agree$'),
+            MessageHandler(Filters.text & (~ Filters.command) & (~Filters.update.edited_message), agreement_callback)],
 
         FULLNAME: [MessageHandler(Filters.text & (~Filters.update.edited_message), fullname_callback)],
 
