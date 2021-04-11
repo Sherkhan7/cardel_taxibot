@@ -1,8 +1,6 @@
 from telegram import (
     Update,
     ReplyKeyboardRemove,
-    InlineKeyboardButton,
-    ParseMode,
     TelegramError,
 )
 from telegram.ext import (
@@ -12,12 +10,9 @@ from telegram.ext import (
     CallbackContext,
     Filters,
 )
-from DB import insert_data, get_user, get_driver
+from DB import insert_data, get_user, get_driver, get_active_driver_by_driver_id
 from languages import LANGS
-from layouts import get_passenger_layout, get_phone_number_layout, get_parcel_layout
 from globalvariables import *
-from helpers import wrap_tags
-from filters import phone_number_filter
 
 from replykeyboards import ReplyKeyboard
 from replykeyboards.replykeyboardvariables import *
@@ -27,8 +22,6 @@ from inlinekeyboards import InlineKeyboard
 from inlinekeyboards.inlinekeyboardvariables import *
 
 import logging
-import datetime
-import re
 
 logger = logging.getLogger()
 
@@ -57,13 +50,15 @@ def driver_conversation_callback(update: Update, context: CallbackContext):
 
         return YES_NO
 
+    elif get_active_driver_by_driver_id(driver_id=driver[ID]):
+        keyboard = active_driver_keyboard
     else:
-        reply_keyboard = ReplyKeyboard(driver_keyboard, user[LANG]).get_keyboard()
-        update.message.reply_text(update.message.text, reply_markup=reply_keyboard)
+        keyboard = driver_keyboard
 
-        return ConversationHandler.END
+    reply_keyboard = ReplyKeyboard(keyboard, user[LANG]).get_keyboard()
+    update.message.reply_text(update.message.text, reply_markup=reply_keyboard)
 
-    # logger.info('user_data: %s', user_data)
+    return ConversationHandler.END
 
 
 def yes_no_callback(update: Update, context: CallbackContext):
@@ -75,9 +70,9 @@ def yes_no_callback(update: Update, context: CallbackContext):
     if data == 'no':
 
         try:
-            callback_query.delete_message()
-        except TelegramError:
             callback_query.edit_message_reply_markup()
+        except TelegramError:
+            pass
 
         icon = reply_keyboard_types[passenger_parcel_keyboard][5]['icon']
         text = reply_keyboard_types[passenger_parcel_keyboard][5][f'text_{user[LANG]}']
@@ -105,8 +100,6 @@ def yes_no_callback(update: Update, context: CallbackContext):
 
         return CAR_MODEL
 
-    # logger.info('user_data: %s', user_data)
-
 
 def car_model_callback(update: Update, context: CallbackContext):
     user = get_user(update.effective_user.id)
@@ -128,7 +121,6 @@ def car_model_callback(update: Update, context: CallbackContext):
 
     user_data[STATE] = BAGGAGE
 
-    # logger.info('user_data: %s', user_data)
     return BAGGAGE
 
 
@@ -211,6 +203,7 @@ def driver_fallback(update: Update, context: CallbackContext):
                    "Рўйхатдан ўтишни тўхтатиш учун /cancel ни босинг"
         text = f'‼ {text}.'
         update.message.reply_text(text, quote=True)
+
         return
 
 
