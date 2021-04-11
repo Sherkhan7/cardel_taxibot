@@ -10,6 +10,8 @@ from handlers import (
     announce_conversation_handler,
     driver_conversation_handler,
     activate_conversation_handler,
+    search_conversation_handler,
+    edit_conversation_handler
 )
 
 
@@ -20,11 +22,14 @@ def main():
 
     updater.dispatcher.add_handler(command_handler)
 
+    updater.dispatcher.add_handler(edit_conversation_handler)
+
     updater.dispatcher.add_handler(activate_conversation_handler)
 
     updater.dispatcher.add_handler(driver_conversation_handler)
 
-    updater.dispatcher.add_handler(announce_conversation_handler)
+    updater.dispatcher.add_handler(search_conversation_handler)
+    # updater.dispatcher.add_handler(announce_conversation_handler)
 
     updater.dispatcher.add_handler(registration_conversation_handler)
 
