@@ -28,7 +28,7 @@ def main():
 
     updater.dispatcher.add_handler(driver_conversation_handler)
 
-    updater.dispatcher.add_handler(search_conversation_handler)
+    # updater.dispatcher.add_handler(search_conversation_handler)
     # updater.dispatcher.add_handler(announce_conversation_handler)
 
     updater.dispatcher.add_handler(registration_conversation_handler)
