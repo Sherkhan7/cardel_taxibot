@@ -22,4 +22,5 @@ from .main import (
     update_active_driver_ask_parcel,
     update_active_driver_departure_time,
     update_active_driver_from_or_to,
+    delete_active_driver,
 )

@@ -275,6 +275,20 @@ def update_active_driver_from_or_to(field, new_json, driver_id):
     return return_value
 
 
+def delete_active_driver(driver_id):
+    with closing(get_connection()) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(f'DELETE FROM `active_drivers` WHERE driver_id = %s', driver_id)
+            connection.commit()
+
+    return_value = 'not deleted'
+
+    if connection.affected_rows() != 0:
+        return_value = 'deleted'
+
+    return return_value
+
+
 def update_user_info(id, **kwargs):
     if 'lang' in kwargs.keys():
         value = kwargs['lang']
