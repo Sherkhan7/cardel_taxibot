@@ -29,7 +29,7 @@ class ReplyKeyboard(object):
         elif keyb_type == passenger_parcel_keyboard:
             return self.__get_passenger_parcel_keyboard(reply_keyboard_types[keyb_type], lang)
 
-        elif keyb_type == driver_keyboard:
+        elif keyb_type == driver_keyboard or active_driver_keyboard:
             return self.__get_driver_keyboard(reply_keyboard_types[keyb_type], lang)
 
     @staticmethod

@@ -121,7 +121,7 @@ reply_keyboard_types = {
             "icon": "🗄",
             "data": ""
         },
-{
+        {
             "text_uz": "Bosh menyu",
             "text_ru": "Главное меню",
             "text_cy": "Бош меню",
@@ -129,5 +129,44 @@ reply_keyboard_types = {
             "data": "main_menyu"
         },
 
-    ]
+    ],
+
+    active_driver_keyboard: [
+        {
+            "text_uz": "Tahrirlash",
+            "text_ru": "Редактировать",
+            "text_cy": "Таҳрирлаш",
+            "icon": "📝",
+            "data": ""
+        },
+        {
+            "text_uz": "E'lonlar filtiri",
+            "text_ru": "Фильтр объявлений",
+            "text_cy": "Эълонлар филтири",
+            "icon": "📊",
+            "data": ""
+        },
+        {
+            "text_uz": "Pochta qaydlari",
+            "text_ru": "Почтовые записи",
+            "text_cy": "Почта қайдлари",
+            "icon": "📦",
+            "data": ""
+        },
+        {
+            "text_uz": "Saqlangan e'lonlar",
+            "text_ru": "Сохраненные объявления",
+            "text_cy": "Сақланган эълонлар",
+            "icon": "🗄",
+            "data": ""
+        },
+        {
+            "text_uz": "Bosh menyu",
+            "text_ru": "Главное меню",
+            "text_cy": "Бош меню",
+            "icon": "🏠",
+            "data": "main_menyu"
+        },
+
+    ],
 }
