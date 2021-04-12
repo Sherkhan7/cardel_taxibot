@@ -56,6 +56,9 @@ class InlineKeyboard(object):
         elif keyb_type == geo_keyboard:
             return self.__get_geo_keyboard(data)
 
+        elif keyb_type == edit_keyboard:
+            return self.__get_edit_keyboard(inline_keyboard_types[keyb_type], lang)
+
     @staticmethod
     def __get_langs_keyboard(buttons):
 
@@ -282,6 +285,14 @@ class InlineKeyboard(object):
 
         inline_keyboard.append([InlineKeyboardButton(button_text, callback_data=button_data)])
 
+        if 'undefined' in data:
+            icon = inline_keyboard_types[back_next_keyboard][2]['icon']
+            text = inline_keyboard_types[back_next_keyboard][2][f'text_{lang}']
+            button_text = f'{icon} {text}'
+            button_data = inline_keyboard_types[back_next_keyboard][2]['data']
+
+            inline_keyboard.append([InlineKeyboardButton(button_text, callback_data=button_data)])
+
         return InlineKeyboardMarkup(inline_keyboard)
 
     @staticmethod
@@ -334,8 +345,8 @@ class InlineKeyboard(object):
 
         return InlineKeyboardMarkup([
             [InlineKeyboardButton(button2_text,
-                                  url=f'http://www.google.com/maps/place/{from_latitude},{from_longitude}/'
-                                      f'@{from_latitude},{from_longitude},12z')]
+                                  url=f'https://www.google.com/maps/place/{from_latitude},{from_longitude}/@'
+                                      f'{from_latitude},{from_longitude},12z')]
         ])
 
     @staticmethod
@@ -432,6 +443,16 @@ class InlineKeyboard(object):
                 InlineKeyboardButton(button3_text, callback_data=button3_data),
             ],
         ])
+
+    @staticmethod
+    def __get_edit_keyboard(buttons, lang):
+        keyboard = [
+            [
+                InlineKeyboardButton(f'{button["icon"]} {button[f"text_{lang}"]}', callback_data=button['data']),
+            ] for button in buttons
+        ]
+
+        return InlineKeyboardMarkup(keyboard)
 
     def get_keyboard(self):
 
