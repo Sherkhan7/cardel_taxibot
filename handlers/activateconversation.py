@@ -16,7 +16,7 @@ from DB import insert_data, get_user, get_driver_and_car_data, get_active_driver
 from languages import LANGS
 from layouts import get_active_driver_layout, get_comment_text
 from globalvariables import *
-from helpers import wrap_tags
+from helpers import wrap_tags, loop
 
 from replykeyboards import ReplyKeyboard
 from replykeyboards.replykeyboardvariables import *
@@ -30,21 +30,6 @@ import datetime
 import json
 
 logger = logging.getLogger()
-
-
-def loop(icon, action, inline_keyboard):
-    district_ids_list = []
-
-    for row in inline_keyboard[1:]:
-        for col in row:
-            if col.callback_data != 'back':
-                text = col.text.split(maxsplit=1)
-                data = col.callback_data.split('_')
-                col.text = f'{icon} {text[-1]}'
-                col.callback_data = f'{data[0]}_{action}'
-                district_ids_list.append(int(data[0]))
-
-    return district_ids_list
 
 
 def activate_conversation_callback(update: Update, context: CallbackContext):

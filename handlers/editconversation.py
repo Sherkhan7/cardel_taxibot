@@ -27,7 +27,7 @@ from DB import (
 from languages import LANGS
 from layouts import get_active_driver_layout, get_comment_text
 from globalvariables import *
-from helpers import wrap_tags
+from helpers import wrap_tags, loop
 
 from replykeyboards import ReplyKeyboard
 from replykeyboards.replykeyboardvariables import *
@@ -42,24 +42,6 @@ import json
 import datetime
 
 logger = logging.getLogger()
-
-EDIT_EMPTY_SEATS, EDIT_DISTRICT, EDIT_REGION, EDIT_ASK_PARCEL, EDIT_DATE, EDIT_TIME, EDIT_COMMENT = \
-    ('edit_empty_seats', 'edit_district', 'edit_region', 'edit_ask_parcel', 'edit_date', 'edit_time', 'edit_comment')
-
-
-def loop(icon, action, inline_keyboard):
-    district_ids_list = []
-
-    for row in inline_keyboard[1:]:
-        for col in row:
-            if col.callback_data != 'back':
-                text = col.text.split(maxsplit=1)
-                data = col.callback_data.split('_')
-                col.text = f'{icon} {text[-1]}'
-                col.callback_data = f'{data[0]}_{action}'
-                district_ids_list.append(int(data[0]))
-
-    return district_ids_list
 
 
 def get_edited_alert(lang):
@@ -173,7 +155,7 @@ def choose_editing_callback(update: Update, context: CallbackContext):
 
         user_data[STATE] = state
 
-        logger.info('user_data: %s', user_data)
+        # logger.info('user_data: %s', user_data)
         return EDIT_REGION
 
     elif action == EMPTY_SEATS:
@@ -356,7 +338,7 @@ def edit_region_callback(update: Update, context: CallbackContext):
 
         user_data[STATE] = state
 
-        logger.info('user_data: %s', user_data)
+        # logger.info('user_data: %s', user_data)
         return EDIT_DISTRICT
 
     active_driver_data = get_active_driver_by_driver_id(driver_and_car_data[ID])
@@ -370,7 +352,7 @@ def edit_region_callback(update: Update, context: CallbackContext):
     if CHECKED in user_data:
         user_data.pop(CHECKED)
 
-    logger.info('user_data: %s', user_data)
+    # logger.info('user_data: %s', user_data)
     return CHOOSE_EDITING
 
 
@@ -436,7 +418,7 @@ def edit_district_callback(update: Update, context: CallbackContext):
 
         user_data[STATE] = state
 
-        logger.info('user_data: %s', user_data)
+        # logger.info('user_data: %s', user_data)
         return EDIT_REGION
 
     elif data == 'check_all':
@@ -469,7 +451,7 @@ def edit_district_callback(update: Update, context: CallbackContext):
 
             del user_data[CHECKED][key][region_id]
 
-        logger.info('user_data: %s', user_data)
+        # logger.info('user_data: %s', user_data)
         return
 
     else:
@@ -535,7 +517,7 @@ def edit_district_callback(update: Update, context: CallbackContext):
 
         alert = f'{text[-1]} {alert}'
         callback_query.answer(alert)
-        logger.info('user_data: %s', user_data)
+        # logger.info('user_data: %s', user_data)
         return
 
 

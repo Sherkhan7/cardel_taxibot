@@ -26,3 +26,6 @@ PARCEL_TEXT, RECEIVER_CONTACT_TEXT, SENDER_TEXT, CAR_MODEL, CAR_ID, BAGGAGE, CHE
 
 TAXI_TEXT, EMPTY_SEATS_TEXT, DRIVER_TEXT, BAGGAGE_TEXT, DRIVER_ID, AGREEMENT, CHOOSE_EDITING = \
     ('taxi_text', 'empty_seats_text', 'driver_text', 'baggage_text', 'driver_id', 'agreement', 'choose_editing')
+
+EDIT_EMPTY_SEATS, EDIT_DISTRICT, EDIT_REGION, EDIT_ASK_PARCEL, EDIT_DATE, EDIT_TIME, EDIT_COMMENT = \
+    ('edit_empty_seats', 'edit_district', 'edit_region', 'edit_ask_parcel', 'edit_date', 'edit_time', 'edit_comment')
