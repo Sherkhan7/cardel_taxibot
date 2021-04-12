@@ -181,7 +181,7 @@ def region_callback(update: Update, context: CallbackContext):
 
         user_data[STATE] = state
 
-        logger.info('user_data: %s', user_data)
+        # logger.info('user_data: %s', user_data)
         return return_state
 
     else:
@@ -198,7 +198,7 @@ def region_callback(update: Update, context: CallbackContext):
 
         user_data[STATE] = state
 
-        logger.info('user_data: %s', user_data)
+        # logger.info('user_data: %s', user_data)
         return DISTRICT
 
 
@@ -259,7 +259,7 @@ def district_callback(update: Update, context: CallbackContext):
 
         user_data[STATE] = state
 
-        logger.info('user_data: %s', user_data)
+        # logger.info('user_data: %s', user_data)
         return REGION
 
     elif data == 'check_all':
@@ -292,7 +292,7 @@ def district_callback(update: Update, context: CallbackContext):
 
             del user_data[CHECKED][key][region_id]
 
-        logger.info('user_data: %s', user_data)
+        # logger.info('user_data: %s', user_data)
         return
 
     else:
@@ -359,7 +359,7 @@ def district_callback(update: Update, context: CallbackContext):
 
         alert = f'{text[-1]} {alert}'
         callback_query.answer(alert)
-        logger.info('user_data: %s', user_data)
+        # logger.info('user_data: %s', user_data)
         return
 
 
@@ -386,7 +386,7 @@ def empty_seats_callback(update: Update, context: CallbackContext):
 
     user_data[STATE] = ASK_PARCEL
 
-    logger.info('user_data: %s', user_data)
+    # logger.info('user_data: %s', user_data)
     return ASK_PARCEL
 
 
@@ -411,7 +411,7 @@ def ask_parcel_callback(update: Update, context: CallbackContext):
 
     user_data[STATE] = DATE
 
-    logger.info('user_data: %s', user_data)
+    # logger.info('user_data: %s', user_data)
     return DATE
 
 
@@ -434,7 +434,7 @@ def date_callback(update: Update, context: CallbackContext):
 
         user_data[STATE] = COMMENT
 
-        logger.info('user_data: %s', user_data)
+        # logger.info('user_data: %s', user_data)
         return COMMENT
 
     else:
@@ -457,7 +457,7 @@ def date_callback(update: Update, context: CallbackContext):
 
         user_data[STATE] = TIME
 
-        logger.info('user_data: %s', user_data)
+        # logger.info('user_data: %s', user_data)
         return TIME
 
 
@@ -479,7 +479,7 @@ def time_callback(update: Update, context: CallbackContext):
 
         callback_query.edit_message_reply_markup(inline_keyboard)
 
-        logger.info('user_data: %s', user_data)
+        # logger.info('user_data: %s', user_data)
         return
 
     else:
@@ -492,7 +492,7 @@ def time_callback(update: Update, context: CallbackContext):
         callback_query.edit_message_text(text[0], reply_markup=inline_keyboard)
 
         user_data[STATE] = COMMENT
-        logger.info('user_data: %s', user_data)
+        # logger.info('user_data: %s', user_data)
         return COMMENT
 
 
@@ -518,7 +518,7 @@ def comment_callback(update: Update, context: CallbackContext):
 
     user_data[STATE] = CONFIRMATION
 
-    logger.info('user_data: %s', user_data)
+    # logger.info('user_data: %s', user_data)
     return CONFIRMATION
 
 
