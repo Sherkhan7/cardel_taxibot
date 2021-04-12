@@ -14,9 +14,6 @@ def get_connection():
     return connection
 
 
-users_table_name = 'users'
-
-
 def insert_data(data, table_name):
     data_keys = tuple(data.keys())
     data_values = tuple(data.values())
@@ -46,35 +43,10 @@ def get_main_menu_buttons():
     return cursor.fetchall()
 
 
-def insert_order_items(items_data, table_name):
-    basket = items_data.pop('basket')
-    data_keys = list(items_data.keys())
-    data_keys += ['book_id', 'quantity']
-    data_values = tuple(items_data.values())
-
-    data_values = [data_values + tuple([book_id, quantity]) for (book_id, quantity) in basket.items()]
-
-    fields = ','.join(data_keys)
-    mask = ','.join(['%s'] * len(data_keys))
-
-    with closing(get_connection()) as connection:
-        with connection.cursor() as cursor:
-            sql = f'INSERT INTO {table_name} ({fields}) VALUES ({mask})'
-
-            cursor.executemany(sql, data_values)
-            connection.commit()
-
-    value = cursor.rowcount
-
-    print(f'{table_name}: +{value}')
-
-    return value
-
-
 def get_user(id):
     with closing(get_connection()) as connection:
         with connection.cursor() as cursor:
-            cursor.execute(f'SELECT * FROM {users_table_name} WHERE tg_id = %s OR id = %s', (id, id))
+            cursor.execute(f'SELECT * FROM `users` WHERE tg_id = %s OR id = %s', (id, id))
 
     return cursor.fetchone()
 
@@ -116,9 +88,11 @@ def get_region_districts(region_id, district_ids_list):
 
 
 def get_active_drivers_by_seats(empty_seats):
+    mark = ','.join(['%s' for i in range(len(empty_seats))])
     with closing(get_connection()) as connection:
         with connection.cursor() as cursor:
-            cursor.execute(f"SELECT * FROM `active_drivers` WHERE empty_seats = %s", empty_seats)
+            cursor.execute(f"SELECT * FROM `active_drivers` WHERE empty_seats IN ({mark}) ORDER BY empty_seats DESC",
+                           empty_seats)
 
     return cursor.fetchall()
 
@@ -139,6 +113,14 @@ def get_driver(user_id):
     return cursor.fetchone()
 
 
+def get_driver_by_driver_id(driver_id):
+    with closing(get_connection()) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(f"SELECT * FROM `drivers` WHERE id = %s", driver_id)
+
+    return cursor.fetchone()
+
+
 def get_driver_and_car_data(user_id):
     with closing(get_connection()) as connection:
         with connection.cursor() as cursor:
@@ -147,24 +129,6 @@ def get_driver_and_car_data(user_id):
             cursor.execute(sql, user_id)
 
     return cursor.fetchone()
-
-
-def get_order_items(order_id):
-    with closing(get_connection()) as connection:
-        with connection.cursor() as cursor:
-            cursor.execute(
-                f'SELECT * FROM order_items WHERE order_items.order_id = %s', order_id)
-
-    return cursor.fetchall()
-
-
-def get_user_orders(user_id):
-    with closing(get_connection()) as connection:
-        with connection.cursor() as cursor:
-            cursor.execute(
-                f'SELECT * FROM orders WHERE orders.user_id = %s ORDER BY id DESC', user_id)
-
-    return cursor.fetchall()
 
 
 def get_car_models():
@@ -186,20 +150,6 @@ def get_orders_by_status(status):
             cursor.execute(sql, status)
 
     return cursor.fetchall()
-
-
-def update_order_status(status, order_id):
-    with closing(get_connection()) as connection:
-        with connection.cursor() as cursor:
-            cursor.execute('UPDATE orders SET status = %s WHERE id = %s', (status, order_id))
-            connection.commit()
-
-    return_value = 'not updated'
-
-    if connection.affected_rows() != 0:
-        return_value = 'updated'
-
-    return return_value
 
 
 def update_active_driver_comment(new_comment, driver_id):
@@ -292,7 +242,7 @@ def delete_active_driver(driver_id):
 def update_user_info(id, **kwargs):
     if 'lang' in kwargs.keys():
         value = kwargs['lang']
-        sql = f'UPDATE {users_table_name} SET lang = %s WHERE tg_id = %s OR id = %s'
+        sql = f'UPDATE `users` SET lang = %s WHERE tg_id = %s OR id = %s'
 
     with closing(get_connection()) as connection:
         with connection.cursor() as cursor:

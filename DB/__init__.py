@@ -2,10 +2,6 @@ from .main import (
     get_user,
     insert_data,
     update_user_info,
-    insert_order_items,
-    get_order_items,
-    update_order_status,
-    get_user_orders,
     get_orders_by_status,
     get_main_menu_buttons,
     get_all_regions,
@@ -23,4 +19,5 @@ from .main import (
     update_active_driver_departure_time,
     update_active_driver_from_or_to,
     delete_active_driver,
+    get_driver_by_driver_id,
 )
