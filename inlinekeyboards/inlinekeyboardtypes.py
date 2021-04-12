@@ -212,6 +212,20 @@ inline_keyboard_types = {
             "icon": "✏",
             "data": "edit_comment"
         },
+        {
+            "text_uz": "Tahrirlashni yakunlash",
+            "text_ru": "Завершите редактирование",
+            "text_cy": "Таҳрирлашни якунлаш",
+            "icon": "✅",
+            "data": "edit_complete"
+        },
+        {
+            "text_uz": "O'chirish",
+            "text_ru": "Удалить",
+            "text_cy": "Ўчириш",
+            "icon": "❌",
+            "data": "edit_delete"
+        },
 
     ],
 }
