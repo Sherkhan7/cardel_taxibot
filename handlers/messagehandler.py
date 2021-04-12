@@ -1,6 +1,5 @@
-from telegram import Update, InlineKeyboardMarkup, ReplyKeyboardRemove
+from telegram import Update
 from telegram.ext import Filters, MessageHandler, CallbackContext
-
 from DB import get_user
 from helpers import wrap_tags
 from globalvariables import *
@@ -8,9 +7,6 @@ from languages import LANGS
 
 from replykeyboards import ReplyKeyboard
 from replykeyboards.replykeyboardvariables import *
-
-from inlinekeyboards import InlineKeyboard
-from inlinekeyboards.inlinekeyboardvariables import *
 
 import re
 
@@ -36,17 +32,23 @@ def message_handler_callback(update: Update, context: CallbackContext):
         # elif settings_obj:
         #     pass
         #
-        # # Biz bilan bo'glanish
-        # elif contact_us_obj:
-        #
-        #     text = f"Kitapp premium adminlari bilan boglanish uchun:\n" \
-        #            f"{wrap_tags('@kitapp_admin', '[ +998999131099 ]')} yoki\n\n" \
-        #            f"{wrap_tags('@alisherqultayev', '[ +998903261609 ]')} larga murojaat qilishingiz mumkin."
-        #
-        #     update.message.reply_html(text)
+        # Biz bilan bo'glanish
+        elif contact_us_obj:
+            admin = wrap_tags('@cardel_admin')
+
+            if user[LANG] == LANGS[0]:
+                text = f"Savollar, takliflar va shikoyatlaringiz boʼlsa {admin} ga murojaat qilishingiz mumkin."
+            if user[LANG] == LANGS[1]:
+                text = f"Если у вас есть какие-либо вопросы, предложения или жалобы, свяжитесь с {admin}."
+            if user[LANG] == LANGS[2]:
+                text = f"Саволлар, таклифлар ва шикоятларингиз бўлса {admin} га мурожаат қилишингиз мумкин."
+
+            update.message.reply_html(text)
+
         elif main_menu_obj:
             reply_keyboard = ReplyKeyboard(main_menu_keyboard, user[LANG]).get_keyboard()
             update.message.reply_text(text, reply_markup=reply_keyboard)
+
         else:
 
             thinking_emoji = '🤔🤔🤔'
