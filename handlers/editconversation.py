@@ -13,6 +13,7 @@ from telegram.ext import (
     Filters,
 )
 from DB import (
+    insert_data,
     get_user,
     get_driver_and_car_data,
     get_active_driver_by_driver_id,
@@ -21,6 +22,7 @@ from DB import (
     update_active_driver_ask_parcel,
     update_active_driver_departure_time,
     update_active_driver_from_or_to,
+    delete_active_driver,
 )
 from languages import LANGS
 from layouts import get_active_driver_layout, get_comment_text
@@ -97,6 +99,24 @@ def edit_conversation_callback(update: Update, context: CallbackContext):
 
     driver_and_car_data = get_driver_and_car_data(user[ID])
     active_driver_data = get_active_driver_by_driver_id(driver_and_car_data[ID])
+
+    if active_driver_data is None:
+
+        if user[LANG] == LANGS[0]:
+            text = "Hozir siz aktiv holatda emassiz.\n\n" \
+                   "Aktiv holatga o'tish ucun 🔄 Aktivlashtirish tugmasini bosing."
+
+        if user[LANG] == LANGS[1]:
+            text = "Вы в настоящее время не активны.\n\n" \
+                   "Нажмите кнопку 🔄 Активировать, чтобы перейти в активный режим."
+
+        if user[LANG] == LANGS[2]:
+            text = "Ҳозир сиз актив ҳолатда эмассиз.\n\n" \
+                   "Актив ҳолатга ўтиш уcун 🔄 Активлаштириш тугмасини босинг."
+        reply_keyboard = ReplyKeyboard(driver_keyboard, user[LANG]).get_keyboard()
+        update.message.reply_text(text, reply_markup=reply_keyboard)
+
+        return ConversationHandler.END
     data = set_data(user, driver_and_car_data, active_driver_data)
     label = reply_keyboard_types[active_driver_keyboard][0][f'text_{user[LANG]}']
     layout = get_active_driver_layout(user[LANG], data=data, label=f'[{label}]')
@@ -222,7 +242,47 @@ def choose_editing_callback(update: Update, context: CallbackContext):
         user_data[STATE] = EDIT_COMMENT
         return EDIT_COMMENT
 
-    callback_query.answer()
+    elif action == 'complete' or action == 'delete':
+
+        if user[LANG] == LANGS[0]:
+            text = "Tahrirlashni yakunlandi"
+            text_2 = "Aktiv holat o'chirildi"
+        if user[LANG] == LANGS[1]:
+            text = "Редактирование завершено"
+            text_2 = "Активный режим отключен"
+        if user[LANG] == LANGS[2]:
+            text = "Таҳрирлашни якунланди"
+            text_2 = "Актив ҳолат ўчирилди"
+
+        keyboard = active_driver_keyboard
+        alert_text = show_alert = None
+
+        if action == 'delete':
+            text = text_2
+            keyboard = driver_keyboard
+            driver_and_car_data = get_driver_and_car_data(user[ID])
+            active_driver_data = get_active_driver_by_driver_id(driver_and_car_data[ID])
+            active_driver_data.pop('updated_at')
+            active_driver_data['deleted_at'] = datetime.datetime.now()
+            result_1 = insert_data(active_driver_data, 'active_drivers_history')
+            result_2 = delete_active_driver(driver_and_car_data[ID])
+            if result_1 == 0 and result_2 == 'deleted':
+                alert_text = text_2
+                show_alert = True
+
+        text = f'✅ {text}!'
+
+    callback_query.answer(alert_text, show_alert=show_alert)
+
+    reply_keyboard = ReplyKeyboard(keyboard, user[LANG]).get_keyboard()
+    callback_query.message.reply_text(text, reply_markup=reply_keyboard)
+    try:
+        callback_query.delete_message()
+    except TelegramError:
+        callback_query.edit_message_reply_markup()
+
+    user_data.clear()
+    return ConversationHandler.END
 
 
 def edit_region_callback(update: Update, context: CallbackContext):
@@ -692,7 +752,7 @@ edit_conversation_handler = ConversationHandler(
                                  (~Filters.update.edited_message), edit_conversation_callback)],
 
     states={
-        CHOOSE_EDITING: [CallbackQueryHandler(choose_editing_callback, pattern=r'^edit_\w+$')],
+        CHOOSE_EDITING: [CallbackQueryHandler(choose_editing_callback, pattern=r'^(edit_\w+|complete_editing)$')],
 
         EDIT_REGION: [CallbackQueryHandler(edit_region_callback, pattern=r'^(\d+|save_checked|back)$')],
 
