@@ -81,6 +81,8 @@ def activate_conversation_callback(update: Update, context: CallbackContext):
         message = update.message.reply_text(text, reply_markup=inline_keyboard)
 
         user_data[STATE] = FROM_REGION
+        user_data[FULLNAME] = user[FULLNAME]
+        user_data[PHONE_NUMBER] = user[PHONE_NUMBER]
         user_data[CAR_MODEL] = data[CAR_MODEL]
         user_data[BAGGAGE] = data[BAGGAGE]
         user_data[DRIVER_ID] = data[ID]
@@ -498,8 +500,6 @@ def comment_callback(update: Update, context: CallbackContext):
     user = get_user(update.effective_user.id)
     user_data = context.user_data
     callback_query = update.callback_query
-    user_data[FULLNAME] = user[FULLNAME]
-    user_data[PHONE_NUMBER] = user[PHONE_NUMBER]
 
     inline_keyboard = InlineKeyboard(confirm_keyboard, user[LANG]).get_keyboard()
 
