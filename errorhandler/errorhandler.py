@@ -47,6 +47,6 @@ def error_handler(update, context) -> None:
 
     with open(full_path, 'r') as f:
         document = InputFile(f)
-    caption = 'New error 😥'
+    caption = '#newerror 😥'
     # Finally, send the document
     context.bot.send_document(chat_id=DEVELOPER_CHAT_ID, caption=caption, document=document)
