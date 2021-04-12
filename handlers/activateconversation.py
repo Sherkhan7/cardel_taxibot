@@ -498,6 +498,8 @@ def comment_callback(update: Update, context: CallbackContext):
     user = get_user(update.effective_user.id)
     user_data = context.user_data
     callback_query = update.callback_query
+    user_data[FULLNAME] = user[FULLNAME]
+    user_data[PHONE_NUMBER] = user[PHONE_NUMBER]
 
     inline_keyboard = InlineKeyboard(confirm_keyboard, user[LANG]).get_keyboard()
 
