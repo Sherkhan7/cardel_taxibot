@@ -104,14 +104,31 @@ def get_region_and_district(region_id, district_id):
 
 
 def get_region_districts(region_id, district_ids_list):
-    district_ids_list.append(region_id)
+    new_list = list(district_ids_list)
+    new_list.append(region_id)
 
-    mark = ','.join(['%s' for i in range(len(district_ids_list))])
+    mark = ','.join(['%s' for i in range(len(new_list))])
     with closing(get_connection()) as connection:
         with connection.cursor() as cursor:
-            cursor.execute(f"SELECT * FROM `regions` WHERE id IN ({mark})", district_ids_list)
+            cursor.execute(f"SELECT * FROM `regions` WHERE id IN ({mark})", new_list)
 
     return cursor.fetchall()
+
+
+def get_active_drivers_by_seats(empty_seats):
+    with closing(get_connection()) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(f"SELECT * FROM `active_drivers` WHERE empty_seats = %s", empty_seats)
+
+    return cursor.fetchall()
+
+
+def get_active_driver_by_driver_id(driver_id):
+    with closing(get_connection()) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(f"SELECT * FROM `active_drivers` WHERE driver_id = %s", driver_id)
+
+    return cursor.fetchone()
 
 
 def get_driver(user_id):
@@ -122,10 +139,10 @@ def get_driver(user_id):
     return cursor.fetchone()
 
 
-def get_car_baggage_status_car(user_id):
+def get_driver_and_car_data(user_id):
     with closing(get_connection()) as connection:
         with connection.cursor() as cursor:
-            sql = "SELECT cars.car_model, drivers.baggage, drivers.status FROM cars " \
+            sql = "SELECT drivers.id, cars.car_model, drivers.baggage, drivers.status FROM cars " \
                   "INNER JOIN drivers ON drivers.car_id = cars.id WHERE drivers.user_id = %s"
             cursor.execute(sql, user_id)
 
@@ -175,6 +192,79 @@ def update_order_status(status, order_id):
     with closing(get_connection()) as connection:
         with connection.cursor() as cursor:
             cursor.execute('UPDATE orders SET status = %s WHERE id = %s', (status, order_id))
+            connection.commit()
+
+    return_value = 'not updated'
+
+    if connection.affected_rows() != 0:
+        return_value = 'updated'
+
+    return return_value
+
+
+def update_active_driver_comment(new_comment, driver_id):
+    with closing(get_connection()) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute('UPDATE `active_drivers` SET comment = %s WHERE driver_id = %s', (new_comment, driver_id))
+            connection.commit()
+
+    return_value = 'not updated'
+
+    if connection.affected_rows() != 0:
+        return_value = 'updated'
+
+    return return_value
+
+
+def update_active_driver_empty_seats(new_empty_seats, driver_id):
+    with closing(get_connection()) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute('UPDATE `active_drivers` SET empty_seats = %s WHERE driver_id = %s',
+                           (new_empty_seats, driver_id))
+            connection.commit()
+
+    return_value = 'not updated'
+
+    if connection.affected_rows() != 0:
+        return_value = 'updated'
+
+    return return_value
+
+
+def update_active_driver_ask_parcel(new_answer, driver_id):
+    with closing(get_connection()) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute('UPDATE `active_drivers` SET ask_parcel = %s WHERE driver_id = %s', (new_answer, driver_id))
+            connection.commit()
+
+    return_value = 'not updated'
+
+    if connection.affected_rows() != 0:
+        return_value = 'updated'
+
+    return return_value
+
+
+def update_active_driver_departure_time(new_daparture_time, driver_id):
+    with closing(get_connection()) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute('UPDATE `active_drivers` SET departure_time = %s WHERE driver_id = %s',
+                           (new_daparture_time, driver_id))
+            connection.commit()
+
+    return_value = 'not updated'
+
+    if connection.affected_rows() != 0:
+        return_value = 'updated'
+
+    return return_value
+
+
+def update_active_driver_from_or_to(field, new_json, driver_id):
+    field = 'from_' if field == 'from' else 'to_'
+    with closing(get_connection()) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(f'UPDATE `active_drivers` SET {field} = %s WHERE driver_id = %s', (new_json, driver_id))
             connection.commit()
 
     return_value = 'not updated'
