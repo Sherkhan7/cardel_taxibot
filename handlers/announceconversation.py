@@ -449,6 +449,7 @@ def announce_fallback(update: Update, context: CallbackContext):
     text = update.message.text
 
     if text == '/start' or text == '/menu' or text == '/cancel':
+        keyboard = passenger_parcel_keyboard if text == '/cancel' else main_menu_keyboard
 
         if user[LANG] == LANGS[0]:
             text = "E'lon berish bekor qilindi"
@@ -458,7 +459,6 @@ def announce_fallback(update: Update, context: CallbackContext):
             text = "Эълон бериш бекор қилинди"
 
         text = f'‼ {text} !'
-        keyboard = passenger_parcel_keyboard if text == '/cancel' else main_menu_keyboard
         reply_keyboard = ReplyKeyboard(keyboard, user[LANG]).get_keyboard()
         update.message.reply_text(text, reply_markup=reply_keyboard)
 
