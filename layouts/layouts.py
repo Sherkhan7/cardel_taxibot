@@ -3,7 +3,7 @@ from layouts.layoutdicts import *
 from languages import LANGS
 from DB import get_region_and_district, get_region_districts
 from config import BOT_USERNAME
-from inlinekeyboards.inlinekeyboardvariables import yes_no_keyboard
+from inlinekeyboards.inlinekeyboardvariables import yes_no_keyboard, back_next_keyboard
 from inlinekeyboards.inlinekeyboardtypes import inline_keyboard_types
 
 
@@ -71,7 +71,7 @@ def get_parcel_layout(lang, data):
     return '\n'.join(layout)
 
 
-def get_active_driver_layout(lang, data):
+def get_active_driver_layout(lang, data, label=None):
     checked = data[CHECKED]
     from_region_name = []
     from_districts_name = []
@@ -101,7 +101,8 @@ def get_active_driver_layout(lang, data):
 
     fullname = data[FULLNAME]
     phone_number = data[PHONE_NUMBER]
-    departure_time = data[DEPARTURE_TIME]
+    date = data[DATE]
+    time = data[TIME]
     comment = str(data[COMMENT])
     empty_seats = str(data[EMPTY_SEATS])
     car_model = data[CAR_MODEL]
@@ -110,14 +111,21 @@ def get_active_driver_layout(lang, data):
     baggage = inline_keyboard_types[yes_no_keyboard][2][f'text_{lang}'] if data[BAGGAGE] else \
         inline_keyboard_types[yes_no_keyboard][1][f'text_{lang}']
 
+    if time == 'now':
+        time = PASSENGER_LAYOUT_DICT[lang][TIME]
+    elif time == 'undefined':
+        time = inline_keyboard_types[back_next_keyboard][2][f'text_{lang}']
+    if label is None:
+        label = ''
+
     layout = [
-        f'🚕 {TAXI_LAYOUT_DICT[lang][TAXI_TEXT]}\n',
+        f'🚕 {TAXI_LAYOUT_DICT[lang][TAXI_TEXT]} {label}\n',
         f'📍 {PASSENGER_LAYOUT_DICT[lang][FROM_TEXT]}: {wrap_tags(from_)}',
-        f'🏁 {PASSENGER_LAYOUT_DICT[lang][TO_TEXT]}: {wrap_tags(to)}\n',
+        f'🏁 {PASSENGER_LAYOUT_DICT[lang][TO_TEXT]}: {wrap_tags(to)}',
         f'🚖 {TAXI_LAYOUT_DICT[lang][EMPTY_SEATS_TEXT]}: {wrap_tags(empty_seats)}',
         f'📦 {TAXI_LAYOUT_DICT[lang][ASK_PARCEL]}: {wrap_tags(parcel)}',
         f'📋 {PASSENGER_LAYOUT_DICT[lang][COMMENT_TEXT]}: {wrap_tags(comment)}',
-        f'🕒 {PASSENGER_LAYOUT_DICT[lang][DATETIME_TEXT]}: {wrap_tags(departure_time)}\n',
+        f'🕒 {PASSENGER_LAYOUT_DICT[lang][DATETIME_TEXT]}: {wrap_tags(date, time)}\n',
         f'👤 {TAXI_LAYOUT_DICT[lang][DRIVER_TEXT]}: {wrap_tags(fullname)}',
         f'📞 {PASSENGER_LAYOUT_DICT[lang][USER_PHONE_NUMBER_TEXT]}: {wrap_tags(phone_number)}',
         f'🚖 {TAXI_LAYOUT_DICT[lang][BAGGAGE_TEXT]}: {wrap_tags(baggage)}',
