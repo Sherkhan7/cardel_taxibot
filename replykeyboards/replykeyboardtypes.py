@@ -4,9 +4,9 @@ reply_keyboard_types = {
 
     passenger_parcel_keyboard: [
         {
-            "text_uz": "Taksi qidirsh",
+            "text_uz": "Taksi qidirish",
             "text_ru": "Поиск такси",
-            "text_cy": "Такси қидирш",
+            "text_cy": "Такси қидириш",
             "icon": "🚕",
             "data": "search_taxi"
         },

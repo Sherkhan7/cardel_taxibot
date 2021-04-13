@@ -201,7 +201,6 @@ def district_callback(update: Update, context: CallbackContext):
 
         user_data[user_data[STATE]] = int(data)
 
-        from_text = f'{from_text}:'
         reply_keyboard = ReplyKeyboardMarkup([
             [
                 KeyboardButton('1'),
