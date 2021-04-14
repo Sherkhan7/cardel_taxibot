@@ -1,56 +1,106 @@
 from globalvariables import *
 
-BOOK_DICT = {
+PASSENGER_LAYOUT_DICT = {
     "uz": {
-        TITLE_TEXT: "Kitob nomi",
-        AUTHOR_TEXT: "Muallif(lar)",
-        AMOUNT_TEXT: "Hajmi",
-        LANG_TEXT: "Til",
-        TRANSLATOR_TEXT: "Tarjimon(lar)",
-        COVER_TYPE_TEXT: "Muqovasi",
-        PRICE_TEXT: "Narxi",
-        YEAR_TEXT: "Yil",
+        FROM_TEXT: "Qayerdan",
+        TO_TEXT: "Qayerga",
+        WEIGHT_TEXT: "Yuk og'irligi",
+        VOLUME_TEXT: "Yuk hajmi",
+        COMMENT_TEXT: "Izoh",
+        DATETIME_TEXT: "Ketish vaqti",
+        TIME: "hozir",
+        USER_TEXT: "E'lon beruvchi",
+        USER_PHONE_NUMBER_TEXT: "Tel nomer",
+        STATUS_TEXT: "Status",
+        OPENED_STATUS: "e'lon ochiq",
+        CLOSED_STATUS: "e'lon yopilgan",
+        NOT_CONFIRMED_STATUS: "e'lon tasdiqlanmagan",
+        TG_ACCOUNT_TEXT: "Telegram akkaunt",
+        PASSENGER_TEXT: "Yo'lovchi",
+        PASSENGERS_TEXT: "Yo'lovchilar soni"
     },
     "ru": {
-        TITLE_TEXT: "Откуда",
-        AUTHOR_TEXT: "Куда",
-        AMOUNT_TEXT: "Вес груза",
-        LANG_TEXT: "Объем груза",
-        TRANSLATOR_TEXT: "Описание груза",
-        INSCRIPTION_TEXT: "Дата отправки груза",
-        COVER_TYPE_TEXT: "Время отправки груза",
-        PRICE_TEXT: "сейчас",
-        YEAR_TEXT: "Объявитель",
+        FROM_TEXT: "Откуда",
+        TO_TEXT: "Куда",
+        WEIGHT_TEXT: "Вес груза",
+        VOLUME_TEXT: "Объем груза",
+        COMMENT_TEXT: "Примечание",
+        DATETIME_TEXT: "Время отправления",
+        TIME: "сейчас",
+        USER_TEXT: "Объявитель",
         USER_PHONE_NUMBER_TEXT: "Тел номер",
         STATUS_TEXT: "Статус",
         OPENED_STATUS: "объявление открыто",
         CLOSED_STATUS: "объявление закрыто",
         NOT_CONFIRMED_STATUS: "объявление не подтверждено",
         TG_ACCOUNT_TEXT: "Telegram аккаунт",
-        UNDEFINED_TEXT: "неизвестно",
-        ADDRESS: 'nameRu'
+        PASSENGER_TEXT: "Пассажир",
+        PASSENGERS_TEXT: "Количество пассажиров"
     },
     "cy": {
-        TITLE_TEXT: "Қаердан",
-        AUTHOR_TEXT: "Қаерга",
-        AMOUNT_TEXT: "Юк оғирлиги",
-        LANG_TEXT: "Юк ҳажми",
-        TRANSLATOR_TEXT: "Юк тавсифи",
-        INSCRIPTION_TEXT: "Юкни жўнатиш куни",
-        COVER_TYPE_TEXT: "Юкни жўнатиш вақти",
-        PRICE_TEXT: "ҳозир",
-        YEAR_TEXT: "Эълон берувчи",
+        FROM_TEXT: "Қаердан",
+        TO_TEXT: "Қаерга",
+        WEIGHT_TEXT: "Юк оғирлиги",
+        VOLUME_TEXT: "Юк ҳажми",
+        COMMENT_TEXT: "Изоҳ",
+        DATETIME_TEXT: "Кетиш вақти",
+        TIME: "ҳозир",
+        USER_TEXT: "Эълон берувчи",
         USER_PHONE_NUMBER_TEXT: "Тел номер",
         STATUS_TEXT: "Статус",
         OPENED_STATUS: "эълон очиқ",
         CLOSED_STATUS: "эълон ёпилган",
         NOT_CONFIRMED_STATUS: "эълон тасдиқланмаган",
         TG_ACCOUNT_TEXT: "Телеграм аккаунт",
-        UNDEFINED_TEXT: "номаълум",
-        ADDRESS: 'nameCy'
+        PASSENGER_TEXT: "Йўловчи",
+        PASSENGERS_TEXT: "Йўловчилар сони"
     }
 }
 
+PARCEL_LAYOUT_DICT = {
+    "uz": {
+        PARCEL_TEXT: "Pochta",
+        RECEIVER_CONTACT_TEXT: "Qabul qiluvchi",
+        SENDER_TEXT: "Yuboruvchi"
+    },
+    "ru": {
+        PARCEL_TEXT: "Почта",
+        RECEIVER_CONTACT_TEXT: "Получателя",
+        SENDER_TEXT: "Отправитель"
+    },
+    "cy": {
+        PARCEL_TEXT: "Почта",
+        RECEIVER_CONTACT_TEXT: "Қабул қилувчи",
+        SENDER_TEXT: "Юборувчи"
+    },
+}
+
+TAXI_LAYOUT_DICT = {
+    "uz": {
+        TAXI_TEXT: "Taksi",
+        EMPTY_SEATS_TEXT: "Bo'sh joylar soni",
+        ASK_PARCEL: "Pochta qabul qilinadimi",
+        DRIVER_TEXT: "Haydovchi",
+        CAR_MODEL: "Mashina markasi",
+        BAGGAGE_TEXT: "Bagaj(yuqori bagaj)",
+    },
+    "ru": {
+        TAXI_TEXT: "Такси",
+        EMPTY_SEATS_TEXT: "Количество свободных мест",
+        ASK_PARCEL: "Будет ли приниматься почта",
+        DRIVER_TEXT: "Водитель",
+        CAR_MODEL: "Марка машины",
+        BAGGAGE_TEXT: "Багаж (верхний багаж)",
+    },
+    "cy": {
+        TAXI_TEXT: "Такси",
+        EMPTY_SEATS_TEXT: "Бўш жойлар сони",
+        ASK_PARCEL: "Почта қабул қилинадими",
+        DRIVER_TEXT: "Ҳайдовчи",
+        CAR_MODEL: "Машина маркаси",
+        BAGGAGE_TEXT: "Багаж(юқори багаж)",
+    },
+}
 # USER_INFO_LAYOUT_DICT = {
 #     'uz': {
 #         NAME: "Ism",
@@ -71,18 +121,18 @@ BOOK_DICT = {
 
 PHONE_NUMBER_LAYOUT_DICT = {
     "uz": {
-        1: "Telefon raqamini quyidagi shaklda yuboring",
+        1: "Telefon raqamini quyidagi formatda yuboring",
         2: "Misol",
         3: "yoki",
     },
+    "ru": {
+        1: "Отправьте номер телефона в формате ниже",
+        2: "Папример",
+        3: "или",
+    },
     "cy": {
-        1: "Телефон рақамини қуйидаги шаклда юборинг",
+        1: "Телефон рақамини қуйидаги форматда юборинг",
         2: "Мисол",
         3: "ёки",
     },
-    "ru": {
-        1: "Отправьте номер телефона в виде ниже",
-        2: "Папример",
-        3: "или",
-    }
 }

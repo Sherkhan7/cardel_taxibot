@@ -33,7 +33,7 @@ def error_handler(update, context) -> None:
         f'{"".ljust(45, "*")}\n'
         # f'<pre>context.chat_data = {html.escape(str(context.chat_data))}</pre>\n'
         # f'{"".ljust(45, "*")}\n'
-        f'context.user_data = {json.dumps(context.user_data.to_dict(), indent=4, ensure_ascii=False)}\n'
+        f'context.user_data = {json.dumps(context.user_data, indent=4, ensure_ascii=False)}\n'
         f'{"".ljust(45, "*")}\n'
         f'{tb_string}\n'
         f'{"".ljust(45, "*")}\n'
@@ -47,6 +47,6 @@ def error_handler(update, context) -> None:
 
     with open(full_path, 'r') as f:
         document = InputFile(f)
-    caption = 'New error 😥'
+    caption = '#newerror 😥'
     # Finally, send the document
     context.bot.send_document(chat_id=DEVELOPER_CHAT_ID, caption=caption, document=document)

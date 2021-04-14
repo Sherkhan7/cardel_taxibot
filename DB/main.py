@@ -14,10 +14,6 @@ def get_connection():
     return connection
 
 
-users_table_name = 'users'
-books_table_name = 'books'
-
-
 def insert_data(data, table_name):
     data_keys = tuple(data.keys())
     data_values = tuple(data.values())
@@ -39,94 +35,119 @@ def insert_data(data, table_name):
     return value
 
 
-def insert_order_items(items_data, table_name):
-    basket = items_data.pop('basket')
-    data_keys = list(items_data.keys())
-    data_keys += ['book_id', 'quantity']
-    data_values = tuple(items_data.values())
-
-    data_values = [data_values + tuple([book_id, quantity]) for (book_id, quantity) in basket.items()]
-
-    fields = ','.join(data_keys)
-    mask = ','.join(['%s'] * len(data_keys))
-
+def get_main_menu_buttons():
     with closing(get_connection()) as connection:
         with connection.cursor() as cursor:
-            sql = f'INSERT INTO {table_name} ({fields}) VALUES ({mask})'
+            cursor.execute(f'SELECT * FROM `main_menu_buttons` WHERE status = TRUE')
 
-            cursor.executemany(sql, data_values)
-            connection.commit()
-
-    value = cursor.rowcount
-
-    print(f'{table_name}: +{value}')
-
-    return value
+    return cursor.fetchall()
 
 
 def get_user(id):
     with closing(get_connection()) as connection:
         with connection.cursor() as cursor:
-            cursor.execute(f'SELECT * FROM {users_table_name} WHERE tg_id = %s OR id = %s', (id, id))
+            cursor.execute(f'SELECT * FROM `users` WHERE tg_id = %s OR id = %s', (id, id))
 
     return cursor.fetchone()
 
 
-def get_book(id):
+def get_all_regions():
     with closing(get_connection()) as connection:
         with connection.cursor() as cursor:
-            cursor.execute(f'SELECT * FROM {books_table_name} WHERE id = %s', id)
+            cursor.execute(f"SELECT * FROM `regions` WHERE parent_id = 0")
+
+    return cursor.fetchall()
+
+
+def get_districts_by_parent(parent_id):
+    with closing(get_connection()) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(f"SELECT * FROM `regions` WHERE parent_id = %s", parent_id)
+
+    return cursor.fetchall()
+
+
+def get_region_and_district(region_id, district_id):
+    with closing(get_connection()) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(f"SELECT * FROM `regions` WHERE id = %s or id = %s", (region_id, district_id))
+
+    return cursor.fetchall()
+
+
+def get_region_districts(region_id, district_ids_list):
+    new_list = list(district_ids_list)
+    new_list.append(region_id)
+
+    mark = ','.join(['%s' for i in range(len(new_list))])
+    with closing(get_connection()) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(f"SELECT * FROM `regions` WHERE id IN ({mark})", new_list)
+
+    return cursor.fetchall()
+
+
+def get_active_drivers_by_seats(empty_seats):
+    mark = ','.join(['%s' for i in range(len(empty_seats))])
+    with closing(get_connection()) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(f"SELECT * FROM `active_drivers` WHERE empty_seats IN ({mark}) ORDER BY empty_seats DESC",
+                           empty_seats)
+
+    return cursor.fetchall()
+
+
+def get_active_driver_by_driver_id(driver_id):
+    with closing(get_connection()) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(f"SELECT * FROM `active_drivers` WHERE driver_id = %s", driver_id)
 
     return cursor.fetchone()
 
 
-def get_all_books():
+def get_driver(user_id):
     with closing(get_connection()) as connection:
         with connection.cursor() as cursor:
-            cursor.execute(f'SELECT * FROM {books_table_name}')
-
-    return cursor.fetchall()
-
-
-def get_books(ids):
-    interval = ",".join(ids)
-
-    with closing(get_connection()) as connection:
-        with connection.cursor() as cursor:
-            cursor.execute(f'SELECT * FROM {books_table_name} WHERE id in ({interval}) ORDER BY id DESC')
-
-    return cursor.fetchall()
-
-
-def get_order_items(order_id):
-    with closing(get_connection()) as connection:
-        with connection.cursor() as cursor:
-            cursor.execute(
-                f'SELECT * FROM order_items WHERE order_items.order_id = %s', order_id)
-
-    return cursor.fetchall()
-
-
-def get_user_orders(user_id):
-    with closing(get_connection()) as connection:
-        with connection.cursor() as cursor:
-            cursor.execute(
-                f'SELECT * FROM orders WHERE orders.user_id = %s ORDER BY id DESC', user_id)
-
-    return cursor.fetchall()
-
-
-def get_order(order_id):
-    with closing(get_connection()) as connection:
-        with connection.cursor() as cursor:
-            cursor.execute(
-                f'SELECT * FROM orders WHERE orders.id = %s', order_id)
+            cursor.execute(f"SELECT * FROM `drivers` WHERE user_id = %s", user_id)
 
     return cursor.fetchone()
+
+
+def get_driver_by_driver_id(driver_id):
+    with closing(get_connection()) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(f"SELECT * FROM `drivers` WHERE id = %s", driver_id)
+
+    return cursor.fetchone()
+
+
+def get_video_files():
+    with closing(get_connection()) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(f"SELECT * FROM `video_files`")
+
+    return cursor.fetchall()
+
+
+def get_driver_and_car_data(user_id):
+    with closing(get_connection()) as connection:
+        with connection.cursor() as cursor:
+            sql = "SELECT drivers.id, cars.car_model, drivers.baggage, drivers.status FROM cars " \
+                  "INNER JOIN drivers ON drivers.car_id = cars.id WHERE drivers.user_id = %s"
+            cursor.execute(sql, user_id)
+
+    return cursor.fetchone()
+
+
+def get_car_models():
+    with closing(get_connection()) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(f"SELECT * FROM `cars`")
+
+    return cursor.fetchall()
 
 
 def get_orders_by_status(status):
-
     if isinstance(status, tuple):
         sql = f'SELECT * FROM orders WHERE orders.status = %s OR orders.status = %s ORDER BY id DESC'
     else:
@@ -139,10 +160,10 @@ def get_orders_by_status(status):
     return cursor.fetchall()
 
 
-def update_order_status(status, order_id):
+def update_active_driver_comment(new_comment, driver_id):
     with closing(get_connection()) as connection:
         with connection.cursor() as cursor:
-            cursor.execute('UPDATE orders SET status = %s WHERE id = %s', (status, order_id))
+            cursor.execute('UPDATE `active_drivers` SET comment = %s WHERE driver_id = %s', (new_comment, driver_id))
             connection.commit()
 
     return_value = 'not updated'
@@ -153,10 +174,83 @@ def update_order_status(status, order_id):
     return return_value
 
 
+def update_active_driver_empty_seats(new_empty_seats, driver_id):
+    with closing(get_connection()) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute('UPDATE `active_drivers` SET empty_seats = %s WHERE driver_id = %s',
+                           (new_empty_seats, driver_id))
+            connection.commit()
+
+    return_value = 'not updated'
+
+    if connection.affected_rows() != 0:
+        return_value = 'updated'
+
+    return return_value
+
+
+def update_active_driver_ask_parcel(new_answer, driver_id):
+    with closing(get_connection()) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute('UPDATE `active_drivers` SET ask_parcel = %s WHERE driver_id = %s', (new_answer, driver_id))
+            connection.commit()
+
+    return_value = 'not updated'
+
+    if connection.affected_rows() != 0:
+        return_value = 'updated'
+
+    return return_value
+
+
+def update_active_driver_departure_time(new_daparture_time, driver_id):
+    with closing(get_connection()) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute('UPDATE `active_drivers` SET departure_time = %s WHERE driver_id = %s',
+                           (new_daparture_time, driver_id))
+            connection.commit()
+
+    return_value = 'not updated'
+
+    if connection.affected_rows() != 0:
+        return_value = 'updated'
+
+    return return_value
+
+
+def update_active_driver_from_or_to(field, new_json, driver_id):
+    field = 'from_' if field == 'from' else 'to_'
+    with closing(get_connection()) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(f'UPDATE `active_drivers` SET {field} = %s WHERE driver_id = %s', (new_json, driver_id))
+            connection.commit()
+
+    return_value = 'not updated'
+
+    if connection.affected_rows() != 0:
+        return_value = 'updated'
+
+    return return_value
+
+
+def delete_active_driver(driver_id):
+    with closing(get_connection()) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(f'DELETE FROM `active_drivers` WHERE driver_id = %s', driver_id)
+            connection.commit()
+
+    return_value = 'not deleted'
+
+    if connection.affected_rows() != 0:
+        return_value = 'deleted'
+
+    return return_value
+
+
 def update_user_info(id, **kwargs):
     if 'lang' in kwargs.keys():
         value = kwargs['lang']
-        sql = f'UPDATE {users_table_name} SET lang = %s WHERE tg_id = %s OR id = %s'
+        sql = f'UPDATE `users` SET lang = %s WHERE tg_id = %s OR id = %s'
 
     with closing(get_connection()) as connection:
         with connection.cursor() as cursor:
