@@ -28,8 +28,8 @@ from inlinekeyboards.inlinekeyboardvariables import *
 import logging
 import json
 import re
-import random
-from faker import Faker
+# import random
+# from faker import Faker
 
 logger = logging.getLogger()
 
