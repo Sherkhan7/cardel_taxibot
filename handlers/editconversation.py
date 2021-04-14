@@ -461,21 +461,21 @@ def edit_district_callback(update: Update, context: CallbackContext):
     elif data == 'check_all':
         reply_markup = callback_query.message.reply_markup
         inline_keyboard = reply_markup.inline_keyboard
+        icon = "✅"
+        action = "checked"
+        all_alert_text = f'{icon} {all_alert_text}'
+        district_ids_list = loop(icon, action, inline_keyboard)
+
+        if CHECKED not in user_data:
+            user_data[CHECKED] = dict()
+            user_data[CHECKED][key] = dict()
+
+        elif key not in user_data[CHECKED]:
+            user_data[CHECKED][key] = dict()
 
         try:
-            icon = "✅"
-            action = "checked"
-            all_alert_text = f'{icon} {all_alert_text}'
-            district_ids_list = loop(icon, action, inline_keyboard)
             callback_query.edit_message_reply_markup(reply_markup)
             callback_query.answer(all_alert_text)
-
-            if CHECKED not in user_data:
-                user_data[CHECKED] = dict()
-                user_data[CHECKED][key] = dict()
-
-            elif key not in user_data[CHECKED]:
-                user_data[CHECKED][key] = dict()
 
             user_data[CHECKED][key].update({region_id: district_ids_list})
 
@@ -505,6 +505,7 @@ def edit_district_callback(update: Update, context: CallbackContext):
 
         reply_markup = callback_query.message.reply_markup
         inline_keyboard = reply_markup.inline_keyboard
+
         stop = False
         for row in inline_keyboard[1:]:
             for col in row:
@@ -517,18 +518,18 @@ def edit_district_callback(update: Update, context: CallbackContext):
             if stop:
                 break
 
+        if CHECKED not in user_data:
+            user_data[CHECKED] = dict()
+            user_data[CHECKED][key] = dict()
+
+        elif key not in user_data[CHECKED]:
+            user_data[CHECKED][key] = dict()
+
         # When user presses district button many times TelegramErrorn will be thrown
         # Error message: Message is not modified: specified new message content and reply markup are exactly
         # the same as a current content and reply markup of the message
         try:
             callback_query.edit_message_reply_markup(reply_markup)
-
-            if CHECKED not in user_data:
-                user_data[CHECKED] = dict()
-                user_data[CHECKED][key] = dict()
-
-            elif key not in user_data[CHECKED]:
-                user_data[CHECKED][key] = dict()
 
             if new_action == 'checked':
 
