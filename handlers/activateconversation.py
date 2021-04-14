@@ -150,8 +150,8 @@ def region_callback(update: Update, context: CallbackContext):
             text = f'{text_2} {region_text}:'
             alert_text = f'✅ {alert_text}\n\n{text}'
             reply_markup = callback_query.message.reply_markup
-            callback_query.edit_message_text(text, reply_markup=reply_markup)
             callback_query.answer(alert_text, show_alert=True)
+            callback_query.edit_message_text(text, reply_markup=reply_markup)
 
         elif user_data[STATE] == TO_REGION:
             state = return_state = EMPTY_SEATS
@@ -250,21 +250,21 @@ def district_callback(update: Update, context: CallbackContext):
     elif data == 'check_all':
         reply_markup = callback_query.message.reply_markup
         inline_keyboard = reply_markup.inline_keyboard
+        icon = "✅"
+        action = "checked"
+        all_alert_text = f'{icon} {all_alert_text}'
+        district_ids_list = loop(icon, action, inline_keyboard)
+
+        if CHECKED not in user_data:
+            user_data[CHECKED] = dict()
+            user_data[CHECKED][key] = dict()
+
+        elif key not in user_data[CHECKED]:
+            user_data[CHECKED][key] = dict()
 
         try:
-            icon = "✅"
-            action = "checked"
-            all_alert_text = f'{icon} {all_alert_text}'
-            district_ids_list = loop(icon, action, inline_keyboard)
             callback_query.edit_message_reply_markup(reply_markup)
             callback_query.answer(all_alert_text)
-
-            if CHECKED not in user_data:
-                user_data[CHECKED] = dict()
-                user_data[CHECKED][key] = dict()
-
-            elif key not in user_data[CHECKED]:
-                user_data[CHECKED][key] = dict()
 
             user_data[CHECKED][key].update({region_id: district_ids_list})
 
@@ -295,6 +295,7 @@ def district_callback(update: Update, context: CallbackContext):
 
         reply_markup = callback_query.message.reply_markup
         inline_keyboard = reply_markup.inline_keyboard
+
         stop = False
         for row in inline_keyboard[1:]:
             for col in row:
@@ -307,38 +308,39 @@ def district_callback(update: Update, context: CallbackContext):
             if stop:
                 break
 
+        if CHECKED not in user_data:
+            user_data[CHECKED] = dict()
+            user_data[CHECKED][key] = dict()
+
+        elif key not in user_data[CHECKED]:
+            user_data[CHECKED][key] = dict()
+
+        if new_action == 'checked':
+
+            if not user_data[CHECKED][key]:
+                user_data[CHECKED][key] = {region_id: [district_id]}
+            elif region_id in user_data[CHECKED][key]:
+                # List
+                user_data[CHECKED][key][region_id].append(district_id)
+            else:
+                user_data[CHECKED][key].update({region_id: [district_id]})
+            alert = checked_alert_text
+
+        elif new_action == 'unchecked':
+            # Remove district_id if exists in user_data[CHECKED][key][region_id] list
+            if district_id in user_data[CHECKED][key][region_id]:
+                user_data[CHECKED][key][region_id].remove(district_id)
+            # If list is empty delete the `region_id: [districts_id]` pair
+            if not user_data[CHECKED][key][region_id]:
+                del user_data[CHECKED][key][region_id]
+            alert = unchecked_alert_text
+
         # When user presses district button many times TelegramErrorn will be thrown
         # Error message: Message is not modified: specified new message content and reply markup are exactly
         # the same as a current content and reply markup of the message
+
         try:
             callback_query.edit_message_reply_markup(reply_markup)
-
-            if CHECKED not in user_data:
-                user_data[CHECKED] = dict()
-                user_data[CHECKED][key] = dict()
-
-            elif key not in user_data[CHECKED]:
-                user_data[CHECKED][key] = dict()
-
-            if new_action == 'checked':
-
-                if not user_data[CHECKED][key]:
-                    user_data[CHECKED][key] = {region_id: [district_id]}
-                elif region_id in user_data[CHECKED][key]:
-                    # List
-                    user_data[CHECKED][key][region_id].append(district_id)
-                else:
-                    user_data[CHECKED][key].update({region_id: [district_id]})
-                alert = checked_alert_text
-
-            elif new_action == 'unchecked':
-                # Remove district_id if exists in list
-                user_data[CHECKED][key][region_id].remove(district_id)
-                # If list is empty delete the {region_id: [districts_id]} whole dict
-                if not user_data[CHECKED][key][region_id]:
-                    del user_data[CHECKED][key][region_id]
-                alert = unchecked_alert_text
-
         except TelegramError:
             pass
 
