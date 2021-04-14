@@ -121,6 +121,14 @@ def get_driver_by_driver_id(driver_id):
     return cursor.fetchone()
 
 
+def get_video_files():
+    with closing(get_connection()) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(f"SELECT * FROM `video_files`")
+
+    return cursor.fetchall()
+
+
 def get_driver_and_car_data(user_id):
     with closing(get_connection()) as connection:
         with connection.cursor() as cursor:
