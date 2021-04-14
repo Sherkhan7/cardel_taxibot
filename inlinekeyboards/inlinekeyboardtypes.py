@@ -219,13 +219,6 @@ inline_keyboard_types = {
             "icon": "✅",
             "data": "edit_complete"
         },
-        {
-            "text_uz": "O'chirish",
-            "text_ru": "Удалить",
-            "text_cy": "Ўчириш",
-            "icon": "❌",
-            "data": "edit_delete"
-        },
 
     ],
 }
