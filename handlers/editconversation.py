@@ -1,7 +1,9 @@
 from telegram import (
     Update,
-    ReplyKeyboardRemove,
+    ReplyKeyboardMarkup,
+    KeyboardButton,
     InlineKeyboardButton,
+    InlineKeyboardMarkup,
     ParseMode,
     TelegramError,
 )
@@ -40,6 +42,7 @@ from inlinekeyboards.inlinekeyboardtypes import inline_keyboard_types
 import logging
 import json
 import datetime
+import re
 
 logger = logging.getLogger()
 
@@ -77,32 +80,51 @@ def set_data(user, driver_and_car_data, active_driver_data):
 def edit_conversation_callback(update: Update, context: CallbackContext):
     user = get_user(update.effective_user.id)
     user_data = context.user_data
-    update.message.reply_text(update.message.text, reply_markup=ReplyKeyboardRemove())
+    back_btn_icon = reply_keyboard_types[settings_keyboard][2]['icon']
+    back_btn_text = reply_keyboard_types[settings_keyboard][2][f'text_{user[LANG]}']
+    back_btn_text = f'{back_btn_icon} {back_btn_text}'
+
+    reply_keyboard = ReplyKeyboardMarkup([
+        [KeyboardButton(back_btn_text)],
+    ], resize_keyboard=True)
+    update.message.reply_text(update.message.text, reply_markup=reply_keyboard)
 
     driver_and_car_data = get_driver_and_car_data(user[ID])
     active_driver_data = get_active_driver_by_driver_id(driver_and_car_data[ID])
+    icon = '📝'
+    icon_2 = '❌'
+
+    if user[LANG] == LANGS[0]:
+        text = "Hozir siz aktiv holatda emassiz.\n\n" \
+               "Aktiv holatga o'tish ucun 🔄 Aktivlashtirish tugmasini bosing."
+        btn_1_text = "Tahrirlash"
+        btn_2_text = "O'chirish"
+
+    if user[LANG] == LANGS[1]:
+        text = "Вы в настоящее время не активны.\n\n" \
+               "Нажмите кнопку 🔄 Активировать, чтобы перейти в активный режим."
+        btn_1_text = "Редактировать"
+        btn_2_text = "Удалить"
+
+    if user[LANG] == LANGS[2]:
+        text = "Ҳозир сиз актив ҳолатда эмассиз.\n\n" \
+               "Актив ҳолатга ўтиш уcун 🔄 Активлаштириш тугмасини босинг."
+        btn_1_text = "Таҳрирлаш"
+        btn_2_text = "Ўчириш"
 
     if active_driver_data is None:
-
-        if user[LANG] == LANGS[0]:
-            text = "Hozir siz aktiv holatda emassiz.\n\n" \
-                   "Aktiv holatga o'tish ucun 🔄 Aktivlashtirish tugmasini bosing."
-
-        if user[LANG] == LANGS[1]:
-            text = "Вы в настоящее время не активны.\n\n" \
-                   "Нажмите кнопку 🔄 Активировать, чтобы перейти в активный режим."
-
-        if user[LANG] == LANGS[2]:
-            text = "Ҳозир сиз актив ҳолатда эмассиз.\n\n" \
-                   "Актив ҳолатга ўтиш уcун 🔄 Активлаштириш тугмасини босинг."
         reply_keyboard = ReplyKeyboard(driver_keyboard, user[LANG]).get_keyboard()
         update.message.reply_text(text, reply_markup=reply_keyboard)
 
         return ConversationHandler.END
+
     data = set_data(user, driver_and_car_data, active_driver_data)
     label = reply_keyboard_types[active_driver_keyboard][0][f'text_{user[LANG]}']
     layout = get_active_driver_layout(user[LANG], data=data, label=f'[{label}]')
-    inline_keyboard = InlineKeyboard(edit_keyboard, user[LANG]).get_keyboard()
+    inline_keyboard = InlineKeyboardMarkup([
+        [InlineKeyboardButton(f'{icon} {btn_1_text}', callback_data='editing')],
+        [InlineKeyboardButton(f'{icon_2} {btn_2_text}', callback_data='delete')],
+    ])
     message = update.message.reply_html(layout, reply_markup=inline_keyboard)
 
     user_data[STATE] = CHOOSE_EDITING
@@ -224,47 +246,62 @@ def choose_editing_callback(update: Update, context: CallbackContext):
         user_data[STATE] = EDIT_COMMENT
         return EDIT_COMMENT
 
-    elif action == 'complete' or action == 'delete':
+    elif action == 'complete':
+        icon = '📝'
+        icon_2 = '❌'
 
         if user[LANG] == LANGS[0]:
-            text = "Tahrirlashni yakunlandi"
-            text_2 = "Aktiv holat o'chirildi"
+            btn_1_text = "Tahrirlash"
+            btn_2_text = "O'chirish"
+
         if user[LANG] == LANGS[1]:
-            text = "Редактирование завершено"
-            text_2 = "Активный режим отключен"
+            btn_1_text = "Редактировать"
+            btn_2_text = "Удалить"
+
         if user[LANG] == LANGS[2]:
-            text = "Таҳрирлашни якунланди"
-            text_2 = "Актив ҳолат ўчирилди"
+            btn_1_text = "Таҳрирлаш"
+            btn_2_text = "Ўчириш"
+        inline_keyboard = InlineKeyboardMarkup([
+            [InlineKeyboardButton(f'{icon} {btn_1_text}', callback_data='editing')],
+            [InlineKeyboardButton(f'{icon_2} {btn_2_text}', callback_data='delete')],
+        ])
+        callback_query.edit_message_reply_markup(inline_keyboard)
+        return
 
-        keyboard = active_driver_keyboard
-        alert_text = show_alert = None
+    elif callback_query.data == 'delete':
+        if user[LANG] == LANGS[0]:
+            alert_text = "Aktiv holat o'chirildi"
+        if user[LANG] == LANGS[1]:
+            alert_text = "Активный режим отключен"
+        if user[LANG] == LANGS[2]:
+            alert_text = "Актив ҳолат ўчирилди"
 
-        if action == 'delete':
-            text = text_2
-            keyboard = driver_keyboard
-            driver_and_car_data = get_driver_and_car_data(user[ID])
-            active_driver_data = get_active_driver_by_driver_id(driver_and_car_data[ID])
-            active_driver_data.pop('updated_at')
-            active_driver_data['deleted_at'] = datetime.datetime.now()
-            result_1 = insert_data(active_driver_data, 'active_drivers_history')
-            result_2 = delete_active_driver(driver_and_car_data[ID])
-            if result_1 == 0 and result_2 == 'deleted':
-                alert_text = text_2
-                show_alert = True
+        driver_and_car_data = get_driver_and_car_data(user[ID])
+        active_driver_data = get_active_driver_by_driver_id(driver_and_car_data[ID])
+        active_driver_data.pop('updated_at')
+        active_driver_data['deleted_at'] = datetime.datetime.now()
 
-        text = f'✅ {text}!'
+        insert_data(active_driver_data, 'active_drivers_history')
+        result_2 = delete_active_driver(driver_and_car_data[ID])
 
-    callback_query.answer(alert_text, show_alert=show_alert)
+        if result_2 == 'deleted':
+            callback_query.answer(alert_text, show_alert=True)
 
-    reply_keyboard = ReplyKeyboard(keyboard, user[LANG]).get_keyboard()
-    callback_query.message.reply_text(text, reply_markup=reply_keyboard)
-    try:
-        callback_query.delete_message()
-    except TelegramError:
-        callback_query.edit_message_reply_markup()
+        reply_keyboard = ReplyKeyboard(driver_keyboard, user[LANG]).get_keyboard()
+        callback_query.message.reply_text(alert_text, reply_markup=reply_keyboard)
 
-    user_data.clear()
-    return ConversationHandler.END
+        try:
+            callback_query.delete_message()
+        except TelegramError:
+            callback_query.edit_message_reply_markup()
+
+        user_data.clear()
+        return ConversationHandler.END
+
+    elif callback_query.data == 'editing':
+        inline_keyboard = InlineKeyboard(edit_keyboard, user[LANG]).get_keyboard()
+        callback_query.edit_message_reply_markup(inline_keyboard)
+        return
 
 
 def edit_region_callback(update: Update, context: CallbackContext):
@@ -684,21 +721,27 @@ def edit_fallback(update: Update, context: CallbackContext):
     user = get_user(update.effective_user.id)
     user_data = context.user_data
     text = update.message.text
+    back_obj = re.search("(Ortga|Назад|Ортга)$", text)
 
-    if text == '/start' or text == '/menu' or text == '/cancel':
+    if text == '/start' or text == '/menu' or text == '/cancel' or back_obj:
 
-        keyboard = active_driver_keyboard if text == '/cancel' else main_menu_keyboard
+        keyboard = main_menu_keyboard
+        if text == '/cancel':
 
-        if user[LANG] == LANGS[0]:
-            text = "Tahrirlash bekor qilindi"
+            if user[LANG] == LANGS[0]:
+                text = "Tahrirlash bekor qilindi"
 
-        if user[LANG] == LANGS[1]:
-            text = "Редактирование отменено"
+            if user[LANG] == LANGS[1]:
+                text = "Редактирование отменено"
 
-        if user[LANG] == LANGS[2]:
-            text = "Таҳрирлаш бекор қилинди"
+            if user[LANG] == LANGS[2]:
+                text = "Таҳрирлаш бекор қилинди"
+            text = f'‼ {text}!'
+            keyboard = active_driver_keyboard
 
-        text = f'‼ {text}!'
+        if back_obj:
+            keyboard = active_driver_keyboard
+
         reply_keyboard = ReplyKeyboard(keyboard, user[LANG]).get_keyboard()
         update.message.reply_text(text, reply_markup=reply_keyboard)
 
@@ -730,11 +773,11 @@ def edit_fallback(update: Update, context: CallbackContext):
 
 
 edit_conversation_handler = ConversationHandler(
-    entry_points=[MessageHandler(Filters.regex(r"(Tahrirlash|Редактировать|Таҳрирлаш)$") &
+    entry_points=[MessageHandler(Filters.regex(r"(Aktiv holat|Активный статус|Актив ҳолат)$") &
                                  (~Filters.update.edited_message), edit_conversation_callback)],
 
     states={
-        CHOOSE_EDITING: [CallbackQueryHandler(choose_editing_callback, pattern=r'^(edit_\w+|complete_editing)$')],
+        CHOOSE_EDITING: [CallbackQueryHandler(choose_editing_callback, pattern=r'^(edit_\w+|editing|delete)$')],
 
         EDIT_REGION: [CallbackQueryHandler(edit_region_callback, pattern=r'^(\d+|save_checked|back)$')],
 
@@ -751,7 +794,8 @@ edit_conversation_handler = ConversationHandler(
 
         EDIT_COMMENT: [
             CallbackQueryHandler(edit_comment_callback, pattern=r'^(no_comment|back)$'),
-            MessageHandler(Filters.text & (~Filters.command) & (~Filters.update.edited_message), edit_comment_callback)
+            MessageHandler(Filters.regex("^(.(?!(Ortga|Назад|Ортга)))*$") & (~Filters.command) &
+                           (~Filters.update.edited_message), edit_comment_callback)
         ],
     },
     fallbacks=[MessageHandler(Filters.text & (~Filters.update.edited_message), edit_fallback)],
