@@ -60,14 +60,14 @@ reply_keyboard_types = {
             "text_uz": "Tilni o'zgartirish",
             "text_ru": "Изменить язык",
             "text_cy": "Тилни ўзгартириш",
-            "icon": "",
+            "icon": "🌍",
             "data": ""
         },
         {
             "text_uz": "Ortga",
             "text_ru": "Назад",
             "text_cy": "Ортга",
-            "icon": "",
+            "icon": "◀️",
             "data": ""
         },
     ],
@@ -133,10 +133,10 @@ reply_keyboard_types = {
 
     active_driver_keyboard: [
         {
-            "text_uz": "Tahrirlash",
-            "text_ru": "Редактировать",
-            "text_cy": "Таҳрирлаш",
-            "icon": "📝",
+            "text_uz": "Aktiv holat",
+            "text_ru": "Активный статус",
+            "text_cy": "Актив ҳолат",
+            "icon": "✅",
             "data": ""
         },
         {

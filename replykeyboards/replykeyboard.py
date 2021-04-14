@@ -51,7 +51,7 @@ class ReplyKeyboard(object):
 
         return ReplyKeyboardMarkup([
             [
-                KeyboardButton(f'{buttons[0]["icon"]} {buttons[0][f"text_{lang}"]}'),
+                # KeyboardButton(f'{buttons[0]["icon"]} {buttons[0][f"text_{lang}"]}'),
                 KeyboardButton(f'{buttons[1]["icon"]} {buttons[1][f"text_{lang}"]}')
             ],
             [KeyboardButton(f'{buttons[2]["icon"]} {buttons[2][f"text_{lang}"]}')],
@@ -96,7 +96,7 @@ class ReplyKeyboard(object):
         return ReplyKeyboardMarkup([
             [
                 KeyboardButton(f'{buttons[0]["icon"]} {buttons[0][f"text_{lang}"]}'),
-                KeyboardButton(f'{buttons[2]["icon"]} {buttons[2][f"text_{lang}"]}'),
+                # KeyboardButton(f'{buttons[2]["icon"]} {buttons[2][f"text_{lang}"]}'),
                 # KeyboardButton(f'{buttons[1]["icon"]} {buttons[1][f"text_{lang}"]}')
             ],
             [
