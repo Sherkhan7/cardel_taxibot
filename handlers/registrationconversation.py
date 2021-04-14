@@ -8,7 +8,7 @@ from telegram.ext import (
     Filters
 )
 from config import ACTIVE_ADMINS
-from DB import insert_data, get_user
+from DB import *
 from filters import *
 from helpers import wrap_tags
 from languages import LANGS
@@ -112,21 +112,21 @@ def agreement_callback(update: Update, context: CallbackContext):
     if callback_query:
 
         if user_data[LANG] == LANGS[0]:
-            text = "Salom!\n" \
-                   "Ism,familyangizni quyidagi formatda yuboring"
+            text = "Assalomu alaykum!\n" \
+                   "Ismingizni kiriting"
             example = "Misol: Sherzodbek Esanov yoki Sherzodbek"
 
         if user_data[LANG] == LANGS[1]:
-            text = 'Привет!\n' \
-                   'Отправьте свое имя,фамилию в формате ниже'
+            text = "Ассаламу алейкум!\n" \
+                   "Введите ваше имя"
             example = 'Пример: Шерзодбек Эсанов или Шерзодбек'
 
         if user_data[LANG] == LANGS[2]:
-            text = "Салом!\n" \
-                   "Исм,фамилянгизни қуйидаги форматда юборинг"
+            text = "Ассалому алайкум!\n" \
+                   "Исмингизни киритинг"
             example = "Мисол: Шерзодбек Эсанов ёки Шерзодбек"
 
-        text = f'🖐  {text}:\n\n {wrap_tags(example)}'
+        text = f'🖐  {text}:\n\n{wrap_tags(example)}'
         callback_query.edit_message_text(text, parse_mode=ParseMode.HTML)
 
         user_data[STATE] = FULLNAME
@@ -189,18 +189,21 @@ def phone_number_callback(update: Update, context: CallbackContext):
         insert_data(user_data, 'users')
 
         if user_data[LANG] == LANGS[0]:
-            text = f"Xush kelibsiz, {user_data[FULLNAME]}!\n" \
-                   "Biz sizni ko'rganimizdan xursandmiz"
+            text = f"{user_data[FULLNAME]}!\n" \
+                   "Registratsiya muvafaqqiyatli yakunlandi"
 
         if user_data[LANG] == LANGS[1]:
-            text = f"Добро пожаловать, {user_data[FULLNAME]}!\n" \
-                   "Мы рады видеть вас"
+            text = f"{user_data[FULLNAME]}!\n" \
+                   "Регистрация прошла успешно"
 
         if user_data[LANG] == LANGS[2]:
-            text = f"Хуш келибсиз, {user_data[FULLNAME]}!\n" \
-                   "Биз сизни кўрганимиздан хурсандмиз"
+            text = f"{user_data[FULLNAME]}!\n" \
+                   "Регистрация мувафаққиятли якунланди"
 
-        text = f'🤝  {text}!'
+        for video in get_video_files():
+            update.message.reply_video(video['file_id'], caption=video[f'caption_{user_data[LANG]}'])
+
+        text = f'{text}! 👍'
         reply_keyboard = ReplyKeyboard(main_menu_keyboard, user_data[LANG]).get_keyboard()
         update.message.reply_text(text, reply_markup=reply_keyboard)
 
