@@ -13,13 +13,7 @@ from telegram.ext import (
     CallbackContext,
     Filters,
 )
-from DB import (
-    get_user,
-    get_driver_and_car_data,
-    get_active_drivers_by_seats,
-    get_driver_by_driver_id,
-    get_region_and_district,
-)
+from DB import *
 from languages import LANGS
 from layouts import get_active_driver_layout
 from globalvariables import *
@@ -208,7 +202,7 @@ def district_callback(update: Update, context: CallbackContext):
                 KeyboardButton('3'),
                 KeyboardButton('4'),
             ],
-            [KeyboardButton(f'🔎 {stop_btn}')]
+            [KeyboardButton(f'🔍 {stop_btn}')]
         ], resize_keyboard=True)
         from_point = get_region_and_district(user_data[FROM_REGION], user_data[FROM_DISTRICT])
         from_region_name = from_point[0][f'name_{user[LANG]}']
@@ -259,11 +253,12 @@ def empty_seats_callback(update: Update, context: CallbackContext):
         user_data.clear()
         return ConversationHandler.END
 
+    user_data[EMPTY_SEATS] = int(text)
     search_from_region = user_data[FROM_REGION]
     search_from_district = user_data[FROM_DISTRICT]
     search_to_region = user_data[TO_REGION]
     search_to_district = user_data[TO_DISTRICT]
-    empty_seats_list = [i for i in range(int(text), 5)]
+    empty_seats_list = [i for i in range(user_data[EMPTY_SEATS], 5)]
     active_drivers = get_active_drivers_by_seats(empty_seats_list)
     found_active_drivers = []
 
@@ -283,6 +278,17 @@ def empty_seats_callback(update: Update, context: CallbackContext):
     # logger.info('user_data: %s', user_data)
     if not found_active_drivers:
         update.message.reply_text(f'{not_found_icon} {not_found_text}')
+
+        data = dict()
+        data[USER_ID] = user[ID]
+        data[FROM_REGION] = user_data[FROM_REGION]
+        data[FROM_DISTRICT] = user_data[FROM_DISTRICT]
+        data[TO_REGION] = user_data[TO_REGION]
+        data[TO_DISTRICT] = user_data[TO_DISTRICT]
+        data[EMPTY_SEATS] = user_data[EMPTY_SEATS]
+
+        insert_data(data, 'search_history')
+
         return
 
     else:
@@ -357,7 +363,7 @@ def search_fallback(update: Update, context: CallbackContext):
 
 
 search_conversation_handler = ConversationHandler(
-    entry_points=[MessageHandler(Filters.regex(r"(Taksi qidirsh|Поиск такси|Такси қидирш)$") &
+    entry_points=[MessageHandler(Filters.regex(r"(Taksi qidirish|Поиск такси|Такси қидириш)$") &
                                  (~Filters.update.edited_message), search_conversation_callback)],
 
     states={
