@@ -17,6 +17,7 @@ from globalvariables import *
 
 from replykeyboards import ReplyKeyboard
 from replykeyboards.replykeyboardvariables import *
+from replykeyboards.replykeyboardtypes import reply_keyboard_types
 
 from inlinekeyboards import InlineKeyboard
 from inlinekeyboards.inlinekeyboardvariables import *
@@ -36,17 +37,10 @@ def do_command(update: Update, context: CallbackContext):
     if command == '/start':
 
         if user:
+            text = reply_keyboard_types[active_driver_keyboard][4][f'text_{user[LANG]}']
+            icon = reply_keyboard_types[active_driver_keyboard][4]['icon']
 
-            if user[LANG] == LANGS[0]:
-                text = "Siz ro'yxatdan o'tgansiz"
-
-            if user[LANG] == LANGS[1]:
-                text = "Вы зарегистрированы"
-
-            if user[LANG] == LANGS[2]:
-                text = "Сиз рўйхатдан ўтгансиз"
-
-            text = f'⚠  {text}, {user[FULLNAME]}!'
+            text = f'{icon} {text}'
             keyboard = ReplyKeyboard(main_menu_keyboard, user[LANG]).get_keyboard()
             update.message.reply_text(text, reply_markup=keyboard)
 
@@ -94,6 +88,7 @@ def lang_callback(update: Update, context: CallbackContext):
             text = "Cardel Taxi маъмурияти ҳайдовчилар ва йўловчилар орасидаги низоли ҳолатларда ва " \
                    "почта жўнатмалари борасида юзага келадиган низоли ҳолатларда жавобгарликни ўз зиммасига олмайди"
             button_text = "Розиман"
+
         text = f'‼ {wrap_tags(heading)}:\n\n{text} !'
         inline_keyboard = callback_query.message.reply_markup.from_button(InlineKeyboardButton(
             text=button_text, callback_data='agree'
@@ -126,7 +121,7 @@ def agreement_callback(update: Update, context: CallbackContext):
                    "Исмингизни киритинг"
             example = "Мисол: Шерзодбек Эсанов ёки Шерзодбек"
 
-        text = f'🖐  {text}:\n\n{wrap_tags(example)}'
+        text = f'🖐 {text}:\n\n{wrap_tags(example)}'
         callback_query.edit_message_text(text, parse_mode=ParseMode.HTML)
 
         user_data[STATE] = FULLNAME
@@ -200,10 +195,12 @@ def phone_number_callback(update: Update, context: CallbackContext):
             text = f"{user_data[FULLNAME]}!\n" \
                    "Регистрация мувафаққиятли якунланди"
 
+        text = f'{text}! 👍'
+
+        # Sending video files to the user
         for video in get_video_files():
             update.message.reply_video(video['file_id'], caption=video[f'caption_{user_data[LANG]}'])
 
-        text = f'{text}! 👍'
         reply_keyboard = ReplyKeyboard(main_menu_keyboard, user_data[LANG]).get_keyboard()
         update.message.reply_text(text, reply_markup=reply_keyboard)
 
@@ -223,7 +220,8 @@ registration_conversation_handler = ConversationHandler(
 
         AGREEMENT: [
             CallbackQueryHandler(agreement_callback, pattern='^agree$'),
-            MessageHandler(Filters.text & (~ Filters.command) & (~Filters.update.edited_message), agreement_callback)],
+            MessageHandler(Filters.text & (~ Filters.command) & (~Filters.update.edited_message), agreement_callback)
+        ],
 
         FULLNAME: [MessageHandler(Filters.text & (~Filters.update.edited_message), fullname_callback)],
 
