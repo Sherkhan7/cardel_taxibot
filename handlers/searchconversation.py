@@ -16,7 +16,7 @@ from DB import *
 from languages import LANGS
 from layouts import get_active_driver_layout
 from globalvariables import *
-from helpers import wrap_tags, delete_message_by_message_id
+from helpers import *
 
 from replykeyboards import ReplyKeyboard
 from replykeyboards.replykeyboardvariables import *
@@ -263,54 +263,43 @@ def empty_seats_callback(update: Update, context: CallbackContext):
             if found_to_district and found_from_district:
                 found_active_drivers.append(active_driver)
 
-    # logger.info('user_data: %s', user_data)
+    found_active_drivers_num = len(found_active_drivers)
+
     if not found_active_drivers:
         text = f'{search_query_text}\n\n' \
                f'{wrap_tags(search_result_text)}:\n\n' \
                f'🙊 {not_found_text}'
         update.message.reply_html(text)
 
-        data = dict()
-        data[USER_ID] = user[ID]
-        data[FROM_REGION] = user_data[FROM_REGION]
-        data[FROM_DISTRICT] = user_data[FROM_DISTRICT]
-        data[TO_REGION] = user_data[TO_REGION]
-        data[TO_DISTRICT] = user_data[TO_DISTRICT]
-        data[EMPTY_SEATS] = user_data[EMPTY_SEATS]
-
-        insert_data(data, 'search_history')
-
-        return
-
     else:
 
         for found_active_driver in found_active_drivers:
-            driver = get_driver_by_driver_id(found_active_driver[DRIVER_ID])
+            driver = get_driver_by_id(found_active_driver[DRIVER_ID])
             driver_user_data = get_user(driver[USER_ID])
-
-            data = dict()
-            data[CHECKED] = dict()
-            data[FULLNAME] = driver_user_data[FULLNAME]
-            data[PHONE_NUMBER] = driver_user_data[PHONE_NUMBER]
-            data[CAR_MODEL] = get_driver_and_car_data(driver[USER_ID])[CAR_MODEL]
-            data[BAGGAGE] = driver[BAGGAGE]
-            data[CHECKED]['from'] = ujson.loads(found_active_driver['from_'])
-            data[CHECKED]['to'] = ujson.loads(found_active_driver['to_'])
-            data[EMPTY_SEATS] = found_active_driver[EMPTY_SEATS]
-            data[ASK_PARCEL] = found_active_driver[ASK_PARCEL]
-            data[COMMENT] = found_active_driver[COMMENT]
-            departure_time = found_active_driver[DEPARTURE_TIME].split()
-            data[DATE] = departure_time[0]
-            data[TIME] = departure_time[-1]
+            driver_and_car_data = get_driver_and_car_data(driver[USER_ID])
+            data = set_data(driver_user_data, driver_and_car_data, found_active_driver)
 
             layout = get_active_driver_layout(user[LANG], data=data)
             update.message.reply_html(layout)
 
         text = f'\n\n{wrap_tags(search_result_text)}:\n\n' \
-               f'🚕  {found_text}: <b>{len(found_active_drivers)}</b>'
+               f'🚕  {found_text}: <b>{found_active_drivers_num}</b>'
         text = search_query_text + text
         update.message.reply_html(text)
-        return
+
+    data_ = dict()
+    data_[USER_ID] = user[ID]
+    data_[FROM_REGION] = user_data[FROM_REGION]
+    data_[FROM_DISTRICT] = user_data[FROM_DISTRICT]
+    data_[TO_REGION] = user_data[TO_REGION]
+    data_[TO_DISTRICT] = user_data[TO_DISTRICT]
+    data_[EMPTY_SEATS] = user_data[EMPTY_SEATS]
+    data_['found_active_drivers'] = found_active_drivers_num
+
+    insert_data(data_, 'search_history')
+
+    # logger.info('user_data: %s', user_data)
+    return
 
 
 def search_fallback(update: Update, context: CallbackContext):
@@ -327,7 +316,6 @@ def search_fallback(update: Update, context: CallbackContext):
             text = "Қидирув бекор қилинди"
 
         text = f'‼ {text} !'
-
         delete_message_by_message_id(context, user)
 
         reply_keyboard = ReplyKeyboard(main_menu_keyboard, user[LANG]).get_keyboard()
@@ -340,15 +328,19 @@ def search_fallback(update: Update, context: CallbackContext):
 
         if user[LANG] == LANGS[0]:
             text = "Hozir siz taksi qidirish bo'limidasiz.\n\n" \
-                   "Qidiruvni to'xtatish uchun /cancel ni bosing."
+                   "Qidiruvni to'xtatish uchun /cancel ni bosing"
+
         if user[LANG] == LANGS[1]:
             text = "Сейчас вы находитесь в разделе поиска такси.\n\n" \
-                   "Нажмите /cancel, чтобы остановить поиск."
+                   "Нажмите /cancel, чтобы остановить поиск"
+
         if user[LANG] == LANGS[2]:
             text = "Ҳозир сиз такси қидириш бўлимидасиз.\n\n" \
-                   "Қидирувни тўхтатиш учун /cancel ни босинг."
+                   "Қидирувни тўхтатиш учун /cancel ни босинг"
 
+        text = f'‼ {text}.'
         update.message.reply_text(text)
+
         return
 
 
