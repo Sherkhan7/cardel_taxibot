@@ -4,9 +4,6 @@ from telegram.ext import CallbackQueryHandler, CallbackContext
 from DB import *
 from globalvariables import *
 
-from replykeyboards import ReplyKeyboard
-from replykeyboards.replykeyboardvariables import *
-
 import logging
 
 logger = logging.getLogger()
@@ -40,8 +37,7 @@ def inline_keyboards_handler_callback(update: Update, context: CallbackContext):
         except TelegramError:
             callback_query.edit_message_reply_markup()
 
-        reply_keyboard = ReplyKeyboard(settings_keyboard, data).get_keyboard()
-        callback_query.message.reply_text(reply_text, reply_markup=reply_keyboard)
+        callback_query.message.reply_text(reply_text)
 
         return
 
