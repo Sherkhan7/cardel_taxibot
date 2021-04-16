@@ -14,22 +14,11 @@ from telegram.ext import (
     CallbackContext,
     Filters,
 )
-from DB import (
-    insert_data,
-    get_user,
-    get_driver_and_car_data,
-    get_active_driver_by_driver_id,
-    update_active_driver_comment,
-    update_active_driver_empty_seats,
-    update_active_driver_ask_parcel,
-    update_active_driver_departure_time,
-    update_active_driver_from_or_to,
-    delete_active_driver,
-)
+from DB import *
 from languages import LANGS
 from layouts import get_active_driver_layout, get_comment_text
 from globalvariables import *
-from helpers import wrap_tags, loop
+from helpers import *
 
 from replykeyboards import ReplyKeyboard
 from replykeyboards.replykeyboardvariables import *
@@ -40,11 +29,19 @@ from inlinekeyboards.inlinekeyboardvariables import *
 from inlinekeyboards.inlinekeyboardtypes import inline_keyboard_types
 
 import logging
-import json
+import ujson
 import datetime
 import re
 
 logger = logging.getLogger()
+
+
+def get_layout(user, driver_and_car_data):
+    active_driver_data = get_active_driver_by_driver_id(driver_and_car_data[ID])
+    data = set_data(user, driver_and_car_data, active_driver_data)
+    label = reply_keyboard_types[active_driver_keyboard][0][f'text_{user[LANG]}']
+
+    return get_active_driver_layout(user[LANG], data=data, label=f'[{label}]')
 
 
 def get_edited_alert(lang):
@@ -58,28 +55,10 @@ def get_edited_alert(lang):
     return '✅ ' + alert_text
 
 
-def set_data(user, driver_and_car_data, active_driver_data):
-    data = dict()
-    data[CHECKED] = dict()
-    data[FULLNAME] = user[FULLNAME]
-    data[PHONE_NUMBER] = user[PHONE_NUMBER]
-    data[CAR_MODEL] = driver_and_car_data[CAR_MODEL]
-    data[BAGGAGE] = driver_and_car_data[BAGGAGE]
-    data[CHECKED]['from'] = json.loads(active_driver_data['from_'])
-    data[CHECKED]['to'] = json.loads(active_driver_data['to_'])
-    data[EMPTY_SEATS] = active_driver_data[EMPTY_SEATS]
-    data[ASK_PARCEL] = active_driver_data[ASK_PARCEL]
-    data[COMMENT] = active_driver_data[COMMENT]
-    departure_time = active_driver_data[DEPARTURE_TIME].split()
-    data[DATE] = departure_time[0]
-    data[TIME] = departure_time[-1]
-
-    return data
-
-
 def edit_conversation_callback(update: Update, context: CallbackContext):
     user = get_user(update.effective_user.id)
     user_data = context.user_data
+
     back_btn_icon = reply_keyboard_types[settings_keyboard][2]['icon']
     back_btn_text = reply_keyboard_types[settings_keyboard][2][f'text_{user[LANG]}']
     back_btn_text = f'{back_btn_icon} {back_btn_text}'
@@ -88,11 +67,6 @@ def edit_conversation_callback(update: Update, context: CallbackContext):
         [KeyboardButton(back_btn_text)],
     ], resize_keyboard=True)
     update.message.reply_text(update.message.text, reply_markup=reply_keyboard)
-
-    driver_and_car_data = get_driver_and_car_data(user[ID])
-    active_driver_data = get_active_driver_by_driver_id(driver_and_car_data[ID])
-    icon = '📝'
-    icon_2 = '❌'
 
     if user[LANG] == LANGS[0]:
         text = "Hozir siz aktiv holatda emassiz.\n\n" \
@@ -112,18 +86,19 @@ def edit_conversation_callback(update: Update, context: CallbackContext):
         btn_1_text = "Таҳрирлаш"
         btn_2_text = "Ўчириш"
 
+    driver_and_car_data = get_driver_and_car_data(user[ID])
+    active_driver_data = get_active_driver_by_driver_id(driver_and_car_data[ID])
+
     if active_driver_data is None:
         reply_keyboard = ReplyKeyboard(driver_keyboard, user[LANG]).get_keyboard()
         update.message.reply_text(text, reply_markup=reply_keyboard)
 
         return ConversationHandler.END
 
-    data = set_data(user, driver_and_car_data, active_driver_data)
-    label = reply_keyboard_types[active_driver_keyboard][0][f'text_{user[LANG]}']
-    layout = get_active_driver_layout(user[LANG], data=data, label=f'[{label}]')
+    layout = get_layout(user, driver_and_car_data)
     inline_keyboard = InlineKeyboardMarkup([
-        [InlineKeyboardButton(f'{icon} {btn_1_text}', callback_data='editing')],
-        [InlineKeyboardButton(f'{icon_2} {btn_2_text}', callback_data='delete')],
+        [InlineKeyboardButton(f'📝 {btn_1_text}', callback_data='editing')],
+        [InlineKeyboardButton(f'❌ {btn_2_text}', callback_data='delete')],
     ])
     message = update.message.reply_html(layout, reply_markup=inline_keyboard)
 
@@ -137,58 +112,71 @@ def choose_editing_callback(update: Update, context: CallbackContext):
     user = get_user(update.effective_user.id)
     user_data = context.user_data
     callback_query = update.callback_query
-    action = callback_query.data.split('_', maxsplit=1)[-1]
+    callback_query.answer()
+
+    if user[LANG] == LANGS[0]:
+        from_text = "Qayerdan"
+        to_text = "Qayerga"
+        region_text = "(Viloyatni tanlang)"
+        empty_seats_text = "Bo'sh joylar sonini tanlang"
+        ask_parcel_text = "Pochta qabul qilasizmi"
+        date_text = "Ketish kunini belgilang"
+        edit_btn_text = "Tahrirlash"
+        delete_btn_text = "O'chirish"
+        alert_text = "Aktiv holat o'chirildi"
+
+    if user[LANG] == LANGS[1]:
+        from_text = "Откуда"
+        to_text = "Куда"
+        region_text = "(Выберите область)"
+        empty_seats_text = "Выберите количество свободных мест"
+        ask_parcel_text = "Вы принимаете почту"
+        date_text = "Установите дату отъезда"
+        edit_btn_text = "Редактировать"
+        delete_btn_text = "Удалить"
+        alert_text = "Активный режим отключен"
+
+    if user[LANG] == LANGS[2]:
+        from_text = "Қаердан"
+        to_text = "Қаерга"
+        region_text = "(Вилоятни танланг)"
+        empty_seats_text = "Бўш жойлар сонини белгиланг"
+        ask_parcel_text = "Почта қабул қиласизми"
+        date_text = "Кетиш кунини белгиланг"
+        edit_btn_text = "Таҳрирлаш"
+        delete_btn_text = "Ўчириш"
+        alert_text = "Актив ҳолат ўчирилди"
+
+    empty_seats_text = f'{empty_seats_text}:'
+    date_text = f'{date_text}:'
+    ask_parcel_text = f'📦 {ask_parcel_text}?'
+
     back_btn_icon = inline_keyboard_types[back_next_keyboard][0]['icon']
     back_btn_text = inline_keyboard_types[back_next_keyboard][0][f'text_{user[LANG]}']
     back_btn_text = f'{back_btn_icon} {back_btn_text}'
     back_btn_data = inline_keyboard_types[back_next_keyboard][0]['data']
 
+    action = callback_query.data.split('_', maxsplit=1)[-1]
+
     if action == 'from' or action == 'to':
-        if user[LANG] == LANGS[0]:
-            text = "Qayerdan"
-            text_2 = "Qayerga"
-            region_text = "(Viloyatni tanlang)"
-
-        if user[LANG] == LANGS[1]:
-            text = "Откуда"
-            text_2 = "Куда"
-            region_text = "(Выберите область)"
-
-        if user[LANG] == LANGS[2]:
-            text = "Қаердан"
-            text_2 = "Қаерга"
-            region_text = "(Вилоятни танланг)"
 
         if action == 'from':
             state = 'edit_from_region'
+            text = from_text
         else:
             state = 'edit_to_region'
-            text = text_2
-        text = f'{text} {region_text}:'
-        save_btn_icon = inline_keyboard_types[districts_selective_keyboard][1]['icon']
-        save_btn_text = inline_keyboard_types[districts_selective_keyboard][1][f'text_{user[LANG]}']
-        save_btn_text = f'{save_btn_icon} {save_btn_text}'
-        save_btn_data = inline_keyboard_types[districts_selective_keyboard][1]['data']
+            text = to_text
 
-        inline_keyboard = InlineKeyboard(regions_keyboard, user[LANG]).get_keyboard()
-        inline_keyboard.inline_keyboard.append([InlineKeyboardButton(save_btn_text, callback_data=save_btn_data)])
+        text = f'{text} {region_text}:'
+        inline_keyboard = InlineKeyboard(regions_keyboard, user[LANG], data=True).get_keyboard()
         inline_keyboard.inline_keyboard.append([InlineKeyboardButton(back_btn_text, callback_data=back_btn_data)])
         callback_query.edit_message_text(text, reply_markup=inline_keyboard)
 
         user_data[STATE] = state
-
-        # logger.info('user_data: %s', user_data)
         return EDIT_REGION
 
     elif action == EMPTY_SEATS:
 
-        if user[LANG] == LANGS[0]:
-            empty_seats_text = "Bo'sh joylar sonini tanlang"
-        if user[LANG] == LANGS[1]:
-            empty_seats_text = "Выберите количество свободных мест"
-        if user[LANG] == LANGS[2]:
-            empty_seats_text = "Бўш жойлар сонини белгиланг"
-        text = f'{empty_seats_text}:'
         inline_keyboard = callback_query.message.reply_markup.from_row([
             InlineKeyboardButton('1', callback_data='1'),
             InlineKeyboardButton('2', callback_data='2'),
@@ -196,39 +184,25 @@ def choose_editing_callback(update: Update, context: CallbackContext):
             InlineKeyboardButton('4', callback_data='4'),
         ])
         inline_keyboard.inline_keyboard.append([InlineKeyboardButton(back_btn_text, callback_data=back_btn_data)])
-        callback_query.edit_message_text(text, reply_markup=inline_keyboard)
+        callback_query.edit_message_text(empty_seats_text, reply_markup=inline_keyboard)
 
         user_data[STATE] = EDIT_EMPTY_SEATS
         return EDIT_EMPTY_SEATS
 
     elif action == ASK_PARCEL:
 
-        if user[LANG] == LANGS[0]:
-            text = "Pochta qabul qilasizmi"
-        if user[LANG] == LANGS[1]:
-            text = "Вы принимаете почту"
-        if user[LANG] == LANGS[2]:
-            text = "Почта қабул қиласизми"
-        text = f'📦 {text}?'
         inline_keyboard = InlineKeyboard(yes_no_keyboard, user[LANG]).get_keyboard()
         inline_keyboard.inline_keyboard.append([InlineKeyboardButton(back_btn_text, callback_data=back_btn_data)])
-        callback_query.edit_message_text(text, reply_markup=inline_keyboard)
+        callback_query.edit_message_text(ask_parcel_text, reply_markup=inline_keyboard)
 
         user_data[STATE] = EDIT_ASK_PARCEL
         return EDIT_ASK_PARCEL
 
     elif action == DATETIME:
 
-        if user[LANG] == LANGS[0]:
-            text = "Ketish kunini belgilang"
-        if user[LANG] == LANGS[1]:
-            text = "Установите дату отъезда"
-        if user[LANG] == LANGS[2]:
-            text = "Кетиш кунини белгиланг"
-        text = f'{text}:'
         inline_keyboard = InlineKeyboard(dates_keyboard, user[LANG]).get_keyboard()
         inline_keyboard.inline_keyboard.append([InlineKeyboardButton(back_btn_text, callback_data=back_btn_data)])
-        callback_query.edit_message_text(text, reply_markup=inline_keyboard)
+        callback_query.edit_message_text(date_text, reply_markup=inline_keyboard)
 
         user_data[STATE] = EDIT_DATE
         return EDIT_DATE
@@ -247,45 +221,29 @@ def choose_editing_callback(update: Update, context: CallbackContext):
         return EDIT_COMMENT
 
     elif action == 'complete':
-        icon = '📝'
-        icon_2 = '❌'
 
-        if user[LANG] == LANGS[0]:
-            btn_1_text = "Tahrirlash"
-            btn_2_text = "O'chirish"
-
-        if user[LANG] == LANGS[1]:
-            btn_1_text = "Редактировать"
-            btn_2_text = "Удалить"
-
-        if user[LANG] == LANGS[2]:
-            btn_1_text = "Таҳрирлаш"
-            btn_2_text = "Ўчириш"
         inline_keyboard = InlineKeyboardMarkup([
-            [InlineKeyboardButton(f'{icon} {btn_1_text}', callback_data='editing')],
-            [InlineKeyboardButton(f'{icon_2} {btn_2_text}', callback_data='delete')],
+            [InlineKeyboardButton(f'📝 {edit_btn_text}', callback_data='editing')],
+            [InlineKeyboardButton(f'❌ {delete_btn_text}', callback_data='delete')],
         ])
         callback_query.edit_message_reply_markup(inline_keyboard)
         return
 
-    elif callback_query.data == 'delete':
-        if user[LANG] == LANGS[0]:
-            alert_text = "Aktiv holat o'chirildi"
-        if user[LANG] == LANGS[1]:
-            alert_text = "Активный режим отключен"
-        if user[LANG] == LANGS[2]:
-            alert_text = "Актив ҳолат ўчирилди"
+    elif callback_query.data == 'editing':
+        inline_keyboard = InlineKeyboard(edit_keyboard, user[LANG]).get_keyboard()
+        callback_query.edit_message_reply_markup(inline_keyboard)
 
-        driver_and_car_data = get_driver_and_car_data(user[ID])
-        active_driver_data = get_active_driver_by_driver_id(driver_and_car_data[ID])
+        return
+
+    elif callback_query.data == 'delete':
+
+        active_driver_data = get_active_driver_by_user_id(user[ID])
         active_driver_data.pop('updated_at')
         active_driver_data['deleted_at'] = datetime.datetime.now()
 
-        insert_data(active_driver_data, 'active_drivers_history')
-        result_2 = delete_active_driver(driver_and_car_data[ID])
-
-        if result_2 == 'deleted':
+        if delete_active_driver(active_driver_data[DRIVER_ID]) == 'deleted':
             callback_query.answer(alert_text, show_alert=True)
+            insert_data(active_driver_data, 'active_drivers_history')
 
         reply_keyboard = ReplyKeyboard(driver_keyboard, user[LANG]).get_keyboard()
         callback_query.message.reply_text(alert_text, reply_markup=reply_keyboard)
@@ -298,38 +256,32 @@ def choose_editing_callback(update: Update, context: CallbackContext):
         user_data.clear()
         return ConversationHandler.END
 
-    elif callback_query.data == 'editing':
-        inline_keyboard = InlineKeyboard(edit_keyboard, user[LANG]).get_keyboard()
-        callback_query.edit_message_reply_markup(inline_keyboard)
-        return
-
 
 def edit_region_callback(update: Update, context: CallbackContext):
     user = get_user(update.effective_user.id)
     user_data = context.user_data
-    driver_and_car_data = get_driver_and_car_data(user[ID])
     callback_query = update.callback_query
     data = callback_query.data
 
     if user[LANG] == LANGS[0]:
-        text = "Qayerdan"
-        text_2 = "Qayerga"
+        from_text = "Qayerdan"
+        to_text = "Qayerga"
         district_text = "(Tumanni tanlang)"
         note_text = "Izoh: Siz, bir nechta tumanlarni tanlashingiz mumkin"
         error_text = "Birorta ham tuman tanlanmadi.\n" \
                      "⚠ Iltimos, kamida bitta tumanni tanlang."
 
     if user[LANG] == LANGS[1]:
-        text = "Откуда"
-        text_2 = "Куда"
+        from_text = "Откуда"
+        to_text = "Куда"
         district_text = "(Выберите район)"
         note_text = "Примечание: Вы можете выбрать несколько районов"
         error_text = "Ни один район не был выбран.\n" \
                      "⚠ Выберите хотя бы один район."
 
     if user[LANG] == LANGS[2]:
-        text = "Қаердан"
-        text_2 = "Қаерга"
+        from_text = "Қаердан"
+        to_text = "Қаерга"
         district_text = "(Туманни танланг)"
         note_text = "Изоҳ: Сиз, бир нечта туманларни танлашингиз мумкин"
         error_text = "Бирорта ҳам туман танланмади.\n" \
@@ -338,10 +290,13 @@ def edit_region_callback(update: Update, context: CallbackContext):
     if user_data[STATE] == 'edit_from_region':
         state = 'edit_from_district'
         key = 'from'
+        text = from_text
     elif user_data[STATE] == 'edit_to_region':
         state = 'edit_to_district'
-        text = text_2
         key = 'to'
+        text = to_text
+
+    driver_and_car_data = get_driver_and_car_data(user[ID])
 
     if data == 'save_checked':
 
@@ -355,9 +310,10 @@ def edit_region_callback(update: Update, context: CallbackContext):
         if not user_data[CHECKED][key]:
             error_text = f'🛑 {error_text}'
             callback_query.answer(error_text, show_alert=True)
+
             return
 
-        new_json = json.dumps(user_data[CHECKED][key])
+        new_json = ujson.dumps(user_data[CHECKED][key])
         update_active_driver_from_or_to(key, new_json, driver_and_car_data[ID])
         callback_query.answer(get_edited_alert(user[LANG]), show_alert=True)
 
@@ -378,12 +334,10 @@ def edit_region_callback(update: Update, context: CallbackContext):
         # logger.info('user_data: %s', user_data)
         return EDIT_DISTRICT
 
-    active_driver_data = get_active_driver_by_driver_id(driver_and_car_data[ID])
-    data = set_data(user, driver_and_car_data, active_driver_data)
-    label = reply_keyboard_types[active_driver_keyboard][0][f'text_{user[LANG]}']
-    layout = get_active_driver_layout(user[LANG], data=data, label=f'[{label}]')
+    layout = get_layout(user, driver_and_car_data)
     inline_keyboard = InlineKeyboard(edit_keyboard, user[LANG]).get_keyboard()
     callback_query.edit_message_text(layout, reply_markup=inline_keyboard, parse_mode=ParseMode.HTML)
+    callback_query.answer()
 
     user_data[STATE] = CHOOSE_EDITING
     if CHECKED in user_data:
@@ -400,24 +354,24 @@ def edit_district_callback(update: Update, context: CallbackContext):
     data = callback_query.data
 
     if user[LANG] == LANGS[0]:
-        text = "Qayerdan"
-        text_2 = "Qayerga"
+        from_text = "Qayerdan"
+        to_text = "Qayerga"
         region_text = "(Viloyatni tanlang)"
         all_alert_text = "Barcha tumanlar tanlandi"
         checked_alert_text = "tanlandi"
         unchecked_alert_text = "olib tashlandi"
 
     if user[LANG] == LANGS[1]:
-        text = "Откуда"
-        text_2 = "Куда"
+        from_text = "Откуда"
+        to_text = "Куда"
         region_text = "(Выберите область)"
         all_alert_text = "Выбраны все районы"
         checked_alert_text = "выбрано"
         unchecked_alert_text = "удалено"
 
     if user[LANG] == LANGS[2]:
-        text = "Қаердан"
-        text_2 = "Қаерга"
+        from_text = "Қаердан"
+        to_text = "Қаерга"
         region_text = "(Вилоятни танланг)"
         all_alert_text = "Барча туманлар танланди"
         checked_alert_text = "танланди"
@@ -426,44 +380,41 @@ def edit_district_callback(update: Update, context: CallbackContext):
     if user_data[STATE] == 'edit_from_district':
         state = 'edit_from_region'
         key = 'from'
+        text = from_text
     elif user_data[STATE] == 'edit_to_district':
         state = 'edit_to_region'
         key = 'to'
-        text = text_2
+        text = to_text
+
     region_id = user_data[state]
 
     if data == 'back':
-
-        text = f'{text} {region_text}:'
-        user_data.pop(state)
-
-        save_btn_icon = inline_keyboard_types[districts_selective_keyboard][1]['icon']
-        save_btn_text = inline_keyboard_types[districts_selective_keyboard][1][f'text_{user[LANG]}']
-        save_btn_text = f'{save_btn_icon} {save_btn_text}'
-        save_btn_data = inline_keyboard_types[districts_selective_keyboard][1]['data']
 
         back_btn_icon = inline_keyboard_types[back_next_keyboard][0]['icon']
         back_btn_text = inline_keyboard_types[back_next_keyboard][0][f'text_{user[LANG]}']
         back_btn_text = f'{back_btn_icon} {back_btn_text}'
         back_btn_data = inline_keyboard_types[back_next_keyboard][0]['data']
 
-        inline_keyboard = InlineKeyboard(regions_keyboard, user[LANG]).get_keyboard()
-        inline_keyboard.inline_keyboard.append([InlineKeyboardButton(save_btn_text, callback_data=save_btn_data)])
+        inline_keyboard = InlineKeyboard(regions_keyboard, user[LANG], data=True).get_keyboard()
         inline_keyboard.inline_keyboard.append([InlineKeyboardButton(back_btn_text, callback_data=back_btn_data)])
+
+        text = f'{text} {region_text}:'
         callback_query.edit_message_text(text, reply_markup=inline_keyboard)
         callback_query.answer()
 
         user_data[STATE] = state
+        user_data.pop(state)
 
         # logger.info('user_data: %s', user_data)
         return EDIT_REGION
 
     elif data == 'check_all':
+
         reply_markup = callback_query.message.reply_markup
         inline_keyboard = reply_markup.inline_keyboard
+
         icon = "✅"
         action = "checked"
-        all_alert_text = f'{icon} {all_alert_text}'
         district_ids_list = loop(icon, action, inline_keyboard)
 
         if CHECKED not in user_data:
@@ -475,7 +426,7 @@ def edit_district_callback(update: Update, context: CallbackContext):
 
         try:
             callback_query.edit_message_reply_markup(reply_markup)
-            callback_query.answer(all_alert_text)
+            callback_query.answer(f'{icon} {all_alert_text}')
 
             user_data[CHECKED][key].update({region_id: district_ids_list})
 
@@ -510,8 +461,8 @@ def edit_district_callback(update: Update, context: CallbackContext):
         for row in inline_keyboard[1:]:
             for col in row:
                 if col.callback_data == data:
-                    text = col.text.split(maxsplit=1)
-                    col.text = f'{new_icon} {text[-1]}'
+                    dirtict_name = col.text.split(maxsplit=1)[-1]
+                    col.text = f'{new_icon} {dirtict_name}'
                     col.callback_data = f'{district_id}_{new_action}'
                     stop = True
                     break
@@ -543,8 +494,10 @@ def edit_district_callback(update: Update, context: CallbackContext):
                 alert = checked_alert_text
 
             elif new_action == 'unchecked':
-                # Remove district_id if exists in list
-                user_data[CHECKED][key][region_id].remove(district_id)
+                # Remove district_id if exists in user_data[CHECKED][key][region_id] list
+                if district_id in user_data[CHECKED][key][region_id]:
+                    user_data[CHECKED][key][region_id].remove(district_id)
+
                 # If list is empty delete the {region_id: [districts_id]} whole dict
                 if not user_data[CHECKED][key][region_id]:
                     del user_data[CHECKED][key][region_id]
@@ -553,7 +506,7 @@ def edit_district_callback(update: Update, context: CallbackContext):
         except TelegramError:
             pass
 
-        alert = f'{text[-1]} {alert}'
+        alert = f'{dirtict_name} {alert}'
         callback_query.answer(alert)
         # logger.info('user_data: %s', user_data)
         return
@@ -562,19 +515,18 @@ def edit_district_callback(update: Update, context: CallbackContext):
 def edit_empty_seats_callback(update: Update, context: CallbackContext):
     user = get_user(update.effective_user.id)
     user_data = context.user_data
-    driver_and_car_data = get_driver_and_car_data(user[ID])
     callback_query = update.callback_query
+
+    driver_and_car_data = get_driver_and_car_data(user[ID])
 
     if callback_query.data != 'back':
         update_active_driver_empty_seats(int(callback_query.data), driver_and_car_data[ID])
         callback_query.answer(get_edited_alert(user[LANG]), show_alert=True)
 
-    active_driver_data = get_active_driver_by_driver_id(driver_and_car_data[ID])
-    data = set_data(user, driver_and_car_data, active_driver_data)
-    label = reply_keyboard_types[active_driver_keyboard][0][f'text_{user[LANG]}']
-    layout = get_active_driver_layout(user[LANG], data=data, label=f'[{label}]')
+    layout = get_layout(user, driver_and_car_data)
     inline_keyboard = InlineKeyboard(edit_keyboard, user[LANG]).get_keyboard()
     callback_query.edit_message_text(layout, reply_markup=inline_keyboard, parse_mode=ParseMode.HTML)
+    callback_query.answer()
 
     user_data[STATE] = CHOOSE_EDITING
     return CHOOSE_EDITING
@@ -591,12 +543,10 @@ def edit_ask_parcel_callback(update: Update, context: CallbackContext):
         update_active_driver_ask_parcel(new_answer, driver_and_car_data[ID])
         callback_query.answer(get_edited_alert(user[LANG]), show_alert=True)
 
-    active_driver_data = get_active_driver_by_driver_id(driver_and_car_data[ID])
-    data = set_data(user, driver_and_car_data, active_driver_data)
-    label = reply_keyboard_types[active_driver_keyboard][0][f'text_{user[LANG]}']
-    layout = get_active_driver_layout(user[LANG], data=data, label=f'[{label}]')
+    layout = get_layout(user, driver_and_car_data)
     inline_keyboard = InlineKeyboard(edit_keyboard, user[LANG]).get_keyboard()
     callback_query.edit_message_text(layout, reply_markup=inline_keyboard, parse_mode=ParseMode.HTML)
+    callback_query.answer()
 
     user_data[STATE] = CHOOSE_EDITING
     return CHOOSE_EDITING
@@ -605,9 +555,18 @@ def edit_ask_parcel_callback(update: Update, context: CallbackContext):
 def edit_date_callback(update: Update, context: CallbackContext):
     user = get_user(update.effective_user.id)
     user_data = context.user_data
-    driver_and_car_data = get_driver_and_car_data(user[ID])
     callback_query = update.callback_query
     data = callback_query.data
+
+    if user[LANG] == LANGS[0]:
+        text = "Soatni belgilang"
+    if user[LANG] == LANGS[1]:
+        text = "Выберите время"
+    if user[LANG] == LANGS[2]:
+        text = "Соатни белгиланг"
+
+    text = f'{text}:'
+    driver_and_car_data = get_driver_and_car_data(user[ID])
 
     if data == 'now':
         new_departure = datetime.datetime.now().strftime("%d-%m-%Y %H:%M")
@@ -618,27 +577,17 @@ def edit_date_callback(update: Update, context: CallbackContext):
 
         user_data['new_date'] = data
 
-        if user[LANG] == LANGS[0]:
-            text = "Soatni belgilang"
-        if user[LANG] == LANGS[1]:
-            text = "Выберите время"
-        if user[LANG] == LANGS[2]:
-            text = "Соатни белгиланг"
-        text = f'{text}:'
         inline_keyboard = InlineKeyboard(times_keyboard, user[LANG],
                                          data={'begin': 6, 'end': 17, 'undefined': True}).get_keyboard()
         callback_query.edit_message_text(text, reply_markup=inline_keyboard)
 
         user_data[STATE] = EDIT_TIME
-
         return EDIT_TIME
 
-    active_driver_data = get_active_driver_by_driver_id(driver_and_car_data[ID])
-    data = set_data(user, driver_and_car_data, active_driver_data)
-    label = reply_keyboard_types[active_driver_keyboard][0][f'text_{user[LANG]}']
-    layout = get_active_driver_layout(user[LANG], data=data, label=f'[{label}]')
+    layout = get_layout(user, driver_and_car_data)
     inline_keyboard = InlineKeyboard(edit_keyboard, user[LANG]).get_keyboard()
     callback_query.edit_message_text(layout, reply_markup=inline_keyboard, parse_mode=ParseMode.HTML)
+    callback_query.answer()
 
     user_data[STATE] = CHOOSE_EDITING
     return CHOOSE_EDITING
@@ -647,7 +596,6 @@ def edit_date_callback(update: Update, context: CallbackContext):
 def edit_time_callback(update: Update, context: CallbackContext):
     user = get_user(update.effective_user.id)
     user_data = context.user_data
-    driver_and_car_data = get_driver_and_car_data(user[ID])
     callback_query = update.callback_query
     data = callback_query.data
 
@@ -666,16 +614,16 @@ def edit_time_callback(update: Update, context: CallbackContext):
         return
 
     else:
+
+        driver_and_car_data = get_driver_and_car_data(user[ID])
         new_departure = f'{user_data["new_date"]} {data}'
         update_active_driver_departure_time(new_departure, driver_and_car_data[ID])
+
         callback_query.answer(get_edited_alert(user[LANG]), show_alert=True)
         if 'new_date' in user_data:
             user_data.pop('new_date')
 
-        active_driver_data = get_active_driver_by_driver_id(driver_and_car_data[ID])
-        data = set_data(user, driver_and_car_data, active_driver_data)
-        label = reply_keyboard_types[active_driver_keyboard][0][f'text_{user[LANG]}']
-        layout = get_active_driver_layout(user[LANG], data=data, label=f'[{label}]')
+        layout = get_layout(user, driver_and_car_data)
         inline_keyboard = InlineKeyboard(edit_keyboard, user[LANG]).get_keyboard()
         callback_query.edit_message_text(layout, reply_markup=inline_keyboard, parse_mode=ParseMode.HTML)
 
@@ -686,33 +634,28 @@ def edit_time_callback(update: Update, context: CallbackContext):
 def edit_comment_callback(update: Update, context: CallbackContext):
     user = get_user(update.effective_user.id)
     user_data = context.user_data
-    driver_and_car_data = get_driver_and_car_data(user[ID])
     callback_query = update.callback_query
+
+    driver_and_car_data = get_driver_and_car_data(user[ID])
 
     if callback_query is None:
         update_active_driver_comment(update.message.text, driver_and_car_data[ID])
-        active_driver_data = get_active_driver_by_driver_id(driver_and_car_data[ID])
-
         context.bot.edit_message_reply_markup(user[TG_ID], user_data[MESSAGE_ID])
-
-        layout = get_active_driver_layout(user[LANG], data=set_data(user, driver_and_car_data, active_driver_data))
-        inline_keyboard = InlineKeyboard(edit_keyboard, user[LANG]).get_keyboard()
-        message = update.message.reply_html(layout, reply_markup=inline_keyboard)
-        user_data[MESSAGE_ID] = message.message_id
-
-        user_data[STATE] = CHOOSE_EDITING
-        return CHOOSE_EDITING
 
     elif callback_query.data == 'no_comment':
         update_active_driver_comment(None, driver_and_car_data[ID])
         callback_query.answer(get_edited_alert(user[LANG]), show_alert=True)
 
-    active_driver_data = get_active_driver_by_driver_id(driver_and_car_data[ID])
-    data = set_data(user, driver_and_car_data, active_driver_data)
-    label = reply_keyboard_types[active_driver_keyboard][0][f'text_{user[LANG]}']
-    layout = get_active_driver_layout(user[LANG], data=data, label=f'[{label}]')
+    layout = get_layout(user, driver_and_car_data)
     inline_keyboard = InlineKeyboard(edit_keyboard, user[LANG]).get_keyboard()
-    callback_query.edit_message_text(layout, reply_markup=inline_keyboard, parse_mode=ParseMode.HTML)
+
+    if callback_query is None:
+        message = update.message.reply_html(layout, reply_markup=inline_keyboard)
+        user_data[MESSAGE_ID] = message.message_id
+
+    elif callback_query.data == 'no_comment' or callback_query.data == 'back':
+        callback_query.edit_message_text(layout, reply_markup=inline_keyboard, parse_mode=ParseMode.HTML)
+        callback_query.answer()
 
     user_data[STATE] = CHOOSE_EDITING
     return CHOOSE_EDITING
@@ -721,36 +664,36 @@ def edit_comment_callback(update: Update, context: CallbackContext):
 def edit_fallback(update: Update, context: CallbackContext):
     user = get_user(update.effective_user.id)
     user_data = context.user_data
-    text = update.message.text
-    back_obj = re.search("(Ortga|Назад|Ортга)$", text)
 
-    if text == '/start' or text == '/menu' or text == '/cancel' or back_obj:
+    back_obj = re.search("(Ortga|Назад|Ортга)$", update.message.text)
+
+    if update.message.text == '/start' or update.message.text == '/menu' or \
+            update.message.text == '/cancel' or back_obj:
 
         keyboard = main_menu_keyboard
-        if text == '/cancel':
+
+        if update.message.text == '/cancel':
 
             if user[LANG] == LANGS[0]:
-                text = "Tahrirlash bekor qilindi"
+                canceled_text = "Tahrirlash bekor qilindi"
 
             if user[LANG] == LANGS[1]:
-                text = "Редактирование отменено"
+                canceled_text = "Редактирование отменено"
 
             if user[LANG] == LANGS[2]:
-                text = "Таҳрирлаш бекор қилинди"
-            text = f'‼ {text}!'
+                canceled_text = "Таҳрирлаш бекор қилинди"
+
+            text = f'‼ {canceled_text}!'
             keyboard = active_driver_keyboard
 
         if back_obj:
             keyboard = active_driver_keyboard
+            text = update.message.text
+
+        delete_message_by_message_id(context, user)
 
         reply_keyboard = ReplyKeyboard(keyboard, user[LANG]).get_keyboard()
         update.message.reply_text(text, reply_markup=reply_keyboard)
-
-        if MESSAGE_ID in user_data:
-            try:
-                context.bot.delete_message(user[TG_ID], user_data[MESSAGE_ID])
-            except TelegramError:
-                context.bot.edit_message_reply_markup(user[TG_ID], user_data[MESSAGE_ID])
 
         user_data.clear()
         return ConversationHandler.END
@@ -769,7 +712,9 @@ def edit_fallback(update: Update, context: CallbackContext):
             text = "Ҳозир сиз таҳрирлаш бўлимидасиз\n\n" \
                    "Таҳрирлашни тўхтатиш учун /cancel ни босинг"
 
+        text = f'‼ {text}.'
         update.message.reply_text(text)
+
         return
 
 
@@ -793,11 +738,9 @@ edit_conversation_handler = ConversationHandler(
 
         EDIT_TIME: [CallbackQueryHandler(edit_time_callback, pattern=r'^(back|next|\d+[:]00|undefined)$')],
 
-        EDIT_COMMENT: [
-            CallbackQueryHandler(edit_comment_callback, pattern=r'^(no_comment|back)$'),
-            MessageHandler(Filters.regex("^(.(?!(Ortga|Назад|Ортга)))*$") & (~Filters.command) &
-                           (~Filters.update.edited_message), edit_comment_callback)
-        ],
+        EDIT_COMMENT: [CallbackQueryHandler(edit_comment_callback, pattern=r'^(no_comment|back)$'),
+                       MessageHandler(Filters.regex("^(.(?!(Ortga|Назад|Ортга)))*$") & (~Filters.command) &
+                                      (~Filters.update.edited_message), edit_comment_callback)],
     },
     fallbacks=[MessageHandler(Filters.text & (~Filters.update.edited_message), edit_fallback)],
 

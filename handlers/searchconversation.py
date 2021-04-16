@@ -3,8 +3,7 @@ from telegram import (
     ReplyKeyboardRemove,
     ReplyKeyboardMarkup,
     KeyboardButton,
-    ParseMode,
-    TelegramError,
+    TelegramError
 )
 from telegram.ext import (
     CallbackQueryHandler,
@@ -17,7 +16,7 @@ from DB import *
 from languages import LANGS
 from layouts import get_active_driver_layout
 from globalvariables import *
-from helpers import wrap_tags
+from helpers import *
 
 from replykeyboards import ReplyKeyboard
 from replykeyboards.replykeyboardvariables import *
@@ -26,72 +25,30 @@ from inlinekeyboards import InlineKeyboard
 from inlinekeyboards.inlinekeyboardvariables import *
 
 import logging
-import json
 import re
-# import random
-# from faker import Faker
+import ujson
 
 logger = logging.getLogger()
 
 
 def search_conversation_callback(update: Update, context: CallbackContext):
-    # fake = Faker()
-    # for i in range(8, 401):
-    #     data = dict()
-    #     data[TG_ID] = i
-    #     data[FULLNAME] = fake.name()
-    #     data[PHONE_NUMBER] = '+998' + str(random.randint(1000000, 9999999))
-    #     data[IS_ADMIN] = random.randint(0, 1)
-    #     data[LANG] = random.choice(LANGS)
-    #
-    #     insert_data(data, 'users')
-    # exit()
-
-    # for i in range(201, 401):
-    #     data = dict()
-    #     data[USER_ID] = i
-    #     data[STATUS] = 'standart'
-    #     data[CAR_ID] = random.randint(1, 10)
-    #     data[BAGGAGE] = random.randint(0, 1)
-    #
-    #     insert_data(data, 'drivers')
-    # exit()
-
-    # for i in range(1, 401):
-    #     data = dict()
-    #     data[DRIVER_ID] = i
-    #     data[EMPTY_SEATS] = random.randint(1, 4)
-    #     data[ASK_PARCEL] = random.randint(0, 1)
-    #     data[DEPARTURE_TIME] = datetime.datetime.now()
-    #     region_id = random.choice([1, 19, 33, 47, 63, 74, 87, 104, 119, 132, 144, 167, 187, 201])
-    #     data['from_'] = {region_id: [x for x in range(region_id + 1, region_id + 11)]}
-    #     data['from_'] = json.dumps(data['from_'])
-    #     region_id = random.choice([1, 19, 33, 47, 63, 74, 87, 104, 119, 132, 144, 167, 187, 201])
-    #     data['to_'] = {region_id: [x for x in range(region_id + 1, region_id + 11)]}
-    #     data['to_'] = json.dumps(data['to_'])
-    #
-    #     insert_data(data, 'active_drivers')
-    #
-    # exit()
-
     user = get_user(update.effective_user.id)
     user_data = context.user_data
-    text = update.message.text
 
     if user[LANG] == LANGS[0]:
-        text = "Qayerdan (Viloyatni tanlang)"
+        choose_region_text = "Qayerdan (Viloyatni tanlang)"
 
     if user[LANG] == LANGS[1]:
-        text = "Откуда (Выберите область)"
+        choose_region_text = "Откуда (Выберите область)"
 
     if user[LANG] == LANGS[2]:
-        text = "Қаердан (Вилоятни танланг)"
+        choose_region_text = "Қаердан (Вилоятни танланг)"
+
+    choose_region_text = f'{choose_region_text}:'
+    inline_keyboard = InlineKeyboard(regions_keyboard, user[LANG]).get_keyboard()
 
     update.message.reply_text(update.message.text, reply_markup=ReplyKeyboardRemove())
-
-    text = f'{text}:'
-    inline_keyboard = InlineKeyboard(regions_keyboard, user[LANG]).get_keyboard()
-    message = update.message.reply_text(text, reply_markup=inline_keyboard)
+    message = update.message.reply_text(choose_region_text, reply_markup=inline_keyboard)
 
     user_data[STATE] = FROM_REGION
     user_data[MESSAGE_ID] = message.message_id
@@ -107,27 +64,29 @@ def region_callback(update: Update, context: CallbackContext):
     user_data[user_data[STATE]] = str(region_id)
 
     if user[LANG] == LANGS[0]:
-        text = "Qayerdan"
-        text_2 = "Qayerga"
-        text_3 = "(Tumanni tanlang)"
+        from_text = "Qayerdan"
+        to_text = "Qayerga"
+        district_text = "(Tumanni tanlang)"
 
     if user[LANG] == LANGS[1]:
-        text = "Откуда"
-        text_2 = "Куда"
-        text_3 = "(Выберите район)"
+        from_text = "Откуда"
+        to_text = "Куда"
+        district_text = "(Выберите район)"
 
     if user[LANG] == LANGS[2]:
-        text = "Қаердан"
-        text_2 = "Қаерга"
-        text_3 = "(Туманни танланг)"
+        from_text = "Қаердан"
+        to_text = "Қаерга"
+        district_text = "(Туманни танланг)"
 
     if user_data[STATE] == FROM_REGION:
         state = FROM_DISTRICT
+        text = from_text
+
     elif user_data[STATE] == TO_REGION:
-        text = text_2
+        text = to_text
         state = TO_DISTRICT
 
-    text = f'{text} {text_3}:'
+    text = f'{text} {district_text}:'
     inline_keyboard = InlineKeyboard(districts_keyboard, user[LANG], data=region_id).get_keyboard()
 
     callback_query.answer()
@@ -172,19 +131,21 @@ def district_callback(update: Update, context: CallbackContext):
         if data == 'back':
             if user_data[STATE] == FROM_DISTRICT:
                 state = FROM_REGION
+                text = from_text
             elif user_data[STATE] == TO_DISTRICT:
-                from_text = to_text
+                text = to_text
                 state = TO_REGION
+
             user_data.pop(state)
 
         else:
-            from_text = to_text
             state = TO_REGION
+            text = to_text
             user_data[user_data[STATE]] = int(data)
 
-        from_text = f'{from_text} {region_text}:'
+        text = f'{text} {region_text}:'
         inline_keyboard = InlineKeyboard(regions_keyboard, user[LANG]).get_keyboard()
-        callback_query.edit_message_text(from_text, reply_markup=inline_keyboard)
+        callback_query.edit_message_text(text, reply_markup=inline_keyboard)
 
         user_data[STATE] = state
 
@@ -204,17 +165,11 @@ def district_callback(update: Update, context: CallbackContext):
             ],
             [KeyboardButton(f'🔍 {stop_btn}')]
         ], resize_keyboard=True)
-        from_point = get_region_and_district(user_data[FROM_REGION], user_data[FROM_DISTRICT])
-        from_region_name = from_point[0][f'name_{user[LANG]}']
-        from_district_name = from_point[1][f'name_{user[LANG]}']
 
-        to_point = get_region_and_district(user_data[TO_REGION], user_data[TO_DISTRICT])
-        to_region_name = to_point[0][f'name_{user[LANG]}']
-        to_district_name = to_point[1][f'name_{user[LANG]}']
-
-        edit_text = f"{from_text}: {wrap_tags(from_region_name, from_district_name)}\n\n" \
-                    f"{to_text}: {wrap_tags(to_region_name, to_district_name)}"
-        callback_query.edit_message_text(edit_text, parse_mode=ParseMode.HTML)
+        try:
+            callback_query.delete_message()
+        except TelegramError:
+            callback_query.edit_message_reply_markup()
 
         callback_query.message.reply_text(set_seats_text, reply_markup=reply_keyboard)
 
@@ -228,100 +183,130 @@ def district_callback(update: Update, context: CallbackContext):
 def empty_seats_callback(update: Update, context: CallbackContext):
     user = get_user(update.effective_user.id)
     user_data = context.user_data
-    not_found_icon = "🙊"
-    text = update.message.text
 
-    stop_search = re.search("(Qidiruvni to'xtatish|Остановить поиск|Қидирувни тўхтатиш)$", text)
+    stop_search = re.search("(Qidiruvni to'xtatish|Остановить поиск|Қидирувни тўхтатиш)$", update.message.text)
 
     if user[LANG] == LANGS[0]:
         not_found_text = "Kechirasiz, birortaham taksi topilmadi"
         found_text = "Barcha topilgan taksilar soni"
         stop_search_text = "Qidiruv to'xtatildi"
+        from_text = "Qayerdan"
+        to_text = "Qayerga"
+        empty_seats_text = "Yo'lovchi soni"
+        search_text = "Qidiruv so'rovi"
+        search_result_text = "Qidiruv natijasi"
+
     if user[LANG] == LANGS[1]:
         not_found_text = "К сожалению, не было найдено ни одного такси"
         found_text = "Всего найдено такси"
         stop_search_text = "Поиск был остановлен"
+        from_text = "Откуда"
+        to_text = "Куда"
+        empty_seats_text = "Количество пассажиров"
+        search_text = "Поисковый запрос"
+        search_result_text = "Результаты поиска"
+
     if user[LANG] == LANGS[2]:
         not_found_text = "Кечирасиз, бирортаҳам такси топилмади"
         found_text = "Барча топилган таксилар сони"
         stop_search_text = "Қидирув тўхтатилди"
+        from_text = "Қаердан"
+        to_text = "Қаерга"
+        empty_seats_text = "Йўловчи сони"
+        search_text = "Қидирув сўрови"
+        search_result_text = "Қидирув натижаси"
 
     if stop_search:
         stop_search_text = f'‼ {stop_search_text}!'
         reply_keyboard = ReplyKeyboard(main_menu_keyboard, user[LANG]).get_keyboard()
         update.message.reply_text(stop_search_text, reply_markup=reply_keyboard)
+
         user_data.clear()
         return ConversationHandler.END
 
-    user_data[EMPTY_SEATS] = int(text)
-    search_from_region = user_data[FROM_REGION]
-    search_from_district = user_data[FROM_DISTRICT]
-    search_to_region = user_data[TO_REGION]
-    search_to_district = user_data[TO_DISTRICT]
+    user_data[EMPTY_SEATS] = int(update.message.text)
+
+    from_point = get_region_and_district(user_data[FROM_REGION], user_data[FROM_DISTRICT])
+    from_region_name = from_point[0][f'name_{user[LANG]}']
+    from_district_name = from_point[1][f'name_{user[LANG]}']
+
+    to_point = get_region_and_district(user_data[TO_REGION], user_data[TO_DISTRICT])
+    to_region_name = to_point[0][f'name_{user[LANG]}']
+    to_district_name = to_point[1][f'name_{user[LANG]}']
+
+    search_query_text = f"{wrap_tags(search_text)}:\n\n" \
+                        f"📍 {from_text}: <b>{from_region_name}, {from_district_name}</b>\n\n" \
+                        f"🏁 {to_text}: <b>{to_region_name}, {to_district_name}</b>\n\n" \
+                        f"🏃 {empty_seats_text}: <b>{update.message.text}</b>"
+
+    search_from_region_id = user_data[FROM_REGION]
+    search_from_district_id = user_data[FROM_DISTRICT]
+
+    search_to_region_id = user_data[TO_REGION]
+    search_to_district_id = user_data[TO_DISTRICT]
+
     empty_seats_list = [i for i in range(user_data[EMPTY_SEATS], 5)]
     active_drivers = get_active_drivers_by_seats(empty_seats_list)
-    found_active_drivers = []
 
+    found_active_drivers = []
     for active_driver in active_drivers:
-        from_ = json.loads(active_driver['from_'])
-        to_ = json.loads(active_driver['to_'])
-        found_from_region = search_from_region in from_
-        found_to_region = search_to_region in to_
+        from_ = ujson.loads(active_driver['from_'])
+        to_ = ujson.loads(active_driver['to_'])
+        found_from_region = search_from_region_id in from_
+        found_to_region = search_to_region_id in to_
 
         if found_from_region and found_to_region:
-            found_from_district = search_from_district in from_[search_from_region]
-            found_to_district = search_to_district in to_[search_to_region]
+
+            found_from_district = search_from_district_id in from_[search_from_region_id]
+            found_to_district = search_to_district_id in to_[search_to_region_id]
 
             if found_to_district and found_from_district:
                 found_active_drivers.append(active_driver)
 
-    # logger.info('user_data: %s', user_data)
+    found_active_drivers_num = len(found_active_drivers)
+
     if not found_active_drivers:
-        update.message.reply_text(f'{not_found_icon} {not_found_text}')
-
-        data = dict()
-        data[USER_ID] = user[ID]
-        data[FROM_REGION] = user_data[FROM_REGION]
-        data[FROM_DISTRICT] = user_data[FROM_DISTRICT]
-        data[TO_REGION] = user_data[TO_REGION]
-        data[TO_DISTRICT] = user_data[TO_DISTRICT]
-        data[EMPTY_SEATS] = user_data[EMPTY_SEATS]
-
-        insert_data(data, 'search_history')
-
-        return
+        text = f'{search_query_text}\n\n' \
+               f'{wrap_tags(search_result_text)}:\n\n' \
+               f'🙊 {not_found_text}'
+        update.message.reply_html(text)
 
     else:
+
         for found_active_driver in found_active_drivers:
-            driver = get_driver_by_driver_id(found_active_driver[DRIVER_ID])
+            driver = get_driver_by_id(found_active_driver[DRIVER_ID])
             driver_user_data = get_user(driver[USER_ID])
-            data = dict()
-            data[CHECKED] = dict()
-            data[FULLNAME] = driver_user_data[FULLNAME]
-            data[PHONE_NUMBER] = driver_user_data[PHONE_NUMBER]
-            data[CAR_MODEL] = get_driver_and_car_data(driver[USER_ID])[CAR_MODEL]
-            data[BAGGAGE] = driver[BAGGAGE]
-            data[CHECKED]['from'] = json.loads(found_active_driver['from_'])
-            data[CHECKED]['to'] = json.loads(found_active_driver['to_'])
-            data[EMPTY_SEATS] = found_active_driver[EMPTY_SEATS]
-            data[ASK_PARCEL] = found_active_driver[ASK_PARCEL]
-            data[COMMENT] = found_active_driver[COMMENT]
-            departure_time = found_active_driver[DEPARTURE_TIME].split()
-            data[DATE] = departure_time[0]
-            data[TIME] = departure_time[-1]
+            driver_and_car_data = get_driver_and_car_data(driver[USER_ID])
+            data = set_data(driver_user_data, driver_and_car_data, found_active_driver)
+
             layout = get_active_driver_layout(user[LANG], data=data)
             update.message.reply_html(layout)
 
-        update.message.reply_text(f'{found_text}: {len(found_active_drivers)}')
-        return
+        text = f'\n\n{wrap_tags(search_result_text)}:\n\n' \
+               f'🚕  {found_text}: <b>{found_active_drivers_num}</b>'
+        text = search_query_text + text
+        update.message.reply_html(text)
+
+    data_ = dict()
+    data_[USER_ID] = user[ID]
+    data_[FROM_REGION] = user_data[FROM_REGION]
+    data_[FROM_DISTRICT] = user_data[FROM_DISTRICT]
+    data_[TO_REGION] = user_data[TO_REGION]
+    data_[TO_DISTRICT] = user_data[TO_DISTRICT]
+    data_[EMPTY_SEATS] = user_data[EMPTY_SEATS]
+    data_['found_active_drivers'] = found_active_drivers_num
+
+    insert_data(data_, 'search_history')
+
+    # logger.info('user_data: %s', user_data)
+    return
 
 
 def search_fallback(update: Update, context: CallbackContext):
     user = get_user(update.effective_user.id)
     user_data = context.user_data
-    text = update.message.text
 
-    if text == '/start' or text == '/menu' or text == '/cancel':
+    if update.message.text == '/start' or update.message.text == '/menu' or update.message.text == '/cancel':
 
         if user[LANG] == LANGS[0]:
             text = "Qidruv bekor qilindi"
@@ -331,17 +316,10 @@ def search_fallback(update: Update, context: CallbackContext):
             text = "Қидирув бекор қилинди"
 
         text = f'‼ {text} !'
+        delete_message_by_message_id(context, user)
+
         reply_keyboard = ReplyKeyboard(main_menu_keyboard, user[LANG]).get_keyboard()
         update.message.reply_text(text, reply_markup=reply_keyboard)
-
-        if MESSAGE_ID in user_data:
-            try:
-                context.bot.delete_message(user[TG_ID], user_data[MESSAGE_ID])
-            except TelegramError:
-                try:
-                    context.bot.edit_message_reply_markup(user[TG_ID], user_data[MESSAGE_ID])
-                except TelegramError:
-                    pass
 
         user_data.clear()
         return ConversationHandler.END
@@ -350,21 +328,26 @@ def search_fallback(update: Update, context: CallbackContext):
 
         if user[LANG] == LANGS[0]:
             text = "Hozir siz taksi qidirish bo'limidasiz.\n\n" \
-                   "Qidiruvni to'xtatish uchun /cancel ni bosing."
+                   "Qidiruvni to'xtatish uchun /cancel ni bosing"
+
         if user[LANG] == LANGS[1]:
             text = "Сейчас вы находитесь в разделе поиска такси.\n\n" \
-                   "Нажмите /cancel, чтобы остановить поиск."
+                   "Нажмите /cancel, чтобы остановить поиск"
+
         if user[LANG] == LANGS[2]:
             text = "Ҳозир сиз такси қидириш бўлимидасиз.\n\n" \
-                   "Қидирувни тўхтатиш учун /cancel ни босинг."
+                   "Қидирувни тўхтатиш учун /cancel ни босинг"
 
+        text = f'‼ {text}.'
         update.message.reply_text(text)
+
         return
 
 
 search_conversation_handler = ConversationHandler(
-    entry_points=[MessageHandler(Filters.regex(r"(Taksi qidirish|Поиск такси|Такси қидириш)$") &
-                                 (~Filters.update.edited_message), search_conversation_callback)],
+    entry_points=[
+        MessageHandler(Filters.regex(r"(Taksi qidirish|Поиск такси|Такси қидириш)$") & (~Filters.update.edited_message),
+                       search_conversation_callback)],
 
     states={
         REGION: [CallbackQueryHandler(region_callback, pattern=r'^\d+$')],
@@ -374,8 +357,8 @@ search_conversation_handler = ConversationHandler(
         EMPTY_SEATS: [
             MessageHandler(Filters.regex("([1-4])|(Qidiruvni to'xtatish|Остановить поиск|Қидирувни тўхтатиш)"),
                            empty_seats_callback)],
-
     },
+
     fallbacks=[MessageHandler(Filters.text & (~Filters.update.edited_message), search_fallback)],
 
     persistent=True,

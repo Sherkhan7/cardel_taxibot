@@ -10,8 +10,9 @@ from telegram.ext import (
     CallbackContext,
     Filters,
 )
-from DB import insert_data, get_user, get_driver, get_active_driver_by_driver_id
+from DB import *
 from languages import LANGS
+from helpers import *
 from globalvariables import *
 
 from replykeyboards import ReplyKeyboard
@@ -29,7 +30,7 @@ logger = logging.getLogger()
 def driver_conversation_callback(update: Update, context: CallbackContext):
     user = get_user(update.effective_user.id)
     user_data = context.user_data
-    driver = get_driver(user[ID])
+    driver = get_driver_by_user_id(user[ID])
 
     if driver is None:
 
@@ -40,8 +41,9 @@ def driver_conversation_callback(update: Update, context: CallbackContext):
         if user[LANG] == LANGS[2]:
             text = "Ҳайдочи сифатида рўйхатдан ўтмоқчимисиз"
 
-        update.message.reply_text(update.message.text, reply_markup=ReplyKeyboardRemove())
         text = f'🟡 {text}?'
+
+        update.message.reply_text(update.message.text, reply_markup=ReplyKeyboardRemove())
         inline_keyboard = InlineKeyboard(yes_no_keyboard, user[LANG]).get_keyboard()
         message = update.message.reply_text(text, reply_markup=inline_keyboard)
 
@@ -128,34 +130,35 @@ def baggage_callback(update: Update, context: CallbackContext):
     user = get_user(update.effective_user.id)
     user_data = context.user_data
     callback_query = update.callback_query
-    data = dict()
 
+    data = dict()
     data[BAGGAGE] = True if callback_query.data == 'yes' else False
     data[USER_ID] = user[ID]
-    data[STATUS] = 'standart'
     data[CAR_ID] = user_data[CAR_ID]
+    data[STATUS] = 'standart'
 
     # Inset driver data to database
     insert_data(data, 'drivers')
 
     if user[LANG] == LANGS[0]:
-        text = "Registratsiya muvofaqqiyatli yakunlandi"
-        text_2 = "Haydovchi"
+        reg_complete_text = "Registratsiya muvofaqqiyatli yakunlandi"
+        driver_text = "Haydovchi"
 
     if user[LANG] == LANGS[1]:
-        text = "Регистрация успешно завершена"
-        text_2 = "Водитель"
+        reg_complete_text = "Регистрация успешно завершена"
+        driver_text = "Водитель"
 
     if user[LANG] == LANGS[2]:
-        text = "Регистрация мувофаққиятли якунланди"
-        text_2 = "Ҳайдовчи"
+        reg_complete_text = "Регистрация мувофаққиятли якунланди"
+        driver_text = "Ҳайдовчи"
 
-    text = f'{text}! 👍'
-    callback_query.edit_message_text(text)
+    reg_complete_text = f'{reg_complete_text}! 👍'
+    driver_text = f'🚕 {driver_text}'
 
-    text_2 = f'🚕 {text_2}'
+    callback_query.edit_message_text(reg_complete_text)
+
     reply_keyboard = ReplyKeyboard(driver_keyboard, user[LANG]).get_keyboard()
-    callback_query.message.reply_text(text_2, reply_markup=reply_keyboard)
+    callback_query.message.reply_text(driver_text, reply_markup=reply_keyboard)
 
     user_data.clear()
     return ConversationHandler.END
@@ -176,16 +179,13 @@ def driver_fallback(update: Update, context: CallbackContext):
             text = "Ҳайдовчи сифатида рўйхатдан ўтиш бекор қилинди"
 
         text = f'‼ {text} !'
+        delete_message_by_message_id(context, user)
+
         reply_keyboard = ReplyKeyboard(main_menu_keyboard, user[LANG]).get_keyboard()
         update.message.reply_text(text, reply_markup=reply_keyboard)
 
-        if MESSAGE_ID in user_data:
-            try:
-                context.bot.delete_message(user[TG_ID], user_data[MESSAGE_ID])
-            except TelegramError:
-                context.bot.edit_message_reply_markup(user[TG_ID], user_data[MESSAGE_ID])
-
         user_data.clear()
+
         return ConversationHandler.END
 
     else:
@@ -201,6 +201,7 @@ def driver_fallback(update: Update, context: CallbackContext):
         if user[LANG] == LANGS[2]:
             text = "Ҳозир сиз ҳайдовчи сифатида рўйхатдан ўтяпсиз\n\n" \
                    "Рўйхатдан ўтишни тўхтатиш учун /cancel ни босинг"
+
         text = f'‼ {text}.'
         update.message.reply_text(text, quote=True)
 
