@@ -97,6 +97,7 @@ def yes_no_callback(update: Update, context: CallbackContext):
         text = f'🚕 {text}:'
         inline_keyboard = InlineKeyboard(car_models_keyboard).get_keyboard()
         callback_query.edit_message_text(text, reply_markup=inline_keyboard)
+        callback_query.answer()
 
         user_data[STATE] = CAR_MODEL
 
@@ -120,6 +121,7 @@ def car_model_callback(update: Update, context: CallbackContext):
     text = f'{text}?'
     inline_keyboard = InlineKeyboard(yes_no_keyboard, user[LANG]).get_keyboard()
     callback_query.edit_message_text(text, reply_markup=inline_keyboard)
+    callback_query.answer()
 
     user_data[STATE] = BAGGAGE
 
@@ -130,15 +132,6 @@ def baggage_callback(update: Update, context: CallbackContext):
     user = get_user(update.effective_user.id)
     user_data = context.user_data
     callback_query = update.callback_query
-
-    data = dict()
-    data[BAGGAGE] = True if callback_query.data == 'yes' else False
-    data[USER_ID] = user[ID]
-    data[CAR_ID] = user_data[CAR_ID]
-    data[STATUS] = 'standart'
-
-    # Inset driver data to database
-    insert_data(data, 'drivers')
 
     if user[LANG] == LANGS[0]:
         reg_complete_text = "Registratsiya muvofaqqiyatli yakunlandi"
@@ -154,6 +147,15 @@ def baggage_callback(update: Update, context: CallbackContext):
 
     reg_complete_text = f'{reg_complete_text}! 👍'
     driver_text = f'🚕 {driver_text}'
+
+    data = dict()
+    data[BAGGAGE] = True if callback_query.data == 'yes' else False
+    data[USER_ID] = user[ID]
+    data[CAR_ID] = user_data[CAR_ID]
+    data[STATUS] = 'standart'
+
+    # Inset driver data to database
+    insert_data(data, 'drivers')
 
     callback_query.edit_message_text(reg_complete_text)
 
