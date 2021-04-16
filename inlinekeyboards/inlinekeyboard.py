@@ -19,10 +19,10 @@ class InlineKeyboard(object):
             return self.__get_langs_keyboard(inline_keyboard_types[keyb_type])
 
         elif keyb_type == regions_keyboard:
-            return self.__get_regions_keyboard(get_all_regions(), keyb_type, lang)
+            return self.__get_regions_keyboard(get_all_regions(), keyb_type, lang, data)
 
         elif keyb_type == districts_keyboard:
-            return self.__get_regions_keyboard(get_districts_by_parent(data), keyb_type, lang)
+            return self.__get_regions_keyboard(get_districts_by_parent(data), keyb_type, lang, data)
 
         elif keyb_type == districts_selective_keyboard:
             re_check_list = None
@@ -69,12 +69,18 @@ class InlineKeyboard(object):
         ])
 
     @staticmethod
-    def __get_regions_keyboard(regions, keyb_type, lang):
+    def __get_regions_keyboard(regions, keyb_type, lang, data):
         length = len(regions)
-        icon = inline_keyboard_types[back_next_keyboard][0]['icon']
+
+        back_btn_icon = inline_keyboard_types[back_next_keyboard][0]['icon']
         back_btn_text = inline_keyboard_types[back_next_keyboard][0][f'text_{lang}']
-        back_btn_text = f'{icon} {back_btn_text}'
+        back_btn_text = f'{back_btn_icon} {back_btn_text}'
         back_btn_data = inline_keyboard_types[back_next_keyboard][0]['data']
+
+        save_btn_icon = inline_keyboard_types[districts_selective_keyboard][1]['icon']
+        save_btn_text = inline_keyboard_types[districts_selective_keyboard][1][f'text_{lang}']
+        save_btn_text = f'{save_btn_icon} {save_btn_text}'
+        save_btn_data = inline_keyboard_types[districts_selective_keyboard][1]['data']
 
         if length % 2 == 0:
 
@@ -101,6 +107,9 @@ class InlineKeyboard(object):
                     InlineKeyboardButton(regions[i + 1][f'name_{lang}'], callback_data=regions[i + 1]['id'])
                 ] for i in range(0, length, 2)
             ]
+
+        if data and keyb_type == regions_keyboard:
+            keyboard.append([InlineKeyboardButton(save_btn_text, callback_data=save_btn_data)])
 
         return InlineKeyboardMarkup(keyboard)
 
