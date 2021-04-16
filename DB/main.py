@@ -87,6 +87,14 @@ def get_region_districts(region_id, district_ids_list):
     return cursor.fetchall()
 
 
+def get_active_driver_by_user_id(user_id):
+    with closing(get_connection()) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(f"SELECT * FROM `active_drivers` WHERE user_id = %s", user_id)
+
+    return cursor.fetchone()
+
+
 def get_active_drivers_by_seats(empty_seats):
     mark = ','.join(['%s' for i in range(len(empty_seats))])
     with closing(get_connection()) as connection:
@@ -105,7 +113,7 @@ def get_active_driver_by_driver_id(driver_id):
     return cursor.fetchone()
 
 
-def get_driver(user_id):
+def get_driver_by_user_id(user_id):
     with closing(get_connection()) as connection:
         with connection.cursor() as cursor:
             cursor.execute(f"SELECT * FROM `drivers` WHERE user_id = %s", user_id)
@@ -113,7 +121,7 @@ def get_driver(user_id):
     return cursor.fetchone()
 
 
-def get_driver_by_driver_id(driver_id):
+def get_driver_by_id(driver_id):
     with closing(get_connection()) as connection:
         with connection.cursor() as cursor:
             cursor.execute(f"SELECT * FROM `drivers` WHERE id = %s", driver_id)
@@ -132,7 +140,7 @@ def get_video_files():
 def get_driver_and_car_data(user_id):
     with closing(get_connection()) as connection:
         with connection.cursor() as cursor:
-            sql = "SELECT drivers.id, cars.car_model, drivers.baggage, drivers.status FROM cars " \
+            sql = "SELECT drivers.id, drivers.user_id,  cars.car_model, drivers.baggage, drivers.status FROM cars " \
                   "INNER JOIN drivers ON drivers.car_id = cars.id WHERE drivers.user_id = %s"
             cursor.execute(sql, user_id)
 
