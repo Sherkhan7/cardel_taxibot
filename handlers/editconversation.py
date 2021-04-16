@@ -491,6 +491,7 @@ def edit_district_callback(update: Update, context: CallbackContext):
                     user_data[CHECKED][key][region_id].append(district_id)
                 else:
                     user_data[CHECKED][key].update({region_id: [district_id]})
+
                 alert = checked_alert_text
 
             elif new_action == 'unchecked':
@@ -498,16 +499,18 @@ def edit_district_callback(update: Update, context: CallbackContext):
                 if district_id in user_data[CHECKED][key][region_id]:
                     user_data[CHECKED][key][region_id].remove(district_id)
 
-                # If list is empty delete the {region_id: [districts_id]} whole dict
+                # If list is empty delete the `region_id: [districts_id]` pair
                 if not user_data[CHECKED][key][region_id]:
                     del user_data[CHECKED][key][region_id]
+
                 alert = unchecked_alert_text
+
+            alert = f'{dirtict_name} {alert}'
+            callback_query.answer(alert)
 
         except TelegramError:
             pass
 
-        alert = f'{dirtict_name} {alert}'
-        callback_query.answer(alert)
         # logger.info('user_data: %s', user_data)
         return
 
