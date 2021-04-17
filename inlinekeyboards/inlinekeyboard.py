@@ -1,7 +1,9 @@
+import datetime
+
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+
 from DB import *
 from .inlinekeyboardtypes import *
-import datetime
 
 
 class InlineKeyboard(object):
@@ -41,9 +43,6 @@ class InlineKeyboard(object):
         elif keyb_type == confirm_keyboard:
             return self.__get_confirm_keyboard(inline_keyboard_types[keyb_type], lang)
 
-        elif keyb_type == orders_keyboard:
-            return self.__get_orders_keyboard(inline_keyboard_types[keyb_type][lang], data)
-
         elif keyb_type == yes_no_keyboard:
             return self.__get_yes_no_keyboard(inline_keyboard_types[keyb_type], lang)
 
@@ -52,9 +51,6 @@ class InlineKeyboard(object):
 
         elif keyb_type == paginate_keyboard:
             return self.__get_paginate_keyboard(data, history)
-
-        elif keyb_type == geo_keyboard:
-            return self.__get_geo_keyboard(data)
 
         elif keyb_type == edit_keyboard:
             return self.__get_edit_keyboard(inline_keyboard_types[keyb_type], lang)
@@ -137,41 +133,42 @@ class InlineKeyboard(object):
         ok_btn_data = inline_keyboard_types[districts_selective_keyboard][2]['data']
 
         icon = '☑'
-        _data = '_unchecked'
+        data = 'unchecked'
         recheck = True
 
         if re_check_list and len(re_check_list) == len(regions):
             icon = '✅'
-            _data = '_checked'
+            data = 'checked'
             recheck = False
 
         if length % 2 == 0:
 
             keyboard = [
                 [
-                    InlineKeyboardButton(f'{icon} ' + regions[i][f'name_{lang}'],
-                                         callback_data=str(regions[i]['id']) + _data),
-                    InlineKeyboardButton(f'{icon} ' + regions[i + 1][f'name_{lang}'],
-                                         callback_data=str(regions[i + 1]['id']) + _data)
+                    InlineKeyboardButton(f"{icon} {regions[i][f'name_{lang}']}",
+                                         callback_data=f"{regions[i]['id']}_{data}"),
+                    InlineKeyboardButton(f"{icon} {regions[i + 1][f'name_{lang}']}",
+                                         callback_data=f"{regions[i + 1]['id']}_{data}")
                 ]
                 for i in range(0, length, 2)
             ]
 
             keyboard.append([InlineKeyboardButton(back_btn_text, callback_data=back_btn_data)])
+
         else:
 
             keyboard = [
                 [
-                    InlineKeyboardButton(f'{icon} ' + regions[i][f'name_{lang}'],
-                                         callback_data=str(regions[i]['id']) + _data),
+                    InlineKeyboardButton(f"{icon} {regions[i][f'name_{lang}']}",
+                                         callback_data=f"{regions[i]['id']}_{data}"),
                     InlineKeyboardButton(back_btn_text, callback_data=back_btn_data)
                 ]
                 if i == length - 1 else
                 [
-                    InlineKeyboardButton(f'{icon} ' + regions[i][f'name_{lang}'],
-                                         callback_data=str(regions[i]['id']) + _data),
-                    InlineKeyboardButton(f'{icon} ' + regions[i + 1][f'name_{lang}'],
-                                         callback_data=str(regions[i + 1]['id']) + _data)
+                    InlineKeyboardButton(f"{icon} {regions[i][f'name_{lang}']}",
+                                         callback_data=f"{regions[i]['id']}_{data}"),
+                    InlineKeyboardButton(f"{icon} {regions[i + 1][f'name_{lang}']}",
+                                         callback_data=f"{regions[i + 1]['id']}_{data}")
                 ] for i in range(0, length, 2)
             ]
 
@@ -182,12 +179,12 @@ class InlineKeyboard(object):
                     for col in row:
                         if col.callback_data != 'back':
                             text = col.text.split(maxsplit=1)[-1]
-                            _data = col.callback_data.split('_')
-                            district_id = int(_data[0])
+                            data = col.callback_data.split('_')
+                            district_id = int(data[0])
                             new_action = "checked"
                             new_icon = "✅"
                             if i == district_id:
-                                col.text = f"{new_icon} {text}"
+                                col.text = f'{new_icon} {text}'
                                 col.callback_data = f'{district_id}_{new_action}'
                                 stop = True
                                 break
@@ -197,30 +194,6 @@ class InlineKeyboard(object):
         keyboard.insert(0, [InlineKeyboardButton(check_all_btn_text, callback_data=check_all_btn_data)])
 
         return InlineKeyboardMarkup(keyboard)
-
-    @staticmethod
-    def __get_book_keyboard(buttons, book_data):
-
-        button1_text = f'\U0001F4D6  {buttons[1]}'
-        button1_url = book_data['description_url']
-
-        button2_text = f'\U0001F4E6  {buttons[2]}'
-        button2_data = 'ordering'
-
-        button3_text = f'\U00002B05  {buttons[3]}'
-        button3_data = 'back'
-
-        inline_keyboard = [
-            [InlineKeyboardButton(button2_text, callback_data=button2_data)],
-            [InlineKeyboardButton(button3_text, callback_data=button3_data)],
-        ]
-
-        if book_data['description_url']:
-            inline_keyboard.insert(0, [
-                InlineKeyboardButton(button1_text, url=button1_url)
-            ])
-
-        return InlineKeyboardMarkup(inline_keyboard)
 
     @staticmethod
     def __get_dates_keyboard(buttons, lang):
@@ -319,43 +292,6 @@ class InlineKeyboard(object):
         return InlineKeyboardMarkup([
             [InlineKeyboardButton(button1_text, callback_data=button1_data)],
             [InlineKeyboardButton(button2_text, callback_data=button2_data)]
-        ])
-
-    @staticmethod
-    def __get_orders_keyboard(buttons, data):
-
-        inline_keyboard = []
-        button1_text = f"\U0001F3C1 Manzilni xaritadan ko'rish"
-
-        if data[0]:
-            from_latitude = data[0]['latitude']
-            from_longitude = data[0]['longitude']
-            inline_keyboard.append(
-                [InlineKeyboardButton(button1_text,
-                                      url=f'http://www.google.com/maps/place/{from_latitude},{from_longitude}/'
-                                          f'@{from_latitude},{from_longitude},12z')])
-
-        button2_text = f'\U00002705 {buttons[1]}'
-        button3_text = f'\U0000274C {buttons[2]}'
-
-        inline_keyboard.extend([
-            [InlineKeyboardButton(button2_text, callback_data=f'r_{data[-1]}')],
-            [InlineKeyboardButton(button3_text, callback_data=f'c_{data[-1]}')]
-        ])
-
-        return InlineKeyboardMarkup(inline_keyboard)
-
-    @staticmethod
-    def __get_geo_keyboard(data):
-        button2_text = f"\U0001F3C1 Manzilni xaritadan ko'rish"
-
-        from_latitude = data['latitude']
-        from_longitude = data['longitude']
-
-        return InlineKeyboardMarkup([
-            [InlineKeyboardButton(button2_text,
-                                  url=f'https://www.google.com/maps/place/{from_latitude},{from_longitude}/@'
-                                      f'{from_latitude},{from_longitude},12z')]
         ])
 
     @staticmethod
