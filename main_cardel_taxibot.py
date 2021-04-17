@@ -2,17 +2,7 @@ from telegram.ext import Updater, PicklePersistence
 
 from config import TOKEN, SERVER_IP, PORT, URL
 from errorhandler import error_handler
-from handlers import (
-    message_handler,
-    callback_query_handler,
-    registration_conversation_handler,
-    command_handler,
-    announce_conversation_handler,
-    driver_conversation_handler,
-    activate_conversation_handler,
-    search_conversation_handler,
-    edit_conversation_handler
-)
+from handlers import *
 
 
 def main():
