@@ -1,3 +1,5 @@
+import logging
+
 from telegram import (
     Update,
     ReplyKeyboardRemove,
@@ -21,8 +23,6 @@ from replykeyboards.replykeyboardtypes import reply_keyboard_types
 
 from inlinekeyboards import InlineKeyboard
 from inlinekeyboards.inlinekeyboardvariables import *
-
-import logging
 
 logger = logging.getLogger()
 
@@ -83,6 +83,7 @@ def yes_no_callback(update: Update, context: CallbackContext):
         callback_query.message.reply_text(text, reply_markup=reply_keyboard)
 
         user_data.clear()
+
         return ConversationHandler.END
 
     elif data == 'yes':
@@ -163,6 +164,7 @@ def baggage_callback(update: Update, context: CallbackContext):
     callback_query.message.reply_text(driver_text, reply_markup=reply_keyboard)
 
     user_data.clear()
+
     return ConversationHandler.END
 
 

@@ -1,3 +1,7 @@
+import logging
+import datetime
+import ujson
+
 from telegram import (
     Update,
     ReplyKeyboardRemove,
@@ -23,10 +27,6 @@ from replykeyboards.replykeyboardvariables import *
 
 from inlinekeyboards import InlineKeyboard
 from inlinekeyboards.inlinekeyboardvariables import *
-
-import logging
-import datetime
-import ujson
 
 logger = logging.getLogger()
 
@@ -71,6 +71,7 @@ def activate_conversation_callback(update: Update, context: CallbackContext):
         update.message.reply_text(active_status_text, reply_markup=reply_keyboard)
 
         user_data.clear()
+
         return ConversationHandler.END
 
 
@@ -575,6 +576,7 @@ def confirmation_callback(update: Update, context: CallbackContext):
     callback_query.message.reply_text(text, reply_markup=reply_keyboard)
 
     user_data.clear()
+
     return ConversationHandler.END
 
 
