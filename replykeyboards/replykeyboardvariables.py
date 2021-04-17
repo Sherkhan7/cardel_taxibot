@@ -1,7 +1,5 @@
 main_menu_keyboard = 'main_menu_keyboard'
 passenger_parcel_keyboard = 'passenger_parcel_keyboard'
-client_menu_keyboard = 'client_menu_keyboard'
-admin_menu_keyboard = 'admin_menu_keyboard'
 settings_keyboard = 'settings_keyboard'
 phone_number_keyboard = 'phone_number_keyboard'
 location_keyboard = 'location_keyboard'
