@@ -28,11 +28,9 @@ def insert_data(data, table_name):
             cursor.execute(sql, data_values)
             connection.commit()
 
-    value = cursor.lastrowid
+    print(f'{table_name}: +{cursor.rowcount}(last_row_id = {cursor.lastrowid})')
 
-    print(f'{table_name}: +{cursor.rowcount}(last_row_id = {value})')
-
-    return value
+    return cursor.lastrowid
 
 
 def get_main_menu_buttons():
@@ -155,31 +153,13 @@ def get_car_models():
     return cursor.fetchall()
 
 
-def get_orders_by_status(status):
-    if isinstance(status, tuple):
-        sql = f'SELECT * FROM orders WHERE orders.status = %s OR orders.status = %s ORDER BY id DESC'
-    else:
-        sql = f'SELECT * FROM orders WHERE orders.status = %s ORDER BY id DESC'
-
-    with closing(get_connection()) as connection:
-        with connection.cursor() as cursor:
-            cursor.execute(sql, status)
-
-    return cursor.fetchall()
-
-
 def update_active_driver_comment(new_comment, driver_id):
     with closing(get_connection()) as connection:
         with connection.cursor() as cursor:
             cursor.execute('UPDATE `active_drivers` SET comment = %s WHERE driver_id = %s', (new_comment, driver_id))
             connection.commit()
 
-    return_value = 'not updated'
-
-    if connection.affected_rows() != 0:
-        return_value = 'updated'
-
-    return return_value
+    return 'updated' if connection.affected_rows() != 0 else 'not updated'
 
 
 def update_active_driver_empty_seats(new_empty_seats, driver_id):
@@ -189,12 +169,7 @@ def update_active_driver_empty_seats(new_empty_seats, driver_id):
                            (new_empty_seats, driver_id))
             connection.commit()
 
-    return_value = 'not updated'
-
-    if connection.affected_rows() != 0:
-        return_value = 'updated'
-
-    return return_value
+    return 'updated' if connection.affected_rows() != 0 else 'not updated'
 
 
 def update_active_driver_ask_parcel(new_answer, driver_id):
@@ -203,12 +178,7 @@ def update_active_driver_ask_parcel(new_answer, driver_id):
             cursor.execute('UPDATE `active_drivers` SET ask_parcel = %s WHERE driver_id = %s', (new_answer, driver_id))
             connection.commit()
 
-    return_value = 'not updated'
-
-    if connection.affected_rows() != 0:
-        return_value = 'updated'
-
-    return return_value
+    return 'updated' if connection.affected_rows() != 0 else 'not updated'
 
 
 def update_active_driver_departure_time(new_daparture_time, driver_id):
@@ -218,12 +188,7 @@ def update_active_driver_departure_time(new_daparture_time, driver_id):
                            (new_daparture_time, driver_id))
             connection.commit()
 
-    return_value = 'not updated'
-
-    if connection.affected_rows() != 0:
-        return_value = 'updated'
-
-    return return_value
+    return 'updated' if connection.affected_rows() != 0 else 'not updated'
 
 
 def update_active_driver_from_or_to(field, new_json, driver_id):
@@ -233,12 +198,7 @@ def update_active_driver_from_or_to(field, new_json, driver_id):
             cursor.execute(f'UPDATE `active_drivers` SET {field} = %s WHERE driver_id = %s', (new_json, driver_id))
             connection.commit()
 
-    return_value = 'not updated'
-
-    if connection.affected_rows() != 0:
-        return_value = 'updated'
-
-    return return_value
+    return 'updated' if connection.affected_rows() != 0 else 'not updated'
 
 
 def delete_active_driver(driver_id):
@@ -247,12 +207,7 @@ def delete_active_driver(driver_id):
             cursor.execute(f'DELETE FROM `active_drivers` WHERE driver_id = %s', driver_id)
             connection.commit()
 
-    return_value = 'not deleted'
-
-    if connection.affected_rows() != 0:
-        return_value = 'deleted'
-
-    return return_value
+    return 'deleted' if connection.affected_rows() != 0 else 'not deleted'
 
 
 def update_user_info(id, **kwargs):
@@ -265,9 +220,4 @@ def update_user_info(id, **kwargs):
             cursor.execute(sql, (value, id, id))
             connection.commit()
 
-    return_value = 'not updated'
-
-    if connection.affected_rows() != 0:
-        return_value = 'updated'
-
-    return return_value
+    return 'updated' if connection.affected_rows() != 0 else 'not updated'
