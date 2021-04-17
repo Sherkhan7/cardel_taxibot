@@ -1,3 +1,5 @@
+import logging
+
 from telegram import Update, ParseMode, InlineKeyboardButton
 from telegram.ext import (
     CallbackQueryHandler,
@@ -7,13 +9,13 @@ from telegram.ext import (
     CallbackContext,
     Filters
 )
-from config import ACTIVE_ADMINS
 from DB import *
 from filters import *
-from helpers import wrap_tags
-from languages import LANGS
 from layouts import *
 from globalvariables import *
+from config import ACTIVE_ADMINS
+from helpers import wrap_tags
+from languages import LANGS
 
 from replykeyboards import ReplyKeyboard
 from replykeyboards.replykeyboardvariables import *
@@ -21,8 +23,6 @@ from replykeyboards.replykeyboardtypes import reply_keyboard_types
 
 from inlinekeyboards import InlineKeyboard
 from inlinekeyboards.inlinekeyboardvariables import *
-
-import logging
 
 logger = logging.getLogger()
 

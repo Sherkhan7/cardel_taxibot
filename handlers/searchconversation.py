@@ -1,3 +1,7 @@
+import logging
+import re
+import ujson
+
 from telegram import (
     Update,
     ReplyKeyboardRemove,
@@ -23,10 +27,6 @@ from replykeyboards.replykeyboardvariables import *
 
 from inlinekeyboards import InlineKeyboard
 from inlinekeyboards.inlinekeyboardvariables import *
-
-import logging
-import re
-import ujson
 
 logger = logging.getLogger()
 
@@ -60,8 +60,6 @@ def region_callback(update: Update, context: CallbackContext):
     user = get_user(update.effective_user.id)
     user_data = context.user_data
     callback_query = update.callback_query
-    region_id = callback_query.data
-    user_data[user_data[STATE]] = str(region_id)
 
     if user[LANG] == LANGS[0]:
         from_text = "Qayerdan"
@@ -87,10 +85,14 @@ def region_callback(update: Update, context: CallbackContext):
         state = TO_DISTRICT
 
     text = f'{text} {district_text}:'
+
+    region_id = callback_query.data
+    user_data[user_data[STATE]] = str(region_id)
+
     inline_keyboard = InlineKeyboard(districts_keyboard, user[LANG], data=region_id).get_keyboard()
 
-    callback_query.answer()
     callback_query.edit_message_text(text, reply_markup=inline_keyboard)
+    callback_query.answer()
 
     user_data[STATE] = state
 
@@ -103,7 +105,6 @@ def district_callback(update: Update, context: CallbackContext):
     user_data = context.user_data
     callback_query = update.callback_query
     data = callback_query.data
-    callback_query.answer()
 
     if user[LANG] == LANGS[0]:
         from_text = "Qayerdan"
@@ -146,6 +147,7 @@ def district_callback(update: Update, context: CallbackContext):
         text = f'{text} {region_text}:'
         inline_keyboard = InlineKeyboard(regions_keyboard, user[LANG]).get_keyboard()
         callback_query.edit_message_text(text, reply_markup=inline_keyboard)
+        callback_query.answer()
 
         user_data[STATE] = state
 
@@ -287,15 +289,15 @@ def empty_seats_callback(update: Update, context: CallbackContext):
         text = search_query_text + text
         update.message.reply_html(text)
 
-    data_ = dict()
-    data_[USER_ID] = user[ID]
-    data_[FROM_REGION] = user_data[FROM_REGION]
-    data_[FROM_DISTRICT] = user_data[FROM_DISTRICT]
-    data_[TO_REGION] = user_data[TO_REGION]
-    data_[TO_DISTRICT] = user_data[TO_DISTRICT]
-    data_[EMPTY_SEATS] = user_data[EMPTY_SEATS]
-    data_['found_active_drivers'] = found_active_drivers_num
-
+    data_ = {
+        USER_ID: user[ID],
+        FROM_REGION: user_data[FROM_REGION],
+        FROM_DISTRICT: user_data[FROM_DISTRICT],
+        TO_REGION: user_data[TO_REGION],
+        TO_DISTRICT: user_data[TO_DISTRICT],
+        EMPTY_SEATS: user_data[EMPTY_SEATS],
+        'found_active_drivers': found_active_drivers_num,
+    }
     insert_data(data_, 'search_history')
 
     # logger.info('user_data: %s', user_data)
@@ -322,6 +324,7 @@ def search_fallback(update: Update, context: CallbackContext):
         update.message.reply_text(text, reply_markup=reply_keyboard)
 
         user_data.clear()
+
         return ConversationHandler.END
 
     else:

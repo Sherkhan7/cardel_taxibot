@@ -1,3 +1,8 @@
+import logging
+import ujson
+import datetime
+import re
+
 from telegram import (
     Update,
     ReplyKeyboardMarkup,
@@ -27,11 +32,6 @@ from replykeyboards.replykeyboardtypes import reply_keyboard_types
 from inlinekeyboards import InlineKeyboard
 from inlinekeyboards.inlinekeyboardvariables import *
 from inlinekeyboards.inlinekeyboardtypes import inline_keyboard_types
-
-import logging
-import ujson
-import datetime
-import re
 
 logger = logging.getLogger()
 
@@ -173,6 +173,7 @@ def choose_editing_callback(update: Update, context: CallbackContext):
         callback_query.edit_message_text(text, reply_markup=inline_keyboard)
 
         user_data[STATE] = state
+
         return EDIT_REGION
 
     elif action == EMPTY_SEATS:
@@ -187,6 +188,7 @@ def choose_editing_callback(update: Update, context: CallbackContext):
         callback_query.edit_message_text(empty_seats_text, reply_markup=inline_keyboard)
 
         user_data[STATE] = EDIT_EMPTY_SEATS
+
         return EDIT_EMPTY_SEATS
 
     elif action == ASK_PARCEL:
@@ -196,6 +198,7 @@ def choose_editing_callback(update: Update, context: CallbackContext):
         callback_query.edit_message_text(ask_parcel_text, reply_markup=inline_keyboard)
 
         user_data[STATE] = EDIT_ASK_PARCEL
+
         return EDIT_ASK_PARCEL
 
     elif action == DATETIME:
@@ -205,6 +208,7 @@ def choose_editing_callback(update: Update, context: CallbackContext):
         callback_query.edit_message_text(date_text, reply_markup=inline_keyboard)
 
         user_data[STATE] = EDIT_DATE
+
         return EDIT_DATE
 
     elif action == COMMENT:
@@ -218,6 +222,7 @@ def choose_editing_callback(update: Update, context: CallbackContext):
         callback_query.edit_message_text(text[0], reply_markup=inline_keyboard)
 
         user_data[STATE] = EDIT_COMMENT
+
         return EDIT_COMMENT
 
     elif action == 'complete':
@@ -227,6 +232,7 @@ def choose_editing_callback(update: Update, context: CallbackContext):
             [InlineKeyboardButton(f'❌ {delete_btn_text}', callback_data='delete')],
         ])
         callback_query.edit_message_reply_markup(inline_keyboard)
+
         return
 
     elif callback_query.data == 'editing':
@@ -254,6 +260,7 @@ def choose_editing_callback(update: Update, context: CallbackContext):
             callback_query.edit_message_reply_markup()
 
         user_data.clear()
+
         return ConversationHandler.END
 
 
@@ -532,6 +539,7 @@ def edit_empty_seats_callback(update: Update, context: CallbackContext):
     callback_query.answer()
 
     user_data[STATE] = CHOOSE_EDITING
+
     return CHOOSE_EDITING
 
 
@@ -552,6 +560,7 @@ def edit_ask_parcel_callback(update: Update, context: CallbackContext):
     callback_query.answer()
 
     user_data[STATE] = CHOOSE_EDITING
+
     return CHOOSE_EDITING
 
 
@@ -585,6 +594,7 @@ def edit_date_callback(update: Update, context: CallbackContext):
         callback_query.edit_message_text(text, reply_markup=inline_keyboard)
 
         user_data[STATE] = EDIT_TIME
+
         return EDIT_TIME
 
     layout = get_layout(user, driver_and_car_data)
@@ -593,6 +603,7 @@ def edit_date_callback(update: Update, context: CallbackContext):
     callback_query.answer()
 
     user_data[STATE] = CHOOSE_EDITING
+
     return CHOOSE_EDITING
 
 
@@ -631,6 +642,7 @@ def edit_time_callback(update: Update, context: CallbackContext):
         callback_query.edit_message_text(layout, reply_markup=inline_keyboard, parse_mode=ParseMode.HTML)
 
         user_data[STATE] = CHOOSE_EDITING
+
         return CHOOSE_EDITING
 
 
@@ -661,6 +673,7 @@ def edit_comment_callback(update: Update, context: CallbackContext):
         callback_query.answer()
 
     user_data[STATE] = CHOOSE_EDITING
+
     return CHOOSE_EDITING
 
 
@@ -699,6 +712,7 @@ def edit_fallback(update: Update, context: CallbackContext):
         update.message.reply_text(text, reply_markup=reply_keyboard)
 
         user_data.clear()
+
         return ConversationHandler.END
 
     else:

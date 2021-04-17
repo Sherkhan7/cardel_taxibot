@@ -1,10 +1,10 @@
+import logging
+
 from telegram import Update, TelegramError
 from telegram.ext import CallbackQueryHandler, CallbackContext
 
 from DB import *
 from globalvariables import *
-
-import logging
 
 logger = logging.getLogger()
 
@@ -19,9 +19,8 @@ def inline_keyboards_handler_callback(update: Update, context: CallbackContext):
     if data == 'uz' or data == 'ru' or data == 'cy':
 
         update_user_info(user[ID], lang=data)
-        flag_uzb = '🇺🇿'
-        flag_rus = '🇷🇺'
-        flag = flag_rus if data == 'ru' else flag_uzb
+
+        flag = '🇺🇿' if data == 'uz' or data == 'cy' else '🇷🇺'
 
         if data == 'uz':
             reply_text = "Til o'zgartirildi"
@@ -39,9 +38,8 @@ def inline_keyboards_handler_callback(update: Update, context: CallbackContext):
 
         callback_query.message.reply_text(reply_text)
 
+        # logger.info('user_data: %s', user_data)
         return
-
-    # logger.info('user_data: %s', user_data)
 
 
 callback_query_handler = CallbackQueryHandler(inline_keyboards_handler_callback)
