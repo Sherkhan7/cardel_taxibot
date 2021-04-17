@@ -1,6 +1,8 @@
+import ujson
+
 from telegram import TelegramError
 from globalvariables import *
-import ujson
+
 
 # from faker import Faker
 # import random
@@ -8,7 +10,6 @@ import ujson
 
 def wrap_tags(*args):
     symbol = ' ' if len(args) > 1 else ''
-
     return f'<b><i><u>{symbol.join(args)}</u></i></b>'
 
 
