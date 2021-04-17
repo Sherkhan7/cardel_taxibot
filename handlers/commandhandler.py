@@ -1,7 +1,7 @@
+import ujson
+
 from telegram.ext import Filters, CallbackContext, CommandHandler
 from telegram import Update
-
-import json
 
 
 def do_command(update: Update, context: CallbackContext):
@@ -18,7 +18,7 @@ def do_command(update: Update, context: CallbackContext):
             user_data = persistence.get_user_data()[user_id]
 
             if user_data:
-                text = json.dumps(user_data, indent=3, ensure_ascii=False)
+                text = ujson.dumps(user_data, indent=3, ensure_ascii=False)
             else:
                 text = 'user_tg_id topilmadi !\n' \
                        f'Tip: {command} user_tg_id'
