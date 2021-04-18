@@ -83,6 +83,7 @@ TAXI_LAYOUT_DICT = {
         DRIVER_TEXT: "Haydovchi",
         CAR_MODEL: "Mashina markasi",
         BAGGAGE_TEXT: "Bagaj(yuqori bagaj)",
+
     },
     "ru": {
         TAXI_TEXT: "Такси",
@@ -91,6 +92,7 @@ TAXI_LAYOUT_DICT = {
         DRIVER_TEXT: "Водитель",
         CAR_MODEL: "Марка машины",
         BAGGAGE_TEXT: "Багаж (верхний багаж)",
+
     },
     "cy": {
         TAXI_TEXT: "Такси",
@@ -99,25 +101,35 @@ TAXI_LAYOUT_DICT = {
         DRIVER_TEXT: "Ҳайдовчи",
         CAR_MODEL: "Машина маркаси",
         BAGGAGE_TEXT: "Багаж(юқори багаж)",
+
     },
 }
-# USER_INFO_LAYOUT_DICT = {
-#     'uz': {
-#         NAME: "Ism",
-#         SURNAME: "Familya",
-#         PHONE_NUMBER: "Tel"
-#     },
-#     'cy': {
-#         NAME: "Исм",
-#         SURNAME: "Фамиля",
-#         PHONE_NUMBER: "Тел"
-#     },
-#     'ru': {
-#         NAME: "Имя",
-#         SURNAME: "Фамилия",
-#         PHONE_NUMBER: "Тел"
-#     }
-# }
+USER_INFO_LAYOUT_DICT = {
+    'uz': {
+        'user_caption_text': "Shaxsiy ma'lumotlar",
+        'driver_caption_text': "Haydovchi ma'lumotlari",
+        FULLNAME: "Ism, Familya",
+        PHONE_NUMBER: "Tel(asosiy)",
+        PHONE_NUMBER_2: "Tel(qo'shimcha)",
+        UNDEFINED_TEXT: "yo'q",
+    },
+    'ru': {
+        'user_caption_text': "Личные данные",
+        'driver_caption_text': "Информация о драйвере",
+        FULLNAME: "Исм, Фамиля",
+        PHONE_NUMBER: "Тел(базовый)",
+        PHONE_NUMBER_2: "Тел(дополнительный)",
+        UNDEFINED_TEXT: "нет",
+    },
+    'cy': {
+        'user_caption_text': "Шахсий маълумотлар",
+        'driver_caption_text': "Ҳайдовчи маълумотлари",
+        FULLNAME: "Исм, Фамиля",
+        PHONE_NUMBER: "Тел(асосий)",
+        PHONE_NUMBER_2: "Тел(қўшимча)",
+        UNDEFINED_TEXT: "йўқ",
+    }
+}
 
 PHONE_NUMBER_LAYOUT_DICT = {
     "uz": {

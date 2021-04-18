@@ -195,3 +195,27 @@ def get_comment_text(lang):
         button_text = "Изоҳ йўқ"
 
     return [f'{text}:', button_text]
+
+
+def get_user_data_and_driver_layout(user, driver):
+    user_phone_number_2 = user[PHONE_NUMBER_2] if user[PHONE_NUMBER_2] is not None else \
+        inline_keyboard_types[yes_no_keyboard][1][f'text_{user[LANG]}']
+
+    user_data_layout = f"{wrap_tags(USER_INFO_LAYOUT_DICT[user[LANG]]['user_caption_text'])}\n" \
+                       f"{USER_INFO_LAYOUT_DICT[user[LANG]][FULLNAME]}: {user[FULLNAME]}\n\n" \
+                       f"{USER_INFO_LAYOUT_DICT[user[LANG]][PHONE_NUMBER]}: {user[PHONE_NUMBER]}\n\n" \
+                       f"{USER_INFO_LAYOUT_DICT[user[LANG]][PHONE_NUMBER_2]}: {user_phone_number_2}"
+
+    if driver:
+        baggage = inline_keyboard_types[yes_no_keyboard][1][f'text_{user[LANG]}'] if driver[BAGGAGE] is not None else \
+            inline_keyboard_types[yes_no_keyboard][0][f'text_{user[LANG]}']
+
+        driver_layout = f"{wrap_tags(USER_INFO_LAYOUT_DICT[user[LANG]]['driver_caption_text'])}\n" \
+                        f"{TAXI_LAYOUT_DICT[user[LANG]][BAGGAGE_TEXT]}: {baggage}\n\n" \
+                        f"{TAXI_LAYOUT_DICT[user[LANG]][CAR_MODEL]}: {driver[CAR_MODEL]}\n\n" \
+                        f"{PASSENGER_LAYOUT_DICT[user[LANG]][STATUS_TEXT]}: {driver[STATUS]}"
+    else:
+        driver_layout = f"{wrap_tags(USER_INFO_LAYOUT_DICT[user[LANG]]['driver_caption_text'])}\n" \
+                        f"{inline_keyboard_types[yes_no_keyboard][1][f'text_{user[LANG]}']}"
+
+    return user_data_layout + '\n\n' + driver_layout
