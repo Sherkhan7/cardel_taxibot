@@ -53,7 +53,7 @@ reply_keyboard_types = {
             "text_uz": "Mening ma'lumotlarim",
             "text_ru": "Мои данные",
             "text_cy": "Менинг маълумотларим",
-            "icon": "",
+            "icon": "ℹ️",
             "data": ""
         },
         {
@@ -169,4 +169,28 @@ reply_keyboard_types = {
         },
 
     ],
+
+    my_data_keyboard: [
+        {
+            "text_uz": "Shaxsiy ma'lumotlarni o'zgartirish",
+            "text_ru": "Измененить личных данных",
+            "text_cy": "Шахсий маълумотларни ўзгартириш",
+            "icon": "👤",
+            "data": ""
+        },
+        {
+            "text_uz": "Haydovchi ma'lumotlarini o'zgartirish",
+            "text_ru": "Изменить информацию о драйвере",
+            "text_cy": "Ҳайдовчи маълумотларини ўзгартириш",
+            "icon": "🚖",
+            "data": ""
+        },
+{
+            "text_uz": "Ortga",
+            "text_ru": "Назад",
+            "text_cy": "Ортга",
+            "icon": "◀️",
+            "data": ""
+        },
+    ]
 }
