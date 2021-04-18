@@ -156,11 +156,9 @@ def choose_editing_callback(update: Update, context: CallbackContext):
     back_btn_text = f'{back_btn_icon} {back_btn_text}'
     back_btn_data = inline_keyboard_types[back_next_keyboard][0]['data']
 
-    action = callback_query.data.split('_', maxsplit=1)[-1]
+    if callback_query.data == 'edit_from' or callback_query.data == 'edit_to':
 
-    if action == 'from' or action == 'to':
-
-        if action == 'from':
+        if callback_query.data == 'edit_from':
             state = 'edit_from_region'
             text = from_text
         else:
@@ -176,7 +174,7 @@ def choose_editing_callback(update: Update, context: CallbackContext):
 
         return EDIT_REGION
 
-    elif action == EMPTY_SEATS:
+    elif callback_query.data == EDIT_EMPTY_SEATS:
 
         inline_keyboard = callback_query.message.reply_markup.from_row([
             InlineKeyboardButton('1', callback_data='1'),
@@ -191,7 +189,7 @@ def choose_editing_callback(update: Update, context: CallbackContext):
 
         return EDIT_EMPTY_SEATS
 
-    elif action == ASK_PARCEL:
+    elif callback_query.data == EDIT_ASK_PARCEL:
 
         inline_keyboard = InlineKeyboard(yes_no_keyboard, user[LANG]).get_keyboard()
         inline_keyboard.inline_keyboard.append([InlineKeyboardButton(back_btn_text, callback_data=back_btn_data)])
@@ -201,7 +199,7 @@ def choose_editing_callback(update: Update, context: CallbackContext):
 
         return EDIT_ASK_PARCEL
 
-    elif action == DATETIME:
+    elif callback_query.data == EDIT_DATETIME:
 
         inline_keyboard = InlineKeyboard(dates_keyboard, user[LANG]).get_keyboard()
         inline_keyboard.inline_keyboard.append([InlineKeyboardButton(back_btn_text, callback_data=back_btn_data)])
@@ -211,7 +209,7 @@ def choose_editing_callback(update: Update, context: CallbackContext):
 
         return EDIT_DATE
 
-    elif action == COMMENT:
+    elif callback_query.data == EDIT_COMMENT:
         text = get_comment_text(user[LANG])
 
         inline_keyboard = callback_query.message.reply_markup
@@ -225,23 +223,29 @@ def choose_editing_callback(update: Update, context: CallbackContext):
 
         return EDIT_COMMENT
 
-    elif action == 'complete':
+    elif callback_query.data == EDIT_COMPLETE:
 
         inline_keyboard = InlineKeyboardMarkup([
             [InlineKeyboardButton(f'📝 {edit_btn_text}', callback_data='editing')],
             [InlineKeyboardButton(f'❌ {delete_btn_text}', callback_data='delete')],
         ])
-        callback_query.edit_message_reply_markup(inline_keyboard)
+        try:
+            callback_query.edit_message_reply_markup(inline_keyboard)
+        except TelegramError:
+            pass
 
         return
 
-    elif callback_query.data == 'editing':
+    elif callback_query.data == EDITING:
         inline_keyboard = InlineKeyboard(edit_keyboard, user[LANG]).get_keyboard()
-        callback_query.edit_message_reply_markup(inline_keyboard)
+        try:
+            callback_query.edit_message_reply_markup(inline_keyboard)
+        except TelegramError:
+            pass
 
         return
 
-    elif callback_query.data == 'delete':
+    elif callback_query.data == DELETE:
 
         active_driver_data = get_active_driver_by_user_id(user[ID])
         active_driver_data.pop('updated_at')
