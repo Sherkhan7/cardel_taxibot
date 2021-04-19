@@ -185,12 +185,65 @@ reply_keyboard_types = {
             "icon": "🚖",
             "data": ""
         },
-{
+        {
             "text_uz": "Ortga",
             "text_ru": "Назад",
             "text_cy": "Ортга",
             "icon": "◀️",
             "data": ""
         },
-    ]
+    ],
+    edit_user_data_keyboard: [
+        {
+            "text_uz": "Ism, Familyani o'zgartirish",
+            "text_ru": "Изменить имя, фамилию",
+            "text_cy": "Исм, Фамиляни ўзгартириш",
+            "icon": "👤",
+            "data": ""
+        },
+        {
+            "text_uz": "Asosiy raqamni o'zgartirish",
+            "text_ru": "Измените основной номер",
+            "text_cy": "Асосий рақамни ўзгартириш",
+            "icon": "📞",
+            "data": ""
+        },
+        {
+            "text_uz": "Qo'shimcha raqamni o'zgartirish",
+            "text_ru": "Измените дополнительный номер",
+            "text_cy": "Қўшимча рақамни ўзгартириш",
+            "icon": "📞",
+            "data": ""
+        },
+        {
+            "text_uz": "Ortga",
+            "text_ru": "Назад",
+            "text_cy": "Ортга",
+            "icon": "◀️",
+            "data": ""
+        },
+    ],
+    edit_driver_data_keyboard: [
+        {
+            "text_uz": "Mashina markasini o'zgartirish",
+            "text_ru": "Изменить марку автомобиля",
+            "text_cy": "Машина маркасини ўзгартириш",
+            "icon": "🚖",
+            "data": ""
+        },
+        {
+            "text_uz": "Bagajni o'zgartirish",
+            "text_ru": "Изменение багажа",
+            "text_cy": "Багажни ўзгартириш",
+            "icon": "🚖",
+            "data": ""
+        },
+        {
+            "text_uz": "Ortga",
+            "text_ru": "Назад",
+            "text_cy": "Ортга",
+            "icon": "◀️",
+            "data": ""
+        },
+    ],
 }
