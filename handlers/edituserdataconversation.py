@@ -33,7 +33,7 @@ def edit_user_data_conversation_callback(update: Update, context: CallbackContex
 
     user_data[STATE] = CHOOSE_EDITING_FULLNAME_OR_PHONE_NUMBERS
 
-    logger.info('user_data: %s', user_data)
+    # logger.info('user_data: %s', user_data)
     return CHOOSE_EDITING_FULLNAME_OR_PHONE_NUMBERS
 
 
@@ -68,7 +68,7 @@ def choose_editing_fullname_or_phone_numbers_callback(update: Update, context: C
     update.message.reply_html(reply_text, reply_markup=ReplyKeyboardRemove())
     user_data[STATE] = state
 
-    logger.info('user_data: %s', user_data)
+    # logger.info('user_data: %s', user_data)
     return return_state
 
 
