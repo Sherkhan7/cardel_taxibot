@@ -1,17 +1,9 @@
 import logging
 import re
 
-from telegram import (
-    Update,
-    ReplyKeyboardRemove,
-)
-from telegram.ext import (
-    CallbackQueryHandler,
-    MessageHandler,
-    ConversationHandler,
-    CallbackContext,
-    Filters,
-)
+from telegram import Update, ReplyKeyboardRemove
+from telegram.ext import CallbackQueryHandler, MessageHandler, ConversationHandler, CallbackContext, Filters
+
 from DB import *
 from languages import LANGS
 from helpers import *
@@ -179,7 +171,7 @@ def edit_driver_data_conversation_fallback(update: Update, context: CallbackCont
     user_data = context.user_data
     text = update.message.text
 
-    if update.message.text == '/start' or update.message.text == '/menu' or update.message.text == '/cancel':
+    if text == '/start' or text == '/menu' or text == '/cancel':
 
         if user[LANG] == LANGS[0]:
             cenceled_text = "O'zgartirish bekor qilindi"
@@ -203,6 +195,8 @@ def edit_driver_data_conversation_fallback(update: Update, context: CallbackCont
 
         user_data.clear()
 
+        return ConversationHandler.END
+
     elif re.search("(Ortga|Назад|Ортга)$", update.message.text):
 
         reply_keyboard = ReplyKeyboard(my_data_keyboard, user[LANG]).get_keyboard()
@@ -213,7 +207,7 @@ def edit_driver_data_conversation_fallback(update: Update, context: CallbackCont
         user_data.clear()
         user_data[STATE] = 'my_data'
 
-    return ConversationHandler.END
+        return ConversationHandler.END
 
 
 edit_driver_data_conversation_handler = ConversationHandler(
