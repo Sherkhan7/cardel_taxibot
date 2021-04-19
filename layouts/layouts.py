@@ -140,17 +140,17 @@ def get_active_driver_layout(lang, data, label=None):
 
 def get_fullname_error_text(lang):
     if lang == LANGS[0]:
-        text = "Ism,familya xato yuborildi!\n" \
+        text = "Ism, familya xato yuboril di!\n" \
                "Qaytadan quyidagi formatda yuboring"
         example = "Misol: Sherzodbek Esanov yoki Sherzodbek"
 
     if lang == LANGS[1]:
-        text = "Имя,фамилия введено неверное!\n" \
+        text = "Имя, фамилия введено неве рное!\n" \
                "Отправьте еще раз в следующем формате"
         example = 'Пример: Шерзодбек Эсанов или Шерзодбек'
 
     if lang == LANGS[2]:
-        text = "Исм,фамиля хато юборилди!\n" \
+        text = "Исм, фамиля хато юборилди !\n" \
                "Қайтадан қуйидаги форматда юборинг"
         example = "Мисол: Шерзодбек Эсанов ёки Шерзодбек"
 
@@ -172,7 +172,7 @@ def get_phone_number_error_text(lang):
 
 def get_phone_number_layout(lang):
     """ Layout view
-        telefon raqamini quyidagi formatda yuboring
+        Telefon raqamini quyidagi formatda yuboring
 
         Misol: +998 XX xxx xx xx yoki XX xxx xx xx
     """
@@ -195,3 +195,55 @@ def get_comment_text(lang):
         button_text = "Изоҳ йўқ"
 
     return [f'{text}:', button_text]
+
+
+def get_user_data_and_driver_layout(user, driver):
+    user_phone_number_2 = user[PHONE_NUMBER_2] if user[PHONE_NUMBER_2] is not None else \
+        inline_keyboard_types[yes_no_keyboard][1][f'text_{user[LANG]}']
+
+    user_data_layout = f"{wrap_tags(USER_INFO_LAYOUT_DICT[user[LANG]]['user_caption_text'])}:\n" \
+                       f"{USER_INFO_LAYOUT_DICT[user[LANG]][FULLNAME]}: {user[FULLNAME]}\n\n" \
+                       f"{USER_INFO_LAYOUT_DICT[user[LANG]][PHONE_NUMBER]}: {user[PHONE_NUMBER]}\n\n" \
+                       f"{USER_INFO_LAYOUT_DICT[user[LANG]][PHONE_NUMBER_2]}: {user_phone_number_2}"
+
+    if driver:
+        baggage = inline_keyboard_types[yes_no_keyboard][2][f'text_{user[LANG]}'] if driver[BAGGAGE] else \
+            inline_keyboard_types[yes_no_keyboard][1][f'text_{user[LANG]}']
+
+        driver_layout = f"{wrap_tags(USER_INFO_LAYOUT_DICT[user[LANG]]['driver_caption_text'])}:\n" \
+                        f"{TAXI_LAYOUT_DICT[user[LANG]][CAR_MODEL]}: {driver[CAR_MODEL]}\n\n" \
+                        f"{TAXI_LAYOUT_DICT[user[LANG]][BAGGAGE_TEXT]}: {baggage}\n\n" \
+                        f"{PASSENGER_LAYOUT_DICT[user[LANG]][STATUS_TEXT]}: {driver[STATUS]}"
+    else:
+        driver_layout = f"{wrap_tags(USER_INFO_LAYOUT_DICT[user[LANG]]['driver_caption_text'])}:\n" \
+                        f"{inline_keyboard_types[yes_no_keyboard][1][f'text_{user[LANG]}']}"
+
+    return user_data_layout + '\n\n' + driver_layout
+
+
+def get_only_driver_layout(driver, lang):
+    if driver:
+        baggage = inline_keyboard_types[yes_no_keyboard][2][f'text_{lang}'] if driver[BAGGAGE] else \
+            inline_keyboard_types[yes_no_keyboard][1][f'text_{lang}']
+
+        driver_layout = f"{wrap_tags(USER_INFO_LAYOUT_DICT[lang]['driver_caption_text'])}:\n" \
+                        f"{TAXI_LAYOUT_DICT[lang][CAR_MODEL]}: {driver[CAR_MODEL]}\n\n" \
+                        f"{TAXI_LAYOUT_DICT[lang][BAGGAGE_TEXT]}: {baggage}\n\n" \
+                        f"{PASSENGER_LAYOUT_DICT[lang][STATUS_TEXT]}: {driver[STATUS]}"
+    else:
+        driver_layout = f"{wrap_tags(USER_INFO_LAYOUT_DICT[lang]['driver_caption_text'])}:\n" \
+                        f"{inline_keyboard_types[yes_no_keyboard][1][f'text_{lang}']}"
+
+    return driver_layout
+
+
+def get_only_user_data_layout(user):
+    user_phone_number_2 = user[PHONE_NUMBER_2] if user[PHONE_NUMBER_2] is not None else \
+        inline_keyboard_types[yes_no_keyboard][1][f'text_{user[LANG]}']
+
+    user_data_layout = f"{wrap_tags(USER_INFO_LAYOUT_DICT[user[LANG]]['user_caption_text'])}:\n" \
+                       f"{USER_INFO_LAYOUT_DICT[user[LANG]][FULLNAME]}: {user[FULLNAME]}\n\n" \
+                       f"{USER_INFO_LAYOUT_DICT[user[LANG]][PHONE_NUMBER]}: {user[PHONE_NUMBER]}\n\n" \
+                       f"{USER_INFO_LAYOUT_DICT[user[LANG]][PHONE_NUMBER_2]}: {user_phone_number_2}"
+
+    return user_data_layout

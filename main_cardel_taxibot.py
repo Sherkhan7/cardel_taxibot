@@ -12,6 +12,10 @@ def main():
 
     updater.dispatcher.add_handler(command_handler)
 
+    updater.dispatcher.add_handler(edit_user_data_conversation_handler)
+
+    updater.dispatcher.add_handler(edit_driver_data_conversation_handler)
+
     updater.dispatcher.add_handler(edit_conversation_handler)
 
     updater.dispatcher.add_handler(activate_conversation_handler)

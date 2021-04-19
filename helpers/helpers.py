@@ -35,7 +35,10 @@ def delete_message_by_message_id(context, user):
         try:
             context.bot.delete_message(user[TG_ID], user_data[MESSAGE_ID])
         except TelegramError:
-            context.bot.edit_message_reply_markup(user[TG_ID], user_data[MESSAGE_ID])
+            try:
+                context.bot.edit_message_reply_markup(user[TG_ID], user_data[MESSAGE_ID])
+            except TelegramError:
+                pass
         finally:
             user_data.pop(MESSAGE_ID)
 
