@@ -5,8 +5,8 @@ TO_REGION, TO_DISTRICT, TO_LOCATION, RECEIVER_CONTACT, IS_ADMIN, YES_NO, PASSENG
     ('to_region', 'to_district', 'to_location', 'receiver_contact', 'is_admin', 'yes_no', 'passengers',
      'passengers_text')
 
-ASK_PARCEL, DEFINITION, DATETIME, DATE, TIME, USER_PHONE_NUMBER, CONFIRMATION, EDIT, MESSAGE_ID = \
-    ('ask_parcel', 'definition', 'datetime', 'date', 'time', 'user_phone_number', 'confirmation', 'edit', 'message_id')
+ASK_PARCEL, DEFINITION, DATETIME, DATE, TIME, PHONE_NUMBER_2, CONFIRMATION, EDITING, MESSAGE_ID = \
+    ('ask_parcel', 'definition', 'datetime', 'date', 'time', 'phone_number_2', 'confirmation', 'editing', 'message_id')
 
 FROM_TEXT, TO_TEXT, WEIGHT_TEXT, VOLUME_TEXT, COMMENT_TEXT, DATE_TEXT, POST_ID, FULLNAME = \
     ('from_text', 'to_text', 'weight_text', 'volume_text', 'comment_text', 'date_text', 'post_id', 'fullname')
@@ -29,3 +29,10 @@ TAXI_TEXT, EMPTY_SEATS_TEXT, DRIVER_TEXT, BAGGAGE_TEXT, DRIVER_ID, AGREEMENT, CH
 
 EDIT_EMPTY_SEATS, EDIT_DISTRICT, EDIT_REGION, EDIT_ASK_PARCEL, EDIT_DATE, EDIT_TIME, EDIT_COMMENT = \
     ('edit_empty_seats', 'edit_district', 'edit_region', 'edit_ask_parcel', 'edit_date', 'edit_time', 'edit_comment')
+
+DELETE, EDIT_DATETIME, EDIT_COMPLETE, EDIT_CAR_MODEL, CHOOSE_EDITING_CAR_MODEL_OR_BAGGAGE = \
+    ('delete', 'edit_datetime', 'edit_complete', 'edit_car_model', 'choose_editing_car_model_or_baggage')
+
+EDIT_FULLNAME, EDIT_PHONE_NUMBERS, EDIT_PHONE_NUMBER_2, EDIT_BAGGAGE, CHOOSE_EDITING_FULLNAME_OR_PHONE_NUMBERS = \
+    ('edit_fullname', 'edit_phone_numbers', 'edit_phone_number_2', 'edit_baggage',
+     'choose_editing_fullname_or_phone_numbers')
