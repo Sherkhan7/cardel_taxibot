@@ -14,12 +14,16 @@ from .main import (
     get_active_driver_by_user_id,
     get_driver_by_id,
     get_video_files,
-    update_user_info,
+    update_user_fullname,
+    update_user_phone_numbers,
     update_active_driver_comment,
     update_active_driver_empty_seats,
     update_active_driver_ask_parcel,
     update_active_driver_departure_time,
     update_active_driver_from_or_to,
+    update_driver_car_model,
+    update_baggage,
     delete_active_driver,
+    check_phone_number_existence,
 
 )
