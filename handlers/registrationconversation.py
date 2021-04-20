@@ -93,11 +93,14 @@ def lang_callback(update: Update, context: CallbackContext):
         inline_keyboard = callback_query.message.reply_markup.from_button(InlineKeyboardButton(
             text=button_text, callback_data='agree'
         ))
-        callback_query.edit_message_text(text, parse_mode=ParseMode.HTML, reply_markup=inline_keyboard)
+        # when message edited edited message returned otherwise True returned
+        edited_result = callback_query.edit_message_text(text, parse_mode=ParseMode.HTML, reply_markup=inline_keyboard)
 
-        user_data[STATE] = AGREEMENT
+        # if True returned it means message text and reply_markup not edited
+        if edited_result is not True:
+            user_data[STATE] = AGREEMENT
 
-        return AGREEMENT
+            return AGREEMENT
 
 
 def agreement_callback(update: Update, context: CallbackContext):
