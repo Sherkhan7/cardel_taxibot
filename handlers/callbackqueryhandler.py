@@ -18,7 +18,7 @@ def inline_keyboards_handler_callback(update: Update, context: CallbackContext):
 
     if data == 'uz' or data == 'ru' or data == 'cy':
 
-        update_user_info(user[ID], lang=data)
+        update_user_lang(data, user[ID])
 
         flag = '🇺🇿' if data == 'uz' or data == 'cy' else '🇷🇺'
 
