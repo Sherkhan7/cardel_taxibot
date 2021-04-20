@@ -16,6 +16,7 @@ from .main import (
     get_video_files,
     update_user_fullname,
     update_user_phone_numbers,
+    update_user_lang,
     update_active_driver_comment,
     update_active_driver_empty_seats,
     update_active_driver_ask_parcel,

@@ -237,6 +237,15 @@ def update_user_fullname(fullname, user_id):
     return 'updated' if connection.affected_rows() != 0 else 'not updated'
 
 
+def update_user_lang(lang, id):
+    with closing(get_connection()) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute('UPDATE `users` SET lang = %s WHERE id = %s OR tg_id = %s', (lang, id, id))
+            connection.commit()
+
+    return 'updated' if connection.affected_rows() != 0 else 'not updated'
+
+
 def update_user_phone_numbers(field, phone_number, user_id):
     with closing(get_connection()) as connection:
         with connection.cursor() as cursor:
