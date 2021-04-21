@@ -180,4 +180,12 @@ inline_keyboard_types = {
         },
 
     ],
+    geolocation_keyboard: [
+        {
+            "text_uz": "Manzilni xaritadan ko'rish",
+            "text_ru": "Посмотреть местоположение на карте",
+            "text_cy": "Манзилни харитадан кўриш",
+            "icon": "🗺",
+        }
+    ]
 }
