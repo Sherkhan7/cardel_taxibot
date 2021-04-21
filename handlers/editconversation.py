@@ -55,11 +55,6 @@ def edit_conversation_callback(update: Update, context: CallbackContext):
     back_btn_text = reply_keyboard_types[settings_keyboard][2][f'text_{user[LANG]}']
     back_btn_text = f'{back_btn_icon} {back_btn_text}'
 
-    reply_keyboard = ReplyKeyboardMarkup([
-        [KeyboardButton(back_btn_text)],
-    ], resize_keyboard=True)
-    update.message.reply_text(update.message.text, reply_markup=reply_keyboard)
-
     if user[LANG] == LANGS[0]:
         text = "Hozir siz aktiv holatda emassiz.\n\n" \
                "Aktiv holatga o'tish ucun 🔄 Aktivlashtirish tugmasini bosing."
@@ -85,6 +80,11 @@ def edit_conversation_callback(update: Update, context: CallbackContext):
         update.message.reply_text(text, reply_markup=reply_keyboard)
 
         return ConversationHandler.END
+
+    reply_keyboard = ReplyKeyboardMarkup([
+        [KeyboardButton(back_btn_text)],
+    ], resize_keyboard=True)
+    update.message.reply_text(update.message.text, reply_markup=reply_keyboard)
 
     driver_and_car_data = get_driver_and_car_data(user[ID])
     data = set_data(user, driver_and_car_data, active_driver_data)
