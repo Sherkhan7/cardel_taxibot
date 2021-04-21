@@ -283,7 +283,7 @@ def empty_seats_callback(update: Update, context: CallbackContext):
     else:
 
         for found_active_driver in found_active_drivers:
-            driver_user_data = get_user(found_active_driver[DRIVER_ID])
+            driver_user_data = get_user(found_active_driver[USER_ID])
             driver_and_car_data = get_driver_and_car_data(found_active_driver[USER_ID])
             data = set_data(driver_user_data, driver_and_car_data, found_active_driver)
             active_driver_layout = get_active_driver_layout(user[LANG], data=data)
