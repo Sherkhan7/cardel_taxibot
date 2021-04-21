@@ -377,7 +377,7 @@ def send_location_callback(update: Update, context: CallbackContext):
 
     sending_error_text = f'‼ {sending_error_text} 😥'
     driver_data_not_found = f'‼ {driver_data_not_found} 😥'
-    sent_text = f'{sent_text} ✅'
+    sent_text = f'✅ {sent_text} !'
 
     reply_keyboard = ReplyKeyboardMarkup([
         [
