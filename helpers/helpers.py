@@ -50,6 +50,7 @@ def set_data(user, driver_and_car_data, active_driver_data):
     data[CHECKED]['to'] = ujson.loads(active_driver_data['to_'])
     data[FULLNAME] = user[FULLNAME]
     data[PHONE_NUMBER] = user[PHONE_NUMBER]
+    data[PHONE_NUMBER_2] = user[PHONE_NUMBER_2]
     data[CAR_MODEL] = driver_and_car_data[CAR_MODEL]
     data[BAGGAGE] = driver_and_car_data[BAGGAGE]
     data[EMPTY_SEATS] = active_driver_data[EMPTY_SEATS]

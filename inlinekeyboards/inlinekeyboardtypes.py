@@ -133,42 +133,42 @@ inline_keyboard_types = {
             "text_uz": "\"Qayerdan\"ni tahrirlash",
             "text_ru": "Редактировать \"Откуда\"",
             "text_cy": "\"Қаердан\"ни таҳрирлаш",
-            "icon": "✏",
+            "icon": "📍",
             "data": "edit_from"
         },
         {
             "text_uz": "\"Qayerga\"ni tahrirlash",
             "text_ru": "Редактировать \"Куда\"",
             "text_cy": "\"Қаерга\"ни таҳрирлаш",
-            "icon": "✏",
+            "icon": "🏁",
             "data": "edit_to"
         },
         {
             "text_uz": "Bo'sh joyni tahrirlash",
             "text_ru": "Редактировать свободных мест",
             "text_cy": "Бўш жойни таҳрирлаш",
-            "icon": "✏",
+            "icon": "🚖",
             "data": "edit_empty_seats"
         },
         {
             "text_uz": "Pochtani tahrirlash",
             "text_ru": "Редактировать почту",
             "text_cy": "Почтани таҳрирлаш",
-            "icon": "✏",
+            "icon": "📦",
             "data": "edit_ask_parcel"
         },
         {
             "text_uz": "Kun va vaqtni tahrirlash",
             "text_ru": "Изменить дату и время",
             "text_cy": "Кун ва вақтни таҳрирлаш",
-            "icon": "✏",
+            "icon": "🕒",
             "data": "edit_datetime"
         },
         {
             "text_uz": "Izohni tahrirlash",
             "text_ru": "Редактировать комментарий",
             "text_cy": "Изоҳни таҳрирлаш",
-            "icon": "✏",
+            "icon": "💬",
             "data": "edit_comment"
         },
         {

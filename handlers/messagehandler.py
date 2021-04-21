@@ -110,7 +110,7 @@ def message_handler_callback(update: Update, context: CallbackContext):
             if user[LANG] == LANGS[2]:
                 text = "/start ни босинг"
 
-            text = f'🤔🤔🤔\n\n ❗ {text}!'
+            text = f'🤔🤔🤔\n\n ❗ {text} !'
             update.message.reply_text(text, quote=True)
 
             return
