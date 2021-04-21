@@ -1,7 +1,7 @@
 from helpers import wrap_tags
 from layouts.layoutdicts import *
 from languages import LANGS
-from DB import get_region_and_district, get_region_districts
+from DB import get_region_and_district, get_region_districts, get_region_discricts_num
 from config import BOT_USERNAME
 from inlinekeyboards.inlinekeyboardvariables import yes_no_keyboard, back_next_keyboard
 from inlinekeyboards.inlinekeyboardtypes import inline_keyboard_types
@@ -82,7 +82,12 @@ def get_active_driver_layout(lang, data, label=None):
                 from_region_name.append(region[f'name_{lang}'])
             else:
                 from_districts_name.append(region[f'name_{lang}'])
-        from_ += f'{from_region_name[0]} ({", ".join(from_districts_name)})\n'
+
+        if get_region_discricts_num(region_id)['num'] == len(from_districts_name):
+            from_ += f'{from_region_name[0]} ({TAXI_LAYOUT_DICT[lang][ALL_DISTRICTS_TEXT]})\n'
+        else:
+            from_ += f'{from_region_name[0]} ({", ".join(from_districts_name)})\n'
+
         from_region_name.clear()
         from_districts_name.clear()
 
@@ -95,7 +100,12 @@ def get_active_driver_layout(lang, data, label=None):
                 to_region_name.append(region[f'name_{lang}'])
             else:
                 to_districts_name.append(region[f'name_{lang}'])
-        to += f'{to_region_name[0]} ({", ".join(to_districts_name)})\n'
+
+        if get_region_discricts_num(region_id)['num'] == len(to_districts_name):
+            to += f'{to_region_name[0]} ({TAXI_LAYOUT_DICT[lang][ALL_DISTRICTS_TEXT]})\n'
+        else:
+            to += f'{to_region_name[0]} ({", ".join(to_districts_name)})\n'
+
         to_region_name.clear()
         to_districts_name.clear()
 
@@ -103,7 +113,6 @@ def get_active_driver_layout(lang, data, label=None):
     phone_number = data[PHONE_NUMBER]
     date = data[DATE]
     time = data[TIME]
-    comment = str(data[COMMENT])
     empty_seats = str(data[EMPTY_SEATS])
     car_model = data[CAR_MODEL]
     parcel = inline_keyboard_types[yes_no_keyboard][0][f'text_{lang}'] if data[ASK_PARCEL] \
@@ -115,8 +124,12 @@ def get_active_driver_layout(lang, data, label=None):
         time = PASSENGER_LAYOUT_DICT[lang][TIME]
     elif time == 'undefined':
         time = inline_keyboard_types[back_next_keyboard][2][f'text_{lang}']
-    if label is None:
-        label = ''
+
+    label = f'[{label}]' if label else ''
+    comment = '\n' if data[COMMENT] is None else \
+        f'\n💬 {PASSENGER_LAYOUT_DICT[lang][COMMENT_TEXT]}: {wrap_tags(data[COMMENT])}\n'
+    phone_number_2 = '' if data[PHONE_NUMBER_2] is None else \
+        f'\n📞 {PASSENGER_LAYOUT_DICT[lang][USER_PHONE_NUMBER_TEXT]}: {wrap_tags(data[PHONE_NUMBER_2])}'
 
     layout = [
         f'🚕 {TAXI_LAYOUT_DICT[lang][TAXI_TEXT]} {label}\n',
@@ -124,16 +137,15 @@ def get_active_driver_layout(lang, data, label=None):
         f'🏁 {PASSENGER_LAYOUT_DICT[lang][TO_TEXT]}: {wrap_tags(to)}',
         f'🚖 {TAXI_LAYOUT_DICT[lang][EMPTY_SEATS_TEXT]}: {wrap_tags(empty_seats)}',
         f'📦 {TAXI_LAYOUT_DICT[lang][ASK_PARCEL]}: {wrap_tags(parcel)}',
-        f'📋 {PASSENGER_LAYOUT_DICT[lang][COMMENT_TEXT]}: {wrap_tags(comment)}',
-        f'🕒 {PASSENGER_LAYOUT_DICT[lang][DATETIME_TEXT]}: {wrap_tags(date, time)}\n',
+        f'🕒 {PASSENGER_LAYOUT_DICT[lang][DATETIME_TEXT]}: {wrap_tags(date, time)}'
+        f'{comment}',
         f'👤 {TAXI_LAYOUT_DICT[lang][DRIVER_TEXT]}: {wrap_tags(fullname)}',
-        f'📞 {PASSENGER_LAYOUT_DICT[lang][USER_PHONE_NUMBER_TEXT]}: {wrap_tags(phone_number)}',
+        f'📞 {PASSENGER_LAYOUT_DICT[lang][USER_PHONE_NUMBER_TEXT]}: {wrap_tags(phone_number)}'
+        f'{phone_number_2}',
         f'🚖 {TAXI_LAYOUT_DICT[lang][BAGGAGE_TEXT]}: {wrap_tags(baggage)}',
         f'🚖 {TAXI_LAYOUT_DICT[lang][CAR_MODEL]}: {wrap_tags(car_model)}\n',
         f'🤖 @{BOT_USERNAME} ©',
     ]
-    if data[COMMENT] is None:
-        layout.pop(5)
 
     return '\n'.join(layout)
 

@@ -7,6 +7,9 @@ from telegram import (
     ReplyKeyboardRemove,
     ReplyKeyboardMarkup,
     KeyboardButton,
+    InlineKeyboardMarkup,
+    InlineKeyboardButton,
+    ParseMode,
     TelegramError
 )
 from telegram.ext import (
@@ -18,10 +21,10 @@ from telegram.ext import (
 )
 from DB import *
 from languages import LANGS
-from layouts import get_active_driver_layout
+from layouts import get_active_driver_layout, get_only_user_data_layout
 from globalvariables import *
 from helpers import *
-
+from errorhandler import error_handler
 from replykeyboards import ReplyKeyboard
 from replykeyboards.replykeyboardvariables import *
 
@@ -87,7 +90,7 @@ def region_callback(update: Update, context: CallbackContext):
     text = f'{text} {district_text}:'
 
     region_id = callback_query.data
-    user_data[user_data[STATE]] = str(region_id)
+    user_data[user_data[STATE]] = str(region_id)  # str() because region_id is srting in database
 
     inline_keyboard = InlineKeyboard(districts_keyboard, user[LANG], data=region_id).get_keyboard()
 
@@ -185,6 +188,7 @@ def district_callback(update: Update, context: CallbackContext):
 def empty_seats_callback(update: Update, context: CallbackContext):
     user = get_user(update.effective_user.id)
     user_data = context.user_data
+    context.bot.send_chat_action(update.effective_user.id, 'typing')
 
     stop_search = re.search("(Qidiruvni to'xtatish|Остановить поиск|Қидирувни тўхтатиш)$", update.message.text)
 
@@ -197,6 +201,7 @@ def empty_seats_callback(update: Update, context: CallbackContext):
         empty_seats_text = "Yo'lovchi soni"
         search_text = "Qidiruv so'rovi"
         search_result_text = "Qidiruv natijasi"
+        btn_text = "Lokatsiya yuborish"
 
     if user[LANG] == LANGS[1]:
         not_found_text = "К сожалению, не было найдено ни одного такси"
@@ -207,6 +212,7 @@ def empty_seats_callback(update: Update, context: CallbackContext):
         empty_seats_text = "Количество пассажиров"
         search_text = "Поисковый запрос"
         search_result_text = "Результаты поиска"
+        btn_text = "Отправить местоположение"
 
     if user[LANG] == LANGS[2]:
         not_found_text = "Кечирасиз, бирортаҳам такси топилмади"
@@ -217,9 +223,10 @@ def empty_seats_callback(update: Update, context: CallbackContext):
         empty_seats_text = "Йўловчи сони"
         search_text = "Қидирув сўрови"
         search_result_text = "Қидирув натижаси"
+        btn_text = "Локация юбориш"
 
     if stop_search:
-        stop_search_text = f'‼ {stop_search_text}!'
+        stop_search_text = f'‼ {stop_search_text} !'
         reply_keyboard = ReplyKeyboard(main_menu_keyboard, user[LANG]).get_keyboard()
         update.message.reply_text(stop_search_text, reply_markup=reply_keyboard)
 
@@ -276,13 +283,15 @@ def empty_seats_callback(update: Update, context: CallbackContext):
     else:
 
         for found_active_driver in found_active_drivers:
-            driver = get_driver_by_id(found_active_driver[DRIVER_ID])
-            driver_user_data = get_user(driver[USER_ID])
-            driver_and_car_data = get_driver_and_car_data(driver[USER_ID])
+            driver_user_data = get_user(found_active_driver[DRIVER_ID])
+            driver_and_car_data = get_driver_and_car_data(found_active_driver[USER_ID])
             data = set_data(driver_user_data, driver_and_car_data, found_active_driver)
+            active_driver_layout = get_active_driver_layout(user[LANG], data=data)
 
-            layout = get_active_driver_layout(user[LANG], data=data)
-            update.message.reply_html(layout)
+            inline_keyboard = InlineKeyboardMarkup([
+                [InlineKeyboardButton(f'📍 {btn_text}', callback_data=f'dr_{found_active_driver[USER_ID]}')]
+            ])
+            update.message.reply_html(active_driver_layout, reply_markup=inline_keyboard)
 
         text = f'\n\n{wrap_tags(search_result_text)}:\n\n' \
                f'🚕  {found_text}: <b>{found_active_drivers_num}</b>'
@@ -302,6 +311,140 @@ def empty_seats_callback(update: Update, context: CallbackContext):
 
     # logger.info('user_data: %s', user_data)
     return
+
+
+def select_driver_callback(update: Update, context: CallbackContext):
+    user = get_user(update.effective_user.id)
+    user_data = context.user_data
+    callback_query = update.callback_query
+
+    driver_user_id = update.callback_query.data.split('_')[-1]
+    driver_user_data = get_user(driver_user_id)
+    icon = '📍'
+
+    if user[LANG] == LANGS[0]:
+        reply_text = f"Haydovchi {wrap_tags(driver_user_data[FULLNAME])} ga lokatsiyangizni " \
+                     f"yuborish uchun «{icon} Lokatsiyamni yuborish» tugmasini bosing"
+        btn_text = "Qidiruvga qaytish"
+    if user[LANG] == LANGS[1]:
+        reply_text = f"Нажмите кнопку «{icon} Отправить мое местоположение», " \
+                     f"чтобы отправить свое местоположение водителю {wrap_tags(driver_user_data[FULLNAME])} у"
+        btn_text = "Вернуться к поиску"
+    if user[LANG] == LANGS[2]:
+        reply_text = f"Ҳайдовчи {wrap_tags(driver_user_data[FULLNAME])} га локациянгизни юбориш учун " \
+                     f"«{icon} Локациямни юбориш» тугмасини босинг"
+        btn_text = "Қидирувга қайтиш"
+
+    reply_text = f'🚕 {reply_text}'
+    reply_keyboard = ReplyKeyboard(location_keyboard, user[LANG]).get_keyboard()
+    reply_keyboard.keyboard.append([KeyboardButton(f'◀️ {btn_text}')])
+
+    callback_query.message.reply_text(reply_text, reply_markup=reply_keyboard, parse_mode=ParseMode.HTML)
+    try:
+        callback_query.answer()
+    except TelegramError:
+        pass
+
+    driver_user_data.pop('created_at')
+    driver_user_data.pop('updated_at')
+
+    user_data[STATE] = SEND_LOCATION
+    user_data['driver_data'] = driver_user_data
+
+    # logger.info('user_data: %s', user_data)
+    return SEND_LOCATION
+
+
+def send_location_callback(update: Update, context: CallbackContext):
+    user = get_user(update.effective_user.id)
+    user_data = context.user_data
+
+    if user[LANG] == LANGS[0]:
+        stop_btn = "Qidiruvni to'xtatish"
+        sending_error_text = "Lokatsiyani yuborishda xatolik yuz berdi"
+        driver_data_not_found = "Haydovchi ma'lumotlari topilmadi"
+        sent_text = f"Lokatsiyangiz haydovchi {wrap_tags(user_data['driver_data'][FULLNAME])} ga yetkazildi"
+    if user[LANG] == LANGS[1]:
+        stop_btn = "Остановить поиск"
+        sending_error_text = "Произошла ошибка при отправке местоположения"
+        driver_data_not_found = "Информации о драйверах не найдено"
+        sent_text = f"Ваше местоположение было доставлено водителю {wrap_tags(user_data['driver_data'][FULLNAME])} у"
+    if user[LANG] == LANGS[2]:
+        stop_btn = "Қидирувни тўхтатиш"
+        sending_error_text = "Lokatsiyani yuborishda xatolik yuz berdi"
+        driver_data_not_found = "Ҳайдовчи маълумотлари топилмади"
+        sent_text = f"Локациянгиз ҳайдовчи {wrap_tags(user_data['driver_data'][FULLNAME])} га етказилди"
+
+    sending_error_text = f'‼ {sending_error_text} 😥'
+    driver_data_not_found = f'‼ {driver_data_not_found} 😥'
+    sent_text = f'{sent_text} ✅'
+
+    reply_keyboard = ReplyKeyboardMarkup([
+        [
+            KeyboardButton('1'),
+            KeyboardButton('2'),
+            KeyboardButton('3'),
+            KeyboardButton('4'),
+        ],
+        [KeyboardButton(f'🔍 {stop_btn}')]
+    ], resize_keyboard=True)
+
+    if not update.message.location:
+        reply_text = update.message.text
+
+    else:
+
+        if 'driver_data' in user_data:
+
+            if user_data['driver_data'][LANG] == LANGS[0]:
+                text_to_driver = f"Yo'lovchi {wrap_tags(user[FULLNAME])} sizga o'z lokatsiyasini yubordi"
+            if user_data['driver_data'][LANG] == LANGS[1]:
+                text_to_driver = f"Пассажир {wrap_tags(user[FULLNAME])} сообщил вам свое местонахождение"
+            if user_data['driver_data'][LANG] == LANGS[2]:
+                text_to_driver = f"Йўловчи {wrap_tags(user[FULLNAME])} сизга ўз локациясини юборди"
+
+            text_to_driver = f'📍 {text_to_driver} 🙂'
+
+            location_dict = update.message.location.to_dict()
+            data = {
+                'location': ujson.dumps(location_dict),
+                'from_user_id': user[ID],
+                'to_user_id': user_data['driver_data'][ID],
+            }
+
+            try:
+                # Fake user need to change layout lang corresponding to driver's lang
+                fake_user = dict(user)
+                fake_user[LANG] = user_data['driver_data'][LANG]
+                only_user_data_layout = get_only_user_data_layout(fake_user)
+
+                text_to_driver += f'\n\n{only_user_data_layout}'
+                inline_keyboard = InlineKeyboard(geolocation_keyboard, user[LANG], data=location_dict).get_keyboard()
+                context.bot.send_message(user_data['driver_data'][TG_ID], text_to_driver,
+                                         parse_mode=ParseMode.HTML, reply_markup=inline_keyboard)
+                data.update({STATUS: 'successfull'})
+                reply_text = sent_text
+            except TelegramError as e:
+                reply_text = sending_error_text
+                # Send an error to the DEVELOPER
+                # set context.error to e object to get error's __traceback__ attribute
+                context.error = e
+                error_handler(update, context)
+                data.update({STATUS: 'notsent'})
+
+            insert_data(data, 'sent_locations_history')
+
+        else:
+            reply_text = driver_data_not_found
+
+    update.message.reply_text(reply_text, reply_markup=reply_keyboard, parse_mode=ParseMode.HTML)
+
+    user_data[STATE] = EMPTY_SEATS
+    if 'driver_data' in user_data:
+        user_data.pop('driver_data')
+
+    # logger.info('user_data: %s', user_data)
+    return EMPTY_SEATS
 
 
 def search_fallback(update: Update, context: CallbackContext):
@@ -359,7 +502,12 @@ search_conversation_handler = ConversationHandler(
 
         EMPTY_SEATS: [
             MessageHandler(Filters.regex("([1-4])|(Qidiruvni to'xtatish|Остановить поиск|Қидирувни тўхтатиш)"),
-                           empty_seats_callback)],
+                           empty_seats_callback),
+            CallbackQueryHandler(select_driver_callback, pattern=r'^dr_\d+$')
+        ],
+        SEND_LOCATION: [MessageHandler(Filters.regex("(Qidiruvga qaytish|Вернуться к поиску|Қидирувга қайтиш)$"),
+                                       send_location_callback),
+                        MessageHandler(Filters.location, send_location_callback)]
     },
 
     fallbacks=[MessageHandler(Filters.text & (~Filters.update.edited_message), search_fallback)],

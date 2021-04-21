@@ -55,6 +55,9 @@ class InlineKeyboard(object):
         elif keyb_type == edit_keyboard:
             return self.__get_edit_keyboard(inline_keyboard_types[keyb_type], lang)
 
+        elif keyb_type == geolocation_keyboard:
+            return self.__get_geolocation_keyboard(inline_keyboard_types[keyb_type], lang, data)
+
     @staticmethod
     def __get_langs_keyboard(buttons):
 
@@ -398,6 +401,18 @@ class InlineKeyboard(object):
         ]
 
         return InlineKeyboardMarkup(keyboard)
+
+    @staticmethod
+    def __get_geolocation_keyboard(buttons, lang, data):
+        button1_text = f"{buttons[0]['icon']} {buttons[0][f'text_{lang}']}"
+        latitude = data['latitude']
+        longitude = data['longitude']
+        url = f'https://www.google.com/maps/place/{latitude},{longitude}/@{latitude},{longitude},12z'
+        # url = f'https://www.google.com/maps/search/?api=1&query={latitude},{longitude}'
+
+        return InlineKeyboardMarkup([
+            [InlineKeyboardButton(button1_text, url=url)]
+        ])
 
     def get_keyboard(self):
 

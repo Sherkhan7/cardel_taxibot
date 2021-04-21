@@ -1,10 +1,6 @@
 import logging
 
-from telegram import (
-    Update,
-    ReplyKeyboardRemove,
-    TelegramError,
-)
+from telegram import Update, ReplyKeyboardRemove, TelegramError
 from telegram.ext import (
     CallbackQueryHandler,
     MessageHandler,
@@ -72,9 +68,12 @@ def yes_no_callback(update: Update, context: CallbackContext):
     if data == 'no':
 
         try:
-            callback_query.edit_message_reply_markup()
+            callback_query.delete_message()
         except TelegramError:
-            pass
+            try:
+                callback_query.edit_message_reply_markup()
+            except TelegramError:
+                pass
 
         icon = reply_keyboard_types[passenger_parcel_keyboard][5]['icon']
         text = reply_keyboard_types[passenger_parcel_keyboard][5][f'text_{user[LANG]}']

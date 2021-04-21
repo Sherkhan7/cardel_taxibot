@@ -36,3 +36,5 @@ DELETE, EDIT_DATETIME, EDIT_COMPLETE, EDIT_CAR_MODEL, CHOOSE_EDITING_CAR_MODEL_O
 EDIT_FULLNAME, EDIT_PHONE_NUMBERS, EDIT_PHONE_NUMBER_2, EDIT_BAGGAGE, CHOOSE_EDITING_FULLNAME_OR_PHONE_NUMBERS = \
     ('edit_fullname', 'edit_phone_numbers', 'edit_phone_number_2', 'edit_baggage',
      'choose_editing_fullname_or_phone_numbers')
+
+ALL_DISTRICTS_TEXT, SEND_LOCATION, DRIVER_TG_ID = ('all_districts_text', 'send_location', 'driver_tg_id')

@@ -40,21 +40,26 @@ def activate_conversation_callback(update: Update, context: CallbackContext):
     if user[LANG] == LANGS[0]:
         from_text = "Qayerdan (Viloyatni tanlang)"
         active_status_text = "Siz aktiv holatdasiz"
+        activae_error_text = "Kechirasiz, aktivlashtirish uchun avval haydovchi sifatida ro'yxatdan o'ting"
 
     if user[LANG] == LANGS[1]:
         from_text = "Откуда (Выберите область)"
         active_status_text = "Вы активны"
+        activae_error_text = "Извините, пожалуйста, сначала зарегистрируйтесь как водитель, чтобы активировать"
 
     if user[LANG] == LANGS[2]:
         from_text = "Қаердан (Вилоятни танланг)"
         active_status_text = "Сиз актив ҳолатдасиз"
+        activae_error_text = "Кечирасиз, активлаштириш учун аввал ҳайдовчи сифатида рўйхатдан ўтинг"
 
-    active_status_text = f'‼ {active_status_text}!'
+    active_status_text = f'‼ {active_status_text} !'
     from_text = f'{from_text}:'
+    activae_error_text = f'🛑 {activae_error_text} !'
 
     active_driver_data = get_active_driver_by_user_id(user[ID])
+    driver_data = get_driver_by_user_id(user[ID])
 
-    if not active_driver_data:
+    if not active_driver_data and driver_data:
 
         update.message.reply_text(update.message.text, reply_markup=ReplyKeyboardRemove())
 
@@ -65,6 +70,12 @@ def activate_conversation_callback(update: Update, context: CallbackContext):
         user_data[STATE] = FROM_REGION
 
         return REGION
+
+    elif driver_data is None:
+        reply_keyboard = ReplyKeyboard(main_menu_keyboard, user[LANG]).get_keyboard()
+        update.message.reply_text(activae_error_text, reply_markup=reply_keyboard)
+
+        return ConversationHandler.END
 
     else:
         reply_keyboard = ReplyKeyboard(active_driver_keyboard, user[LANG]).get_keyboard()
@@ -489,6 +500,7 @@ def comment_callback(update: Update, context: CallbackContext):
 
     user_data[FULLNAME] = user[FULLNAME]
     user_data[PHONE_NUMBER] = user[PHONE_NUMBER]
+    user_data[PHONE_NUMBER_2] = user[PHONE_NUMBER_2]
     user_data[DRIVER_ID] = driver_and_car_data[ID]
     user_data[CAR_MODEL] = driver_and_car_data[CAR_MODEL]
     user_data[BAGGAGE] = driver_and_car_data[BAGGAGE]
@@ -539,7 +551,7 @@ def confirmation_callback(update: Update, context: CallbackContext):
 
     if data == 'cancel':
         icon = '🔴'
-        text = f'‼ {canceled_text}!'
+        text = f'‼ {canceled_text} !'
         status = canceled_status
         keyboard = driver_keyboard
 
@@ -593,7 +605,7 @@ def activate_fallback(update: Update, context: CallbackContext):
         if user[LANG] == LANGS[2]:
             text = "Активлаштириш бекор қилинди"
 
-        text = f'‼ {text}!'
+        text = f'‼ {text} !'
         keyboard = driver_keyboard if update.message.text == '/cancel' else main_menu_keyboard
         delete_message_by_message_id(context, user)
 
