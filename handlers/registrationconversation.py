@@ -1,6 +1,6 @@
 import logging
 
-from telegram import Update, ParseMode, InlineKeyboardButton
+from telegram import Update, ParseMode, InlineKeyboardButton, TelegramError
 from telegram.ext import (
     CallbackQueryHandler,
     CommandHandler,
@@ -93,14 +93,16 @@ def lang_callback(update: Update, context: CallbackContext):
         inline_keyboard = callback_query.message.reply_markup.from_button(InlineKeyboardButton(
             text=button_text, callback_data='agree'
         ))
-        # when message edited edited message returned otherwise True returned
-        edited_result = callback_query.edit_message_text(text, parse_mode=ParseMode.HTML, reply_markup=inline_keyboard)
 
-        # if True returned it means message text and reply_markup not edited
-        if edited_result is not True:
-            user_data[STATE] = AGREEMENT
+        try:
+            callback_query.delete_message()
+        except TelegramError:
+            callback_query.edit_message_reply_markup()
 
-            return AGREEMENT
+        callback_query.message.reply_html(text, reply_markup=inline_keyboard)
+        user_data[STATE] = AGREEMENT
+
+        return AGREEMENT
 
 
 def agreement_callback(update: Update, context: CallbackContext):
@@ -183,7 +185,9 @@ def phone_number_callback(update: Update, context: CallbackContext):
     else:
 
         user_data[PHONE_NUMBER] = phone_number
-        user_data.pop(STATE)
+        if STATE in user_data:
+            user_data.pop(STATE)
+
         insert_data(user_data, 'users')
 
         if user_data[LANG] == LANGS[0]:
