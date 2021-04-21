@@ -690,25 +690,18 @@ def edit_fallback(update: Update, context: CallbackContext):
     if update.message.text == '/start' or update.message.text == '/menu' or \
             update.message.text == '/cancel' or back_obj:
 
+        if user[LANG] == LANGS[0]:
+            canceled_text = "Tahrirlash bekor qilindi"
+        if user[LANG] == LANGS[1]:
+            canceled_text = "Редактирование отменено"
+        if user[LANG] == LANGS[2]:
+            canceled_text = "Таҳрирлаш бекор қилинди"
+
+        text = f'‼ {canceled_text}!'
         keyboard = main_menu_keyboard
 
-        if update.message.text == '/cancel':
-
-            if user[LANG] == LANGS[0]:
-                canceled_text = "Tahrirlash bekor qilindi"
-
-            if user[LANG] == LANGS[1]:
-                canceled_text = "Редактирование отменено"
-
-            if user[LANG] == LANGS[2]:
-                canceled_text = "Таҳрирлаш бекор қилинди"
-
-            text = f'‼ {canceled_text}!'
+        if update.message.text == '/cancel' or back_obj:
             keyboard = active_driver_keyboard
-
-        if back_obj:
-            keyboard = active_driver_keyboard
-            text = update.message.text
 
         delete_message_by_message_id(context, user)
 
