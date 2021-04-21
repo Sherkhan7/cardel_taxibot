@@ -5,6 +5,7 @@ from .main import (
     get_all_regions,
     get_districts_by_parent,
     get_region_and_district,
+    get_region_discricts_num,
     get_driver_by_user_id,
     get_car_models,
     get_driver_and_car_data,

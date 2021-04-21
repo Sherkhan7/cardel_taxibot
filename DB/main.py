@@ -85,6 +85,14 @@ def get_region_districts(region_id, district_ids_list):
     return cursor.fetchall()
 
 
+def get_region_discricts_num(region_id):
+    with closing(get_connection()) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute('SELECT count(id) as num FROM `regions` WHERE parent_id = %s', region_id)
+
+    return cursor.fetchone()
+
+
 def get_active_driver_by_user_id(user_id):
     with closing(get_connection()) as connection:
         with connection.cursor() as cursor:
