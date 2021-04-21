@@ -83,6 +83,7 @@ TAXI_LAYOUT_DICT = {
         DRIVER_TEXT: "Haydovchi",
         CAR_MODEL: "Mashina markasi",
         BAGGAGE_TEXT: "Bagaj(yuqori bagaj)",
+        ALL_DISTRICTS_TEXT: "Barcha tumanlar"
 
     },
     "ru": {
@@ -92,6 +93,7 @@ TAXI_LAYOUT_DICT = {
         DRIVER_TEXT: "Водитель",
         CAR_MODEL: "Марка машины",
         BAGGAGE_TEXT: "Багаж (верхний багаж)",
+        ALL_DISTRICTS_TEXT: "Все районы"
 
     },
     "cy": {
@@ -101,6 +103,7 @@ TAXI_LAYOUT_DICT = {
         DRIVER_TEXT: "Ҳайдовчи",
         CAR_MODEL: "Машина маркаси",
         BAGGAGE_TEXT: "Багаж(юқори багаж)",
+        ALL_DISTRICTS_TEXT: "Барча туманлар"
 
     },
 }
