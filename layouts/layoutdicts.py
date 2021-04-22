@@ -119,7 +119,7 @@ USER_INFO_LAYOUT_DICT = {
     'ru': {
         'user_caption_text': "Личные данные",
         'driver_caption_text': "Информация о драйвере",
-        FULLNAME: "Исм, Фамиля",
+        FULLNAME: "Имя, Фамиля",
         PHONE_NUMBER: "Тел (основной)",
         PHONE_NUMBER_2: "Тел (дополнительный)",
         UNDEFINED_TEXT: "нет",

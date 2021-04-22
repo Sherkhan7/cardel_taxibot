@@ -413,13 +413,13 @@ def send_location_callback(update: Update, context: CallbackContext):
             }
 
             try:
-                # Fake user need to change layout lang corresponding to driver's lang
-                fake_user = dict(user)
-                fake_user[LANG] = user_data['driver_data'][LANG]
-                only_user_data_layout = get_only_user_data_layout(fake_user)
+                # Passenger need to change layout lang corresponding to driver's lang
+                passenger = dict(user)
+                passenger[LANG] = user_data['driver_data'][LANG]
+                only_user_data_layout = get_only_user_data_layout(passenger)
 
                 text_to_driver += f'\n\n{only_user_data_layout}'
-                inline_keyboard = InlineKeyboard(geolocation_keyboard, user[LANG], data=location_dict).get_keyboard()
+                inline_keyboard = InlineKeyboard(geolocation_keyboard, passenger[LANG], data=location_dict).get_keyboard()
                 context.bot.send_message(user_data['driver_data'][TG_ID], text_to_driver,
                                          parse_mode=ParseMode.HTML, reply_markup=inline_keyboard)
                 data.update({STATUS: 'successfull'})
