@@ -10,6 +10,8 @@ def main():
 
     updater = Updater(TOKEN, persistence=my_persistence)
 
+    updater.dispatcher.add_handler(sendpost_conversation_handler)
+
     updater.dispatcher.add_handler(command_handler)
 
     updater.dispatcher.add_handler(edit_user_data_conversation_handler)

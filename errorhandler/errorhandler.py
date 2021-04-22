@@ -2,8 +2,10 @@ import logging
 import traceback
 import ujson
 import datetime
+import pickle
 
 from telegram import InputFile
+
 from config import DEVELOPER_CHAT_ID, BOT_USERNAME
 
 # Setting up logging basic config for standart output
@@ -23,6 +25,13 @@ def error_handler(update, context) -> None:
     tb_list = traceback.format_exception(None, context.error, context.error.__traceback__)
     tb_string = ''.join(tb_list)
 
+    user_conversations = ''
+    conversations = pickle.load(open('my_pickle_conversations', 'rb'))
+
+    for conv_name, conv_dict in conversations.items():
+        if (update.effective_user.id, update.effective_user.id) in conv_dict:
+            user_conversations += f"{conv_name}: {conv_dict[(update.effective_user.id, update.effective_user.id)]}\n"
+
     # Build the message with some markup and additional information about what happened.
     # You might need to add some logic to deal with messages longer than the 4096 character limit.
     message = (
@@ -32,6 +41,8 @@ def error_handler(update, context) -> None:
         f'\n'
         f'{"".ljust(45, "*")}\n'
         f'context.user_data = {ujson.dumps(context.user_data, indent=4, ensure_ascii=False)}\n'
+        f'{"".ljust(45, "*")}\n'
+        f'{user_conversations}'
         f'{"".ljust(45, "*")}\n'
         f'{tb_string}\n'
         f'{"".ljust(45, "*")}\n'

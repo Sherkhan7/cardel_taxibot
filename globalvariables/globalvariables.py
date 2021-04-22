@@ -37,4 +37,5 @@ EDIT_FULLNAME, EDIT_PHONE_NUMBERS, EDIT_PHONE_NUMBER_2, EDIT_BAGGAGE, CHOOSE_EDI
     ('edit_fullname', 'edit_phone_numbers', 'edit_phone_number_2', 'edit_baggage',
      'choose_editing_fullname_or_phone_numbers')
 
-ALL_DISTRICTS_TEXT, SEND_LOCATION, DRIVER_TG_ID = ('all_districts_text', 'send_location', 'driver_tg_id')
+ALL_DISTRICTS_TEXT, SEND_LOCATION, DRIVER_TG_ID, POST_CONTENT, SEND_POST_CONFIRMATION = \
+    ('all_districts_text', 'send_location', 'driver_tg_id', 'post_content', 'send_post_confirmation')
