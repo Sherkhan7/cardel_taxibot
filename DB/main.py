@@ -33,6 +33,22 @@ def insert_data(data, table_name):
     return cursor.lastrowid
 
 
+def insert_order_items(data_values, fields_list, table_name):
+    fields = ','.join(fields_list)
+    mask = ','.join(['%s'] * len(fields_list))
+
+    with closing(get_connection()) as connection:
+        with connection.cursor() as cursor:
+            sql = f'INSERT INTO {table_name} ({fields}) VALUES ({mask})'
+
+            cursor.executemany(sql, data_values)
+            connection.commit()
+
+    print(f'{table_name}: +{cursor.rowcount}')
+
+    return cursor.rowcount
+
+
 def get_main_menu_buttons():
     with closing(get_connection()) as connection:
         with connection.cursor() as cursor:
@@ -47,6 +63,14 @@ def get_user(id):
             cursor.execute('SELECT * FROM `users` WHERE tg_id = %s OR id = %s', (id, id))
 
     return cursor.fetchone()
+
+
+def get_all_users():
+    with closing(get_connection()) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute('SELECT * FROM `users`')
+
+    return cursor.fetchall()
 
 
 def get_all_regions():
@@ -258,6 +282,15 @@ def update_user_phone_numbers(field, phone_number, user_id):
     with closing(get_connection()) as connection:
         with connection.cursor() as cursor:
             cursor.execute(f'UPDATE `users` SET {field} = %s WHERE id = %s', (phone_number, user_id))
+            connection.commit()
+
+    return 'updated' if connection.affected_rows() != 0 else 'not updated'
+
+
+def update_post_status(status, post_id):
+    with closing(get_connection()) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute('UPDATE posts SET status = %s WHERE id = %s', (status, post_id))
             connection.commit()
 
     return 'updated' if connection.affected_rows() != 0 else 'not updated'
