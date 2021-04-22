@@ -190,8 +190,9 @@ def send_messages(context: CallbackContext):
     errors_list.insert(0, {
         'start_time': start_time.strftime('%Y-%m-%d %H:%M:%S.%f'),
         'end_time': end_time.strftime('%Y-%m-%d %H:%M:%S.%f'),
-        'delta': (end_time - start_time).total_seconds(),
-        'users_count': len(all_users)
+        'delta': f'{(end_time - start_time).total_seconds()}s',
+        'users_count': len(all_users),
+        'errors_count': len(errors_list)
     })
 
     path = f'/var/www/html/{BOT_USERNAME}/logs/'
