@@ -29,8 +29,8 @@ class InlineKeyboard(object):
         elif keyb_type == districts_selective_keyboard:
             re_check_list = None
             if isinstance(data, dict):
-                re_check_list = list(data.values())[0]
-                data = list(data.keys())[0]
+                re_check_list = data['re_check_list']
+                data = data['region_id']
             return self.__get_districts_selective_keyboard(get_districts_by_parent(data), lang,
                                                            re_check_list=re_check_list)
 
