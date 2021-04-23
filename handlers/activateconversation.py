@@ -179,7 +179,7 @@ def region_callback(update: Update, context: CallbackContext):
         region_id = user_data[user_data[STATE]] = data = int(data)
 
         if CHECKED in user_data and key in user_data[CHECKED] and region_id in user_data[CHECKED][key]:
-            data = {region_id: user_data[CHECKED][key][region_id]}
+            data = {'region_id': region_id, 're_check_list': user_data[CHECKED][key][region_id]}
 
         text = f'{text} {district_text}:\n\n' \
                f'🔅 {wrap_tags(note_text)}'
@@ -244,6 +244,8 @@ def district_callback(update: Update, context: CallbackContext):
         callback_query.answer()
 
         user_data[STATE] = state
+        # delete 'from/to_region' key
+        # this key's value is region id e.g: 1
         user_data.pop(state)
 
         # logger.info('user_data: %s', user_data)
@@ -338,11 +340,11 @@ def district_callback(update: Update, context: CallbackContext):
 
             elif new_action == 'unchecked':
                 # Remove district_id if exists in user_data[CHECKED][key][region_id] list
-                if district_id in user_data[CHECKED][key][region_id]:
+                if region_id in user_data[CHECKED][key] and district_id in user_data[CHECKED][key][region_id]:
                     user_data[CHECKED][key][region_id].remove(district_id)
 
                 # If list is empty delete the `region_id: [districts_id]` pair
-                if not user_data[CHECKED][key][region_id]:
+                if region_id in user_data[CHECKED][key] and not user_data[CHECKED][key][region_id]:
                     del user_data[CHECKED][key][region_id]
 
                 alert = unchecked_alert_text
