@@ -62,6 +62,10 @@ def set_data(user, driver_and_car_data, active_driver_data):
 
     return data
 
+
+def check_comment_length(comment):
+    return True if len(comment) <= 255 else False
+
 # def fake_data_generator():
 #     fake = Faker()
 #     for i in range(8, 401):

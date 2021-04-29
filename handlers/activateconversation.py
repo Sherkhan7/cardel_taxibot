@@ -507,7 +507,20 @@ def comment_callback(update: Update, context: CallbackContext):
     user_data[CAR_MODEL] = driver_and_car_data[CAR_MODEL]
     user_data[BAGGAGE] = driver_and_car_data[BAGGAGE]
 
+    if user[LANG] == LANGS[0]:
+        error_text = "Kechirasiz, izoh ko'pi bilan 255 ta belgidan iborat bo'lishi kerak"
+    if user[LANG] == LANGS[1]:
+        error_text = "Извините, комментарий должен содержать не более 255 символов"
+    if user[LANG] == LANGS[2]:
+        error_text = "Кечирасиз, изоҳ кўпи билан 255 та белгидан иборат бўлиши керак"
+
+    error_text = f'‼ {error_text} !'
+
     if callback_query is None:
+
+        if not check_comment_length(update.message.text):
+            update.message.reply_text(error_text, quote=True)
+            return
 
         user_data[COMMENT] = update.message.text
         context.bot.edit_message_reply_markup(user[TG_ID], user_data[MESSAGE_ID])
