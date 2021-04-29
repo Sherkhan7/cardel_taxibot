@@ -335,7 +335,7 @@ def edit_region_callback(update: Update, context: CallbackContext):
                f'🔅 {wrap_tags(note_text)}'
 
         if CHECKED in user_data and key in user_data[CHECKED] and region_id in user_data[CHECKED][key]:
-            data = {region_id: user_data[CHECKED][key][region_id]}
+            data = {'region_id': region_id, 're_check_list': user_data[CHECKED][key][region_id]}
         inline_keyboard = InlineKeyboard(districts_selective_keyboard, user[LANG], data=data).get_keyboard()
 
         callback_query.edit_message_text(text, reply_markup=inline_keyboard, parse_mode=ParseMode.HTML)
