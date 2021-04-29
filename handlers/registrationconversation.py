@@ -188,8 +188,6 @@ def phone_number_callback(update: Update, context: CallbackContext):
         if STATE in user_data:
             user_data.pop(STATE)
 
-        insert_data(user_data, 'users')
-
         if user_data[LANG] == LANGS[0]:
             text = f"{user_data[FULLNAME]}!\n" \
                    "Registratsiya muvafaqqiyatli yakunlandi"
@@ -207,6 +205,8 @@ def phone_number_callback(update: Update, context: CallbackContext):
         # Sending video files to the user
         for video in get_video_files():
             update.message.reply_video(video['file_id'], caption=video[f'caption_{user_data[LANG]}'])
+
+        insert_data(user_data, 'users')
 
         reply_keyboard = ReplyKeyboard(main_menu_keyboard, user_data[LANG]).get_keyboard()
         update.message.reply_text(text, reply_markup=reply_keyboard)
