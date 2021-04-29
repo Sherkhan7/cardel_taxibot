@@ -11,7 +11,8 @@ from telegram import (
     ReplyKeyboardRemove,
     InlineKeyboardButton,
     InputFile,
-    TelegramError
+    TelegramError,
+    ParseMode,
 )
 from telegram.ext import (
     CallbackQueryHandler,
@@ -34,6 +35,76 @@ from inlinekeyboards import InlineKeyboard
 from inlinekeyboards.inlinekeyboardvariables import yes_no_keyboard
 
 logger = logging.getLogger()
+
+
+def send_messages(context: CallbackContext):
+    user = context.job.context[0]
+    user_data = context.job.context[-1]
+
+    errors_list = []
+    all_users = get_all_users()
+
+    if 'post_photo' in user_data:
+
+        photo = user_data['post_photo'][-1].file_id
+        caption = user_data['caption']
+
+        start_time = datetime.datetime.now()
+        for u in all_users:
+            try:
+                time.sleep(0.3)
+                context.bot.send_photo(u[TG_ID], photo, caption=caption, parse_mode=ParseMode.HTML)
+            except TelegramError as e:
+                errors_list.append({'user_id': u[ID], 'user_tg_id': u[TG_ID], 'error_message': e.message})
+        end_time = datetime.datetime.now()
+
+    if 'post_video' in user_data:
+        video = user_data['post_video'].file_id
+        caption = user_data['caption']
+
+        start_time = datetime.datetime.now()
+        for u in all_users:
+            try:
+                time.sleep(0.3)
+                context.bot.send_video(u[TG_ID], video, caption=caption, parse_mode=ParseMode.HTML)
+            except TelegramError as e:
+                errors_list.append({'user_id': u[ID], 'user_tg_id': u[TG_ID], 'error_message': e.message})
+        end_time = datetime.datetime.now()
+
+    if 'post_text' in user_data:
+
+        start_time = datetime.datetime.now()
+        for u in all_users:
+            try:
+                time.sleep(0.5)
+                context.bot.send_message(u[TG_ID], text=user_data['post_text'])
+            except TelegramError as e:
+                errors_list.append({'user_id': u[ID], 'user_tg_id': u[TG_ID], 'error_message': e.message})
+        end_time = datetime.datetime.now()
+
+    text = f'✅ Sending this message to all users have been successfully finished!'
+    context.bot.send_message(chat_id=user[TG_ID], text=text, reply_to_message_id=user_data[MESSAGE_ID])
+
+    errors_list.insert(0, {
+        'start_time': start_time.strftime('%Y-%m-%d %H:%M:%S.%f'),
+        'end_time': end_time.strftime('%Y-%m-%d %H:%M:%S.%f'),
+        'delta': f'{(end_time - start_time).total_seconds()}s',
+        'users_count': len(all_users),
+        'errors_count': len(errors_list)
+    })
+
+    path = f'/var/www/html/{BOT_USERNAME}/logs/'
+    document_name = datetime.datetime.now().strftime("sent_post_%d-%m-%Y_%H-%M-%S") + '.txt'
+    full_path = path + document_name
+
+    with open(full_path, 'w') as f:
+        f.write(ujson.dumps(errors_list, indent=3))
+    with open(full_path, 'r') as f:
+        document = InputFile(f)
+    context.bot.send_document(DEVELOPER_CHAT_ID, document=document)
+
+    # Update post status
+    update_post_status('sent', user_data['post_id'])
 
 
 def sendpost_conversation_callback(update: Update, context: CallbackContext):
@@ -73,10 +144,10 @@ def sendpost_conversation_callback(update: Update, context: CallbackContext):
 
 def post_content_callback(update: Update, context: CallbackContext):
     # with open('jsons/update.json', 'a') as update_file:
-    #     update_file.write(json.dumps(update.to_dict(), indent=3, ensure_ascii=False))
+    #     update_file.write(ujson.dumps(update.to_dict(), indent=3, ensure_ascii=False))
     user = get_user(update.effective_user.id)
     user_data = context.user_data
-    caption = update.message.caption
+    caption = update.message.caption_html
 
     # List of PhotoSize objects
     photo = update.message.photo
@@ -104,7 +175,7 @@ def post_content_callback(update: Update, context: CallbackContext):
         perfect_text = "Ажойиб"
 
     ask_text += ' ?'
-    error_text = f'❗ {error_text} !'
+    error_text = f'‼ {error_text} !'
     perfect_text = f'✅ {perfect_text} !'
 
     if (video or photo) and caption is None:
@@ -117,96 +188,26 @@ def post_content_callback(update: Update, context: CallbackContext):
     reply_keyboard = ReplyKeyboardMarkup([
         [KeyboardButton(f'🏠 {main_menu_text}')]
     ], resize_keyboard=True)
-
     update.message.reply_text(perfect_text, reply_markup=reply_keyboard)
 
     if photo:
         user_data['post_photo'] = photo
-        user_data['caption'] = caption
-        message = update.message.reply_photo(photo[-1].file_id, caption=caption, reply_markup=inline_keyboard)
+        message = update.message.reply_photo(photo[-1].file_id, caption=caption, reply_markup=inline_keyboard,
+                                             parse_mode=ParseMode.HTML)
     elif video:
         user_data['post_video'] = video
-        user_data['caption'] = caption
-        message = update.message.reply_video(video.file_id, caption=caption, reply_markup=inline_keyboard)
+        message = update.message.reply_video(video.file_id, caption=caption, reply_markup=inline_keyboard,
+                                             parse_mode=ParseMode.HTML)
     else:
-        user_data['post_text'] = update.message.text
-        message = update.message.reply_text(update.message.text, reply_markup=inline_keyboard)
-
+        user_data['post_text'] = update.message.caption_html
+        message = update.message.reply_text(user_data['post_text'], reply_markup=inline_keyboard,
+                                            parse_mode=ParseMode.HTML)
+    user_data['caption'] = caption
     user_data[STATE] = SEND_POST_CONFIRMATION
     user_data[MESSAGE_ID] = message.message_id
 
     # logger.info('user_data: %s', user_data)
     return SEND_POST_CONFIRMATION
-
-
-def send_messages(context: CallbackContext):
-    user = context.job.context[0]
-    user_data = context.job.context[-1]
-
-    errors_list = []
-    all_users = get_all_users()
-
-    if 'post_photo' in user_data:
-
-        photo = user_data['post_photo'][-1].file_id
-        caption = user_data['caption']
-
-        start_time = datetime.datetime.now()
-        for u in all_users:
-            try:
-                time.sleep(0.5)
-                context.bot.send_photo(u[TG_ID], photo, caption=caption)
-            except TelegramError as e:
-                errors_list.append({'user_id': u[ID], 'user_tg_id': u[TG_ID], 'error_message': e.message})
-        end_time = datetime.datetime.now()
-
-    if 'post_video' in user_data:
-        video = user_data['post_video'].file_id
-        caption = user_data['caption']
-
-        start_time = datetime.datetime.now()
-        for u in all_users:
-            try:
-                time.sleep(0.5)
-                context.bot.send_video(u[TG_ID], video, caption=caption)
-            except TelegramError as e:
-                errors_list.append({'user_id': u[ID], 'user_tg_id': u[TG_ID], 'error_message': e.message})
-        end_time = datetime.datetime.now()
-
-    if 'post_text' in user_data:
-
-        start_time = datetime.datetime.now()
-        for u in all_users:
-            try:
-                time.sleep(0.5)
-                context.bot.send_message(u[TG_ID], text=user_data['post_text'])
-            except TelegramError as e:
-                errors_list.append({'user_id': u[ID], 'user_tg_id': u[TG_ID], 'error_message': e.message})
-        end_time = datetime.datetime.now()
-
-    text = f'✅ Sending this message to all users have been successfully finished!'
-    context.bot.send_message(chat_id=user[TG_ID], text=text, reply_to_message_id=user_data[MESSAGE_ID])
-
-    errors_list.insert(0, {
-        'start_time': start_time.strftime('%Y-%m-%d %H:%M:%S.%f'),
-        'end_time': end_time.strftime('%Y-%m-%d %H:%M:%S.%f'),
-        'delta': f'{(end_time - start_time).total_seconds()}s',
-        'users_count': len(all_users),
-        'errors_count': len(errors_list)
-    })
-
-    path = f'/var/www/html/{BOT_USERNAME}/logs/'
-    document_name = datetime.datetime.now().strftime("sent_post_%d-%m-%Y_%H-%M-%S") + '.txt'
-    full_path = path + document_name
-
-    with open(full_path, 'w') as f:
-        f.write(ujson.dumps(errors_list, indent=3))
-    with open(full_path, 'r') as f:
-        document = InputFile(f)
-    context.bot.send_document(DEVELOPER_CHAT_ID, document=document)
-
-    # Update post status
-    update_post_status('sent', user_data['post_id'])
 
 
 def confirmation_send_post_callback(update: Update, context: CallbackContext):
