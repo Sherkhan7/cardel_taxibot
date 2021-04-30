@@ -1,8 +1,8 @@
 import ujson
 import pickle
 
-from telegram.ext import Filters, CallbackContext, CommandHandler
 from telegram import Update
+from telegram.ext import CallbackContext, CommandHandler
 
 
 def do_command(update: Update, context: CallbackContext):
