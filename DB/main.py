@@ -81,6 +81,14 @@ def get_all_regions():
     return cursor.fetchall()
 
 
+def get_all_active_drivers():
+    with closing(get_connection()) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute('SELECT * FROM `active_drivers`')
+
+    return cursor.fetchall()
+
+
 def get_districts_by_parent(parent_id):
     with closing(get_connection()) as connection:
         with connection.cursor() as cursor:

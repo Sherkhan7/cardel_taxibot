@@ -140,17 +140,21 @@ def district_callback(update: Update, context: CallbackContext):
                 text = to_text
                 state = TO_REGION
 
+            alert_text = None
+            show_alert = False
             user_data.pop(state)
 
         else:
             state = TO_REGION
             text = to_text
             user_data[user_data[STATE]] = int(data)
+            alert_text = f'{text} {region_text}'
+            show_alert = True
 
         text = f'{text} {region_text}:'
         inline_keyboard = InlineKeyboard(regions_keyboard, user[LANG]).get_keyboard()
         callback_query.edit_message_text(text, reply_markup=inline_keyboard)
-        callback_query.answer()
+        callback_query.answer(alert_text, show_alert=show_alert)
 
         user_data[STATE] = state
 
@@ -419,7 +423,8 @@ def send_location_callback(update: Update, context: CallbackContext):
                 only_user_data_layout = get_only_user_data_layout(passenger)
 
                 text_to_driver += f'\n\n{only_user_data_layout}'
-                inline_keyboard = InlineKeyboard(geolocation_keyboard, passenger[LANG], data=location_dict).get_keyboard()
+                inline_keyboard = InlineKeyboard(geolocation_keyboard, passenger[LANG],
+                                                 data=location_dict).get_keyboard()
                 context.bot.send_message(user_data['driver_data'][TG_ID], text_to_driver,
                                          parse_mode=ParseMode.HTML, reply_markup=inline_keyboard)
                 data.update({STATUS: 'successfull'})
