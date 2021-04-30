@@ -11,6 +11,16 @@ def do_command(update: Update, context: CallbackContext):
     full_text = update.message.text.split() if update.message else update.edited_message.text.split()
     persistence = context.dispatcher.persistence
 
+    if full_text[0] == '/getjob':
+        current_jobs = context.job_queue.get_jobs_by_name('daily_note_active_drivers')
+        for job in current_jobs:
+            if update.message:
+                update.message.reply_text(str(job.next_t))
+            else:
+                update.edited_message.reply_text(str(job.next_t))
+
+        return
+
     if len(full_text) == 2:
         command = full_text[0]
         user_id = int(full_text[-1])
@@ -82,4 +92,4 @@ def do_command(update: Update, context: CallbackContext):
                 update.edited_message.reply_html(text)
 
 
-command_handler = CommandHandler(['getuserdata', 'getuserstate', 'updateuserstate'], do_command)
+command_handler = CommandHandler(['getuserdata', 'getuserstate', 'updateuserstate', 'getjob'], do_command)
