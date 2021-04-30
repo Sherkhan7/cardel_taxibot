@@ -1,7 +1,11 @@
+import datetime
+import pytz
+
 from telegram.ext import Updater, PicklePersistence
 
 from config import TOKEN, SERVER_IP, PORT, URL
 from errorhandler import error_handler
+from helpers import run_note_callback
 from handlers import *
 
 
@@ -33,7 +37,10 @@ def main():
 
     updater.dispatcher.add_handler(callback_query_handler)
 
-    # ...and the error handler
+    updater.job_queue.run_daily(run_note_callback, datetime.time(hour=5, tzinfo=pytz.timezone('Asia/Tashkent')),
+                                name='daily_note_active_drivers')
+
+    # adding error handler
     updater.dispatcher.add_error_handler(error_handler)
 
     # updater.start_polling()
