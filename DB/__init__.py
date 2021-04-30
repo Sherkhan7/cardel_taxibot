@@ -5,6 +5,7 @@ from .main import (
     get_all_users,
     get_main_menu_buttons,
     get_all_regions,
+    get_all_active_drivers,
     get_districts_by_parent,
     get_region_and_district,
     get_region_discricts_num,
