@@ -37,7 +37,7 @@ def main():
 
     updater.dispatcher.add_handler(callback_query_handler)
 
-    updater.job_queue.run_daily(run_note_callback, datetime.time(hour=5, tzinfo=pytz.timezone('Asia/Tashkent')),
+    updater.job_queue.run_daily(run_note_callback, datetime.time(hour=7, tzinfo=pytz.timezone('Asia/Tashkent')),
                                 name='daily_note_active_drivers')
 
     # adding error handler
