@@ -152,17 +152,17 @@ def get_active_driver_layout(lang, data, label=None):
 
 def get_fullname_error_text(lang):
     if lang == LANGS[0]:
-        text = "Ism, familya xato yuboril di!\n" \
+        text = "Ism xato yuborildi !\n" \
                "Qaytadan quyidagi formatda yuboring"
         example = "Misol: Sherzodbek Esanov yoki Sherzodbek"
 
     if lang == LANGS[1]:
-        text = "Имя, фамилия введено неве рное!\n" \
+        text = "Имя введено неверное !\n" \
                "Отправьте еще раз в следующем формате"
         example = 'Пример: Шерзодбек Эсанов или Шерзодбек'
 
     if lang == LANGS[2]:
-        text = "Исм, фамиля хато юборилди !\n" \
+        text = "Исм хато киритилди !\n" \
                "Қайтадан қуйидаги форматда юборинг"
         example = "Мисол: Шерзодбек Эсанов ёки Шерзодбек"
 
