@@ -12,7 +12,6 @@ from telegram import (
     InlineKeyboardButton,
     InputFile,
     TelegramError,
-    ParseMode,
 )
 from telegram.ext import (
     CallbackQueryHandler,
@@ -22,10 +21,12 @@ from telegram.ext import (
     CallbackContext,
     Filters
 )
+from ptbcontrib.send_by_kwargs import send_by_kwargs
+
 from DB import *
 from globalvariables import *
-from config import DEVELOPER_CHAT_ID, BOT_USERNAME
 from languages import LANGS
+from config import DEVELOPER_CHAT_ID, BOT_USERNAME
 from helpers import delete_message_by_message_id
 
 from replykeyboards import ReplyKeyboard
@@ -41,64 +42,45 @@ def send_messages(context: CallbackContext):
     user = context.job.context[0]
     user_data = context.job.context[-1]
 
-    errors_list = []
+    errors_dict = {'meta_data': None}
     all_users = get_all_users()
+    caption = user_data['caption']
 
     if 'post_photo' in user_data:
-
-        photo = user_data['post_photo'][-1].file_id
-        caption = user_data['caption']
-
-        start_time = datetime.datetime.now()
-        for u in all_users:
-            try:
-                time.sleep(0.3)
-                context.bot.send_photo(u[TG_ID], photo, caption=caption, parse_mode=ParseMode.HTML)
-            except TelegramError as e:
-                errors_list.append({'user_id': u[ID], 'user_tg_id': u[TG_ID], 'error_message': e.message})
-        end_time = datetime.datetime.now()
+        kwargs = {'caption': caption, 'photo': user_data['post_photo'][-1].file_id}
 
     if 'post_video' in user_data:
-        video = user_data['post_video'].file_id
-        caption = user_data['caption']
-
-        start_time = datetime.datetime.now()
-        for u in all_users:
-            try:
-                time.sleep(0.3)
-                context.bot.send_video(u[TG_ID], video, caption=caption, parse_mode=ParseMode.HTML)
-            except TelegramError as e:
-                errors_list.append({'user_id': u[ID], 'user_tg_id': u[TG_ID], 'error_message': e.message})
-        end_time = datetime.datetime.now()
+        kwargs = {'caption': caption, 'video': user_data['post_video'].file_id}
 
     if 'post_text' in user_data:
+        kwargs = {'text': user_data['post_text']}
 
-        start_time = datetime.datetime.now()
-        for u in all_users:
-            try:
-                time.sleep(0.5)
-                context.bot.send_message(u[TG_ID], text=user_data['post_text'])
-            except TelegramError as e:
-                errors_list.append({'user_id': u[ID], 'user_tg_id': u[TG_ID], 'error_message': e.message})
-        end_time = datetime.datetime.now()
+    start_time = datetime.datetime.now()
+    for u in all_users:
+        try:
+            send_by_kwargs(context.bot, kwargs, chat_id=u[TG_ID])
+            time.sleep(0.3)
+        except RuntimeError as e:
+            errors_dict.update({u[TG_ID]: {'user_id': u[ID], 'user_tg_id': u[TG_ID], 'error_message': str(e)}})
+    end_time = datetime.datetime.now()
 
     text = f'✅ Sending this message to all users have been successfully finished!'
     context.bot.send_message(chat_id=user[TG_ID], text=text, reply_to_message_id=user_data[MESSAGE_ID])
 
-    errors_list.insert(0, {
+    errors_dict['meta_data'] = {
         'start_time': start_time.strftime('%Y-%m-%d %H:%M:%S.%f'),
         'end_time': end_time.strftime('%Y-%m-%d %H:%M:%S.%f'),
         'delta': f'{(end_time - start_time).total_seconds()}s',
         'users_count': len(all_users),
-        'errors_count': len(errors_list)
-    })
+        'errors_count': len(errors_dict) - 1
+    }
 
     path = f'/var/www/html/{BOT_USERNAME}/logs/'
     document_name = datetime.datetime.now().strftime("sent_post_%d-%m-%Y_%H-%M-%S") + '.txt'
     full_path = path + document_name
 
     with open(full_path, 'w') as f:
-        f.write(ujson.dumps(errors_list, indent=3))
+        f.write(ujson.dumps(errors_dict, indent=3))
     with open(full_path, 'r') as f:
         document = InputFile(f)
     context.bot.send_document(DEVELOPER_CHAT_ID, document=document)
@@ -192,16 +174,14 @@ def post_content_callback(update: Update, context: CallbackContext):
 
     if photo:
         user_data['post_photo'] = photo
-        message = update.message.reply_photo(photo[-1].file_id, caption=caption, reply_markup=inline_keyboard,
-                                             parse_mode=ParseMode.HTML)
+        message = update.message.reply_photo(photo[-1].file_id, caption=caption, reply_markup=inline_keyboard)
     elif video:
         user_data['post_video'] = video
-        message = update.message.reply_video(video.file_id, caption=caption, reply_markup=inline_keyboard,
-                                             parse_mode=ParseMode.HTML)
+        message = update.message.reply_video(video.file_id, caption=caption, reply_markup=inline_keyboard)
     else:
-        user_data['post_text'] = update.message.caption_html
-        message = update.message.reply_text(user_data['post_text'], reply_markup=inline_keyboard,
-                                            parse_mode=ParseMode.HTML)
+        user_data['post_text'] = update.message.text_html
+        message = update.message.reply_text(user_data['post_text'], reply_markup=inline_keyboard)
+
     user_data['caption'] = caption
     user_data[STATE] = SEND_POST_CONFIRMATION
     user_data[MESSAGE_ID] = message.message_id
@@ -219,9 +199,11 @@ def confirmation_send_post_callback(update: Update, context: CallbackContext):
     if user[LANG] == LANGS[0]:
         confirmed_text = "Barcha foydalanuvchilarga xabar yuborish boshlandi. Biroz kuting"
         not_confirmed_text = "Xabar tasqdiqlanmadi"
+
     if user[LANG] == LANGS[1]:
         confirmed_text = "Отправка сообщений всем пользователям началась. Подождите минуту"
         not_confirmed_text = "Сообщение не было подтверждено"
+
     if user[LANG] == LANGS[2]:
         confirmed_text = "Барча фойдаланувчиларга хабар юбориш бошланди. Бироз кутинг"
         not_confirmed_text = "Хабар тасқдиқланмади"
@@ -239,11 +221,9 @@ def confirmation_send_post_callback(update: Update, context: CallbackContext):
             reply_text = not_confirmed_text
 
         else:
-
             reply_text = confirmed_text
-
             post_data = dict()
-            post_data['caption'] = user_data['caption'] if 'caption' in user_data else user_data['post_text']
+            post_data['caption'] = user_data['caption'] if user_data['caption'] is not None else user_data['post_text']
             post_data[STATUS] = 'sending'
             post_data['sent_by'] = user[ID]
 
@@ -256,10 +236,8 @@ def confirmation_send_post_callback(update: Update, context: CallbackContext):
                 post_photo_sizes = []
                 for photo in user_data['post_photo']:
                     photo = photo.to_dict()
-                    post_photo_sizes.append((
-                        post_id, photo['file_id'], photo['file_unique_id'],
-                        photo['width'], photo['height'], photo['file_size']
-                    ))
+                    post_photo_sizes.append((post_id, photo['file_id'], photo['file_unique_id'], photo['width'],
+                                             photo['height'], photo['file_size']))
 
                 fields_list = ["post_id", "file_id", "file_unique_id", "width", "height", "file_size"]
                 insert_order_items(post_photo_sizes, fields_list, 'post_document_sizes')
@@ -331,8 +309,8 @@ sendpost_conversation_handler = ConversationHandler(
     states={
         POST_CONTENT: [
             MessageHandler(
-                (Filters.photo | Filters.video | Filters.text) & (~Filters.update.edited_message) & (~Filters.command),
-                post_content_callback)],
+                (Filters.photo | Filters.video | Filters.regex("^(.(?!(Bosh menyu|Главное меню|Бош меню)))*$")) &
+                (~Filters.update.edited_message) & (~Filters.command), post_content_callback)],
 
         SEND_POST_CONFIRMATION: [CallbackQueryHandler(confirmation_send_post_callback, pattern=r'(yes|no)|none')]
 

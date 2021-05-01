@@ -1,6 +1,6 @@
 import logging
 
-from telegram import Update, ParseMode, InlineKeyboardButton, TelegramError
+from telegram import Update, InlineKeyboardButton, TelegramError
 from telegram.ext import (
     CallbackQueryHandler,
     CommandHandler,
@@ -112,22 +112,22 @@ def agreement_callback(update: Update, context: CallbackContext):
     if callback_query:
 
         if user_data[LANG] == LANGS[0]:
-            text = "Assalomu alaykum!\n" \
+            text = "Assalomu alaykum !\n" \
                    "Ismingizni kiriting"
             example = "Misol: Sherzodbek Esanov yoki Sherzodbek"
 
         if user_data[LANG] == LANGS[1]:
-            text = "Ассаламу алейкум!\n" \
+            text = "Ассаламу алейкум !\n" \
                    "Введите ваше имя"
             example = 'Пример: Шерзодбек Эсанов или Шерзодбек'
 
         if user_data[LANG] == LANGS[2]:
-            text = "Ассалому алайкум!\n" \
+            text = "Ассалому алайкум !\n" \
                    "Исмингизни киритинг"
             example = "Мисол: Шерзодбек Эсанов ёки Шерзодбек"
 
         text = f'🖐 {text}:\n\n{wrap_tags(example)}'
-        callback_query.edit_message_text(text, parse_mode=ParseMode.HTML)
+        callback_query.edit_message_text(text)
 
         user_data[STATE] = FULLNAME
 
@@ -143,13 +143,13 @@ def fullname_callback(update: Update, context: CallbackContext):
         user_data[FULLNAME] = fullname
 
         if user_data[LANG] == LANGS[0]:
-            text = "📱 Telefon raqamini yuborish tugmasini bosing\nyoki"
+            text = "«📱 Telefon raqamini yuborish» tugmasini bosing\nyoki"
 
         if user_data[LANG] == LANGS[1]:
-            text = "Нажмите на кнопку 📱 Отправить номер телефона\nили"
+            text = "Нажмите на кнопку «📱 Отправить номер телефона»\nили"
 
         if user_data[LANG] == LANGS[2]:
-            text = "📱 Телефон рақамини юбориш тугмасини босинг\nёки"
+            text = "«📱 Телефон рақамини юбориш» тугмасини босинг\nёки"
 
         layout = get_phone_number_layout(user_data[LANG])
         text += f' {layout}'
@@ -177,7 +177,7 @@ def phone_number_callback(update: Update, context: CallbackContext):
 
         error_text = get_phone_number_error_text(user_data[LANG])
         layout = get_phone_number_layout(user_data[LANG])
-        error_text = f'❌ {error_text}!\n\n' + layout
+        error_text = f'❌ {error_text} !\n' + layout
         update.message.reply_html(error_text, quote=True)
 
         return
@@ -189,18 +189,16 @@ def phone_number_callback(update: Update, context: CallbackContext):
             user_data.pop(STATE)
 
         if user_data[LANG] == LANGS[0]:
-            text = f"{user_data[FULLNAME]}!\n" \
+            text = f"{user_data[FULLNAME]} !\n" \
                    "Registratsiya muvafaqqiyatli yakunlandi"
 
         if user_data[LANG] == LANGS[1]:
-            text = f"{user_data[FULLNAME]}!\n" \
+            text = f"{user_data[FULLNAME]} !\n" \
                    "Регистрация прошла успешно"
 
         if user_data[LANG] == LANGS[2]:
-            text = f"{user_data[FULLNAME]}!\n" \
+            text = f"{user_data[FULLNAME]} !\n" \
                    "Регистрация мувафаққиятли якунланди"
-
-        text = f'{text}! 👍'
 
         # Sending video files to the user
         for video in get_video_files():
@@ -209,7 +207,7 @@ def phone_number_callback(update: Update, context: CallbackContext):
         insert_data(user_data, 'users')
 
         reply_keyboard = ReplyKeyboard(main_menu_keyboard, user_data[LANG]).get_keyboard()
-        update.message.reply_text(text, reply_markup=reply_keyboard)
+        update.message.reply_text(f'{text} ! 👍', reply_markup=reply_keyboard)
 
         user_data.clear()
 

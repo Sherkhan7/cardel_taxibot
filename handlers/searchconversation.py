@@ -9,7 +9,6 @@ from telegram import (
     KeyboardButton,
     InlineKeyboardMarkup,
     InlineKeyboardButton,
-    ParseMode,
     TelegramError
 )
 from telegram.ext import (
@@ -343,7 +342,7 @@ def select_driver_callback(update: Update, context: CallbackContext):
     reply_keyboard = ReplyKeyboard(location_keyboard, user[LANG]).get_keyboard()
     reply_keyboard.keyboard.append([KeyboardButton(f'◀️ {btn_text}')])
 
-    callback_query.message.reply_text(reply_text, reply_markup=reply_keyboard, parse_mode=ParseMode.HTML)
+    callback_query.message.reply_text(reply_text, reply_markup=reply_keyboard)
     try:
         callback_query.answer()
     except TelegramError:
@@ -425,8 +424,7 @@ def send_location_callback(update: Update, context: CallbackContext):
                 text_to_driver += f'\n\n{only_user_data_layout}'
                 inline_keyboard = InlineKeyboard(geolocation_keyboard, passenger[LANG],
                                                  data=location_dict).get_keyboard()
-                context.bot.send_message(user_data['driver_data'][TG_ID], text_to_driver,
-                                         parse_mode=ParseMode.HTML, reply_markup=inline_keyboard)
+                context.bot.send_message(user_data['driver_data'][TG_ID], text_to_driver, reply_markup=inline_keyboard)
                 data.update({STATUS: 'successfull'})
                 reply_text = sent_text
             except TelegramError as e:
@@ -442,7 +440,7 @@ def send_location_callback(update: Update, context: CallbackContext):
         else:
             reply_text = driver_data_not_found
 
-    update.message.reply_text(reply_text, reply_markup=reply_keyboard, parse_mode=ParseMode.HTML)
+    update.message.reply_text(reply_text, reply_markup=reply_keyboard)
 
     user_data[STATE] = EMPTY_SEATS
     if 'driver_data' in user_data:
