@@ -12,12 +12,13 @@ def do_command(update: Update, context: CallbackContext):
     persistence = context.dispatcher.persistence
 
     if full_text[0] == '/getjob':
-        current_jobs = context.job_queue.get_jobs_by_name('daily_note_active_drivers')
+        current_jobs = context.job_queue.jobs()
         for job in current_jobs:
+            text = f'<b>Execution time: {str(job.next_t)}\nJob name: {job.name}</b>'
             if update.message:
-                update.message.reply_text(str(job.next_t))
+                update.message.reply_text(text)
             else:
-                update.edited_message.reply_text(str(job.next_t))
+                update.edited_message.reply_text(text)
 
         return
 
