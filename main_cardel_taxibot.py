@@ -1,7 +1,8 @@
 import datetime
 import pytz
 
-from telegram.ext import Updater, PicklePersistence
+from telegram import ParseMode
+from telegram.ext import Updater, PicklePersistence, Defaults
 
 from config import TOKEN, SERVER_IP, PORT, URL
 from errorhandler import error_handler
@@ -11,8 +12,9 @@ from handlers import *
 
 def main():
     my_persistence = PicklePersistence(filename='my_pickle', single_file=False, store_chat_data=False)
+    defaults = Defaults(parse_mode=ParseMode.HTML, tzinfo=pytz.timezone('Asia/Tashkent'))
 
-    updater = Updater(TOKEN, persistence=my_persistence)
+    updater = Updater(TOKEN, persistence=my_persistence, defaults=defaults)
 
     updater.dispatcher.add_handler(sendpost_conversation_handler)
 
@@ -37,8 +39,7 @@ def main():
 
     updater.dispatcher.add_handler(callback_query_handler)
 
-    updater.job_queue.run_daily(run_note_callback, datetime.time(hour=7, tzinfo=pytz.timezone('Asia/Tashkent')),
-                                name='daily_note_active_drivers')
+    updater.job_queue.run_daily(run_note_callback, datetime.time(hour=7), name='daily_note_active_drivers')
 
     # adding error handler
     updater.dispatcher.add_error_handler(error_handler)
