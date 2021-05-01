@@ -2,7 +2,7 @@ import ujson
 import datetime
 import time
 
-from telegram import TelegramError, ParseMode, InputFile
+from telegram import TelegramError, InputFile
 from telegram.ext import CallbackContext
 
 from DB import *
@@ -17,7 +17,7 @@ from config import DEVELOPER_CHAT_ID, BOT_USERNAME
 
 def wrap_tags(*args):
     symbol = ' ' if len(args) > 1 else ''
-    return f'<b><i><u>{symbol.join(args)}</u></i></b>'
+    return f'<b><u>{symbol.join(args)}</u></b>'
 
 
 def loop(icon, action, inline_keyboard):
@@ -78,7 +78,7 @@ def get_text(lang, date_, time_):
     if lang == LANGS[0]:
         time_ = "noma'lum" if time_ == 'undefined' else time_
         text = "<b>Hurmatli haydovchi !\n" \
-               f"Sizning aktiv holatingiz - [{date_}] [{time_}] da turibdi.\n" \
+               f"⚠ Sizning aktiv holatingiz - [{date_}] [{time_}] da turibdi.\n" \
                "Aktiv holatingizni yangilab turishingizni so'raymiz. " \
                "Aktiv holatingizni yangilashingiz uchun siz:\n«🚕 Haydovchi» bo'limidan\n«✅ Aktiv holat» tugmasini " \
                "bosing va bu yerda siz \n«📝 Taxrirlash» tugmasi orqali vaqtni taxrirlashingiz yoki «❌ O'chirish» " \
@@ -86,7 +86,7 @@ def get_text(lang, date_, time_):
     if lang == LANGS[1]:
         time_ = "неизвестно" if time_ == 'undefined' else time_
         text = "<b>Уважаемый водитель !\n" \
-               f"Ваш активный статус - на [{date_}] [{time_}].\n" \
+               f"⚠ Ваш активный статус - на [{date_}] [{time_}].\n" \
                "Пожалуйста, обновляйте свой активный статус. " \
                "Вы можете обновить свой активный статус:\nиз раздела «🚕 Bодитель» нажмите кнопку «✅ Активный статус» " \
                "и здесь вы можете редактировать время, используя кнопку «📝 Редактировать», или повторно " \
@@ -94,7 +94,7 @@ def get_text(lang, date_, time_):
     if lang == LANGS[2]:
         time_ = "номаълум" if time_ == 'undefined' else time_
         text = "<b>Ҳурматли ҳайдовчи !\n" \
-               f"Сизнинг актив ҳолатингиз - [{date_}] [{time_}] да турибди.\n" \
+               f"⚠ Сизнинг актив ҳолатингиз - [{date_}] [{time_}] да турибди.\n" \
                "Актив ҳолатингизни янгилаб туришингизни сўраймиз. " \
                "Актив ҳолатингизни янгилашингиз учун сиз:\n«🚕 Ҳайдовчи» бўлимидан\n«✅ Актив ҳолат» тугмасини " \
                "босинг ва бу ерда сиз \n«📝 Тахрирлаш» тугмаси орқали вақтни тахрирлашингиз ёки «❌ Ўчириш» " \
@@ -135,7 +135,7 @@ def run_note_callback(context: CallbackContext):
     start_time = datetime.datetime.now()
     for active_driver_tg_id, active_driver in filtered_active_drivers.items():
         try:
-            context.bot.send_message(active_driver_tg_id, active_driver[DRIVER_TEXT], parse_mode=ParseMode.HTML)
+            context.bot.send_message(active_driver_tg_id, active_driver[DRIVER_TEXT])
             time.sleep(0.3)
         except TelegramError as e:
             errors_list.append(

@@ -6,7 +6,6 @@ from telegram import (
     Update,
     ReplyKeyboardRemove,
     InlineKeyboardButton,
-    ParseMode,
     TelegramError,
 )
 from telegram.ext import (
@@ -185,7 +184,7 @@ def region_callback(update: Update, context: CallbackContext):
                f'🔅 {wrap_tags(note_text)}'
         inline_keyboard = InlineKeyboard(districts_selective_keyboard, user[LANG], data=data).get_keyboard()
 
-        callback_query.edit_message_text(text, reply_markup=inline_keyboard, parse_mode=ParseMode.HTML)
+        callback_query.edit_message_text(text, reply_markup=inline_keyboard)
         callback_query.answer()
 
         user_data[STATE] = state
@@ -533,7 +532,7 @@ def comment_callback(update: Update, context: CallbackContext):
 
         user_data[COMMENT] = None
         layout = get_active_driver_layout(user[LANG], data=user_data)
-        callback_query.edit_message_text(layout, reply_markup=inline_keyboard, parse_mode=ParseMode.HTML)
+        callback_query.edit_message_text(layout, reply_markup=inline_keyboard)
 
     user_data[STATE] = CONFIRMATION
     # logger.info('user_data: %s', user_data)
@@ -597,7 +596,7 @@ def confirmation_callback(update: Update, context: CallbackContext):
 
     message_text = callback_query.message.text_html
     message_text += f'\n\n{icon} Status: {status}'
-    callback_query.edit_message_text(message_text, parse_mode=ParseMode.HTML)
+    callback_query.edit_message_text(message_text)
 
     reply_keyboard = ReplyKeyboard(keyboard, user[LANG]).get_keyboard()
     callback_query.message.reply_text(text, reply_markup=reply_keyboard)

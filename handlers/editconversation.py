@@ -9,7 +9,6 @@ from telegram import (
     KeyboardButton,
     InlineKeyboardButton,
     InlineKeyboardMarkup,
-    ParseMode,
     TelegramError,
 )
 from telegram.ext import (
@@ -338,7 +337,7 @@ def edit_region_callback(update: Update, context: CallbackContext):
             data = {'region_id': region_id, 're_check_list': user_data[CHECKED][key][region_id]}
         inline_keyboard = InlineKeyboard(districts_selective_keyboard, user[LANG], data=data).get_keyboard()
 
-        callback_query.edit_message_text(text, reply_markup=inline_keyboard, parse_mode=ParseMode.HTML)
+        callback_query.edit_message_text(text, reply_markup=inline_keyboard)
         callback_query.answer()
 
         user_data[STATE] = state
@@ -352,7 +351,7 @@ def edit_region_callback(update: Update, context: CallbackContext):
     active_driver_layout = get_active_driver_layout(user[LANG], data_, label)
 
     inline_keyboard = InlineKeyboard(edit_keyboard, user[LANG]).get_keyboard()
-    callback_query.edit_message_text(active_driver_layout, reply_markup=inline_keyboard, parse_mode=ParseMode.HTML)
+    callback_query.edit_message_text(active_driver_layout, reply_markup=inline_keyboard)
     callback_query.answer()
 
     user_data[STATE] = CHOOSE_EDITING
@@ -548,7 +547,7 @@ def edit_empty_seats_callback(update: Update, context: CallbackContext):
     active_driver_layout = get_active_driver_layout(user[LANG], data, label)
 
     inline_keyboard = InlineKeyboard(edit_keyboard, user[LANG]).get_keyboard()
-    callback_query.edit_message_text(active_driver_layout, reply_markup=inline_keyboard, parse_mode=ParseMode.HTML)
+    callback_query.edit_message_text(active_driver_layout, reply_markup=inline_keyboard)
     callback_query.answer()
 
     user_data[STATE] = CHOOSE_EDITING
@@ -573,7 +572,7 @@ def edit_ask_parcel_callback(update: Update, context: CallbackContext):
     active_driver_layout = get_active_driver_layout(user[LANG], data, label)
 
     inline_keyboard = InlineKeyboard(edit_keyboard, user[LANG]).get_keyboard()
-    callback_query.edit_message_text(active_driver_layout, reply_markup=inline_keyboard, parse_mode=ParseMode.HTML)
+    callback_query.edit_message_text(active_driver_layout, reply_markup=inline_keyboard)
     callback_query.answer()
 
     user_data[STATE] = CHOOSE_EDITING
@@ -619,7 +618,7 @@ def edit_date_callback(update: Update, context: CallbackContext):
     active_driver_layout = get_active_driver_layout(user[LANG], data, label)
 
     inline_keyboard = InlineKeyboard(edit_keyboard, user[LANG]).get_keyboard()
-    callback_query.edit_message_text(active_driver_layout, reply_markup=inline_keyboard, parse_mode=ParseMode.HTML)
+    callback_query.edit_message_text(active_driver_layout, reply_markup=inline_keyboard)
     callback_query.answer()
 
     user_data[STATE] = CHOOSE_EDITING
@@ -663,7 +662,7 @@ def edit_time_callback(update: Update, context: CallbackContext):
         active_driver_layout = get_active_driver_layout(user[LANG], data, label)
 
         inline_keyboard = InlineKeyboard(edit_keyboard, user[LANG]).get_keyboard()
-        callback_query.edit_message_text(active_driver_layout, reply_markup=inline_keyboard, parse_mode=ParseMode.HTML)
+        callback_query.edit_message_text(active_driver_layout, reply_markup=inline_keyboard)
 
         user_data[STATE] = CHOOSE_EDITING
 
@@ -711,7 +710,7 @@ def edit_comment_callback(update: Update, context: CallbackContext):
         user_data[MESSAGE_ID] = message.message_id
 
     elif callback_query.data == 'no_comment' or callback_query.data == 'back':
-        callback_query.edit_message_text(active_driver_layout, reply_markup=inline_keyboard, parse_mode=ParseMode.HTML)
+        callback_query.edit_message_text(active_driver_layout, reply_markup=inline_keyboard)
         callback_query.answer()
 
     user_data[STATE] = CHOOSE_EDITING
