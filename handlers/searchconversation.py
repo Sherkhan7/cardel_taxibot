@@ -55,6 +55,7 @@ def search_conversation_callback(update: Update, context: CallbackContext):
     user_data[STATE] = FROM_REGION
     user_data[MESSAGE_ID] = message.message_id
 
+    # logger.info('user_data: %s', user_data)
     return REGION
 
 
@@ -62,6 +63,7 @@ def region_callback(update: Update, context: CallbackContext):
     user = get_user(update.effective_user.id)
     user_data = context.user_data
     callback_query = update.callback_query
+    callback_query.answer()
 
     if user[LANG] == LANGS[0]:
         from_text = "Qayerdan"
@@ -87,15 +89,11 @@ def region_callback(update: Update, context: CallbackContext):
         state = TO_DISTRICT
 
     text = f'{text} {district_text}:'
-
     region_id = callback_query.data
     user_data[user_data[STATE]] = str(region_id)  # str() because region_id is srting in database
 
     inline_keyboard = InlineKeyboard(districts_keyboard, user[LANG], data=region_id).get_keyboard()
-
     callback_query.edit_message_text(text, reply_markup=inline_keyboard)
-    callback_query.answer()
-
     user_data[STATE] = state
 
     # logger.info('user_data: %s', user_data)
@@ -150,10 +148,11 @@ def district_callback(update: Update, context: CallbackContext):
             alert_text = f'{text} {region_text}'
             show_alert = True
 
+        callback_query.answer(alert_text, show_alert=show_alert)
+
         text = f'{text} {region_text}:'
         inline_keyboard = InlineKeyboard(regions_keyboard, user[LANG]).get_keyboard()
         callback_query.edit_message_text(text, reply_markup=inline_keyboard)
-        callback_query.answer(alert_text, show_alert=show_alert)
 
         user_data[STATE] = state
 
@@ -163,7 +162,6 @@ def district_callback(update: Update, context: CallbackContext):
     elif user_data[STATE] == TO_DISTRICT:
 
         user_data[user_data[STATE]] = int(data)
-
         reply_keyboard = ReplyKeyboardMarkup([
             [
                 KeyboardButton('1'),
@@ -407,7 +405,6 @@ def send_location_callback(update: Update, context: CallbackContext):
                 text_to_driver = f"Йўловчи {wrap_tags(user[FULLNAME])} сизга ўз локациясини юборди"
 
             text_to_driver = f'📍 {text_to_driver} 🙂'
-
             location_dict = update.message.location.to_dict()
             data = {
                 'location': ujson.dumps(location_dict),
@@ -504,7 +501,7 @@ search_conversation_handler = ConversationHandler(
         DISTRICT: [CallbackQueryHandler(district_callback, pattern=r'^(back|\d+)$')],
 
         EMPTY_SEATS: [
-            MessageHandler(Filters.regex("([1-4])|(Qidiruvni to'xtatish|Остановить поиск|Қидирувни тўхтатиш)"),
+            MessageHandler(Filters.regex("(^[1-4]$)|(Qidiruvni to'xtatish|Остановить поиск|Қидирувни тўхтатиш)"),
                            empty_seats_callback),
             CallbackQueryHandler(select_driver_callback, pattern=r'^dr_\d+$')
         ],
