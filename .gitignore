@@ -1,6 +1,6 @@
 .idea/
 __pycache__/
-config/
+config/config.py
 *.json
 my_pickle_conversations
 my_pickle_user_data
