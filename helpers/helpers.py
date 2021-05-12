@@ -8,7 +8,7 @@ from telegram.ext import CallbackContext
 from DB import *
 from globalvariables import *
 from languages import LANGS
-from config import DEVELOPER_CHAT_ID, BOT_USERNAME
+from config import DEVELOPER_CHAT_ID, LOGS_URL
 
 
 # from faker import Faker
@@ -151,13 +151,11 @@ def run_note_callback(context: CallbackContext):
         'errors_count': len(errors_list)
     })
 
-    path = f'/var/www/html/{BOT_USERNAME}/logs/'
     document_name = datetime.datetime.now().strftime("daily_note_active_drivers_%d-%m-%Y_%H-%M-%S") + '.txt'
-    full_path = path + document_name
-
-    with open(full_path, 'w') as f:
+    full_path = LOGS_URL + document_name
+    with open(full_path, 'w+') as f:
         f.write(ujson.dumps(errors_list, indent=3))
-    with open(full_path, 'r') as f:
+        f.seek(0)
         document = InputFile(f)
     context.bot.send_document(DEVELOPER_CHAT_ID, document=document)
 
